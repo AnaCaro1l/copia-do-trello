@@ -1,8 +1,14 @@
 import { Router } from 'express';
-import { createUser } from '../controllers/UserController';
+import { addUser, showUser } from '../controllers/UserController';
+import { login } from '../controllers/SessionController';
+import { isAuth } from '../middlewares/isAuth';
 
 const router = Router();
 
-router.post('/user', createUser);
+router.post('/user', addUser);
+
+router.post('/login', login);
+
+router.get('/user/:id', isAuth, showUser);
 
 export default router;
