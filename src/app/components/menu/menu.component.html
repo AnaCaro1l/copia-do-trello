@@ -1,1 +1,31 @@
-<p>menu works!</p>
+<div
+  class="flex flex-col border-r border-white/10 w-[250px] h-screen pt-10 p-2 gap-4"
+>
+  <div
+    class="w-full hover:bg-white/10 gap-2 p-2 rounded-lg cursor-pointer flex items-center"
+  >
+    <lucide-angular
+      [img]="layoutDashboard"
+      color="white"
+      size="22"
+    ></lucide-angular>
+    <span class="text-white">Quadros</span>
+  </div>
+
+  <div class="w-full border-t border-white/10 ">
+    <div class="mt-4">
+      <span class="text-white text-sm">Áreas de Trabalho</span>
+    </div>
+
+    <div
+      class="w-full hover:bg-white/10 gap-2 p-2 mt-2 rounded-lg cursor-pointer flex items-center"
+    >
+      <lucide-angular
+        [img]="bookA"
+        color="green"
+        size="22"
+      ></lucide-angular>
+      <span class="text-white">Área de Trabalho da Trela</span>
+    </div>
+  </div>
+</div>
