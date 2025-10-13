@@ -13,7 +13,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'chat/:id',
+        path: 'dashboard/:id',
         component: HomeComponent,
       },
     ],

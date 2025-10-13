@@ -87,6 +87,9 @@ export class LoginComponent {
     //     });
     //   },
     // });
+    
+    localStorage.setItem('auth', 'true');
+    this.router.navigate(['/home']);
   }
 
   showError(message: string) {
