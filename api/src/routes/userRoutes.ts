@@ -9,6 +9,6 @@ router.post('/user', addUser);
 
 router.post('/login', login);
 
-router.get('/user/:id', isAuth, showUser);
+router.get('/user/:id', showUser);
 
 export default router;

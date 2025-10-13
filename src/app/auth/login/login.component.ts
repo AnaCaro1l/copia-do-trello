@@ -13,6 +13,8 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 // import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
+import { UserService } from '../../services/user.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -24,11 +26,12 @@ import { CommonModule } from '@angular/common';
     FormsModule,
     ReactiveFormsModule,
     ToastModule,
-    CommonModule
+    CommonModule,
+    HttpClientModule
 ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  providers: [MessageService],
+  providers: [MessageService, UserService],
 })
 export class LoginComponent {
   readonly Eye = Eye;
@@ -44,7 +47,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private router: Router,
     private messageService: MessageService,
-    // private userService: UserService
+    private userService: UserService
   ) {
     this.loginForm = this.fb.group({
       email: ['', Validators.required],
@@ -72,24 +75,21 @@ export class LoginComponent {
   onSubmit() {
     const { email, password } = this.loginForm.value;
 
-    // this.userService.login(email, password).subscribe({
-    //   next: (user) => {
-    //     localStorage.setItem('auth', 'true');
-    //     localStorage.setItem('currentUser', JSON.stringify(user));
-    //     this.router.navigate(['/home']);
-    //   },
-    //   error: (err) => {
-    //     this.messageService.add({
-    //       severity: 'error',
-    //       summary: 'Erro',
-    //       detail: err.error.message || 'Usuário ou senha incorretos',
-    //       life: 3000,
-    //     });
-    //   },
-    // });
-    
-    localStorage.setItem('auth', 'true');
-    this.router.navigate(['/home']);
+    this.userService.login(email, password).subscribe({
+      next: (user) => {
+        localStorage.setItem('auth', 'true');
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.router.navigate(['/home']);
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: err.error.message || 'Usuário ou senha incorretos',
+          life: 3000,
+        });
+      },
+    });
   }
 
   showError(message: string) {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Inject, OnInit, Optional } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -7,12 +7,19 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, Eye, EyeOff, User, Mail } from 'lucide-angular';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-// import { UserService } from '../../services/user.service';
+import { UserService } from '../../services/user.service';
+// HttpClient é fornecido globalmente via app.config.ts
+
+interface UserDto {
+  id?: number;
+  name: string;
+  email: string;
+  password?: string;
+}
 
 @Component({
   selector: 'app-register',
@@ -23,11 +30,11 @@ import { ToastModule } from 'primeng/toast';
     RouterLink,
     ToastModule,
     ReactiveFormsModule,
-    CommonModule
+    CommonModule,
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
-  providers: [MessageService],
+  providers: [MessageService, UserService],
 })
 export class RegisterComponent implements OnInit {
   readonly Eye = Eye;
@@ -49,9 +56,7 @@ export class RegisterComponent implements OnInit {
     private messageService: MessageService,
     private router: Router,
     private fb: FormBuilder,
-    // private userService: UserService,
-    @Optional() private dialogRef?: MatDialogRef<RegisterComponent>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data?: any
+    private userService: UserService,
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -62,35 +67,25 @@ export class RegisterComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.checkScreenSize();
-
-    const user = this.data?.user;
+    // Lê somente o estado de navegação (sem priorizar diálogo)
+    const nav = this.router.getCurrentNavigation();
+    const st = (nav?.extras?.state as any) ?? (window.history.state as any) ?? {};
+    // Aceita tanto { user: {...} } quanto o objeto direto
+    const user: UserDto | undefined = st.user ?? (Object.keys(st).length ? (st as UserDto) : undefined);
 
     if (user) {
       this.isEditMode = true;
       this.originalUsername = user.name;
 
       this.registerForm.patchValue({
-        email: user.user.email,
-        username: user.user.name,
+        email: user.email,
+        username: user.name,
         password: '',
         confirmPassword: '',
       });
     }
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize() {
-    this.checkScreenSize();
-  }
-
-  private checkScreenSize() {
-    if (window.innerWidth < 790) {
-      this.isMobile = true;
-    } else {
-      this.isMobile = false;
-    }
-  }
 
   onSubmit(): void {
     const { email, username, password, confirmPassword } =
@@ -107,45 +102,44 @@ export class RegisterComponent implements OnInit {
 
     const formData = { name: username, email, password };
 
-    // if (this.isEditMode) {
-    //   this.userService.updateUser(formData).subscribe({
-    //     next: (user) => {
-    //       this.messageService.add({
-    //         severity: 'success',
-    //         summary: 'Sucesso',
-    //         detail: 'Perfil atualizado',
-    //       });
-    //       if (this.dialogRef) this.dialogRef.close(user);
-    //       else this.router.navigate(['/home']);
-    //     },
-    //     error: (err) => {
-    //       this.messageService.add({
-    //         severity: 'error',
-    //         summary: 'Erro',
-    //         detail: err.error.message || 'Erro ao atualizar perfil',
-    //       });
-    //     },
-    //   });
-    // } else {
-    //   if (!this.registerForm.valid) return;
-    //   this.userService.createUser(formData).subscribe({
-    //     next: () => {
-    //       this.messageService.add({
-    //         severity: 'success',
-    //         summary: 'Sucesso',
-    //         detail: 'Cadastro realizado',
-    //       });
-    //       this.router.navigate(['/login']);
-    //     },
-    //     error: (err) => {
-    //       this.messageService.add({
-    //         severity: 'error',
-    //         summary: 'Erro',
-    //         detail: err.error.message || 'Erro ao cadastrar usuário',
-    //       });
-    //     },
-    //   });
-    // }
+    if (this.isEditMode) {
+      this.userService.updateUser(formData).subscribe({
+        next: (user) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Perfil atualizado',
+          });
+          this.router.navigate(['/home']);
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: err.error.message || 'Erro ao atualizar perfil',
+          });
+        },
+      });
+    } else {
+      if (!this.registerForm.valid) return;
+      this.userService.createUser(formData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Cadastro realizado',
+          });
+          this.router.navigate(['/login']);
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: err.error.message || 'Erro ao cadastrar usuário',
+          });
+        },
+      });
+    }
   }
 
   togglePasswordVisibility() {
@@ -154,5 +148,9 @@ export class RegisterComponent implements OnInit {
 
   togglePasswordConfirmVisibility() {
     this.viewPasswordConfirm = !this.viewPasswordConfirm;
+  }
+
+  OutToEditProfile() {
+    this.router.navigate(['/home']);
   }
 }
