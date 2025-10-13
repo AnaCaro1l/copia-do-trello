@@ -1,5 +1,10 @@
 import dotenv from 'dotenv';
 import { Sequelize } from 'sequelize-typescript';
+import { User } from '../models/User';
+import { Workspace } from '../models/Workspace';
+import { WorkspaceUser } from '../models/WorkspaceUser';
+import { List } from '../models/List';
+import { Card } from '../models/Card';
 
 dotenv.config();
 
@@ -10,5 +15,6 @@ export const sequelize = new Sequelize({
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   port: Number(process.env.DB_PORT) || 3306,
+  models: [User, Workspace, WorkspaceUser, List, Card],
   logging: false,
 });

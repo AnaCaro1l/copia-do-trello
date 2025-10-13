@@ -1,4 +1,4 @@
-import { BelongsTo, Column, Model, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { List } from './List';
 
 @Table
@@ -12,6 +12,7 @@ export class Card extends Model<Card> {
   @Column
   media: string;
 
+  @ForeignKey(() => List)
   @Column
   listId: number;
 
