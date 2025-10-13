@@ -3,6 +3,7 @@ import {
   BelongsToMany,
   Column,
   Default,
+  ForeignKey,
   Model,
   Table,
 } from 'sequelize-typescript';
@@ -24,6 +25,7 @@ export class Workspace extends Model<Workspace> {
   @Column
   visibility: boolean;
 
+  @ForeignKey(() => User)
   @Column
   ownerId: number;
 

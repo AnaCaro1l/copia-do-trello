@@ -1,4 +1,4 @@
-import { BelongsTo, Column, HasMany, Model, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 import { Workspace } from './Workspace';
 import { Card } from './Card';
 
@@ -10,6 +10,7 @@ export class List extends Model<List> {
   @Column
   cardIds: string;
 
+  @ForeignKey(() => Workspace)
   @Column
   workspaceId: number;
 
