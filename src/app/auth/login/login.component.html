@@ -1,0 +1,80 @@
+<div class="h-screen w-screen flex justify-center items-center">
+  <div
+    class="flex flex-col gap-5 w-[90vw] sm:w-[70vw] md:w-[50vw] lg:w-[30vw] h-[40vh] text-white border border-gray-700 rounded-lg p-10 shadow-lg bg-black/30 backdrop-blur-md"
+  >
+    <div>
+      <div class="text-center text-xl font-medium text-white leading-tight">
+        Bem vindo de volta!
+      </div>
+      <div class="text-center">
+        <span class="text-white/80 text-sm">Ainda não possui uma conta? </span>
+        <a
+          [routerLink]="'/register'"
+          class="text-white/80 cursor-pointer hover:text-white/90 underline"
+          >Cadastre-se
+        </a>
+      </div>
+    </div>
+
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="onSubmit()"
+      class="flex flex-col gap-4"
+    >
+      <div class="flex flex-col gap-1">
+        <div class="flex gap-2 items-center">
+          <input
+            formControlName="email"
+            type="email"
+            placeholder="Email"
+            class="p-2 rounded-lg bg-transparent border border-gray-700 text-white w-full placeholder:!text-white/40"
+          />
+          <lucide-angular [img]="user" color="white" size="24"></lucide-angular>
+        </div>
+        <div
+          *ngIf="
+            loginForm.get('email')?.invalid && loginForm.get('email')?.touched
+          "
+          class="erro"
+        >
+          Campo obrigatório
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <div class="flex gap-2 items-center">
+          <input
+            formControlName="password"
+            [type]="viewPassword ? 'text' : 'password'"
+            placeholder="Senha"
+            class="p-2 rounded-lg bg-transparent border border-gray-700 text-white w-full placeholder:!text-white/40 focus:outline-none"
+          />
+          <lucide-angular
+            [img]="viewPassword ? Eye : EyeOff"
+            color="white"
+            size="24"
+            class="cursor-pointer"
+            (click)="togglePasswordVisibility()"
+          ></lucide-angular>
+        </div>
+        <div
+          *ngIf="
+            loginForm.get('password')?.invalid &&
+            loginForm.get('password')?.touched
+          "
+          class="erro"
+        >
+          Campo obrigatório
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="bg-[#1270a7] text-white p-2 rounded-lg "
+        [ngClass]="{ 'hover:bg-[#1185a1] cursor-pointer': !loginForm.invalid }"
+        [disabled]="loginForm.invalid"
+      >
+        Entrar
+      </button>
+    </form>
+  </div>
+</div>
