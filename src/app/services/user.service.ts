@@ -30,7 +30,7 @@ export class UserService {
   }
 
   updateUser(user: User): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/user`, user);
+    return this.http.put<any>(`${this.apiUrl}/user`, user);
   }
 
   deleteUser(id: number): Observable<void> {
@@ -38,6 +38,6 @@ export class UserService {
   }
 
   login(email: string, password: string) {
-    return this.http.post<User>(`${this.apiUrl}/login`, { email, password });
+    return this.http.post<{ token: string; user: User }>(`${this.apiUrl}/login`, { email, password });
   }
 }

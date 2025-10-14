@@ -13,7 +13,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { AvatarModule } from 'primeng/avatar';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { MessageService } from 'primeng/api';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, AuthSession } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { UserService } from '../../services/user.service';
@@ -34,7 +34,7 @@ import { RegisterComponent } from '../../auth/register/register.component';
   ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  providers: [MessageService, AuthService, UserService],
+  providers: [MessageService, UserService],
 })
 export class HeaderComponent {
   readonly panelLeftClose = PanelLeftClose;
@@ -62,14 +62,23 @@ export class HeaderComponent {
   }
 
   getCurrentUser() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    return currentUser.user;
+    // Prefer reactive session if available
+    const session: AuthSession | null = this.authService.sessionValue;
+    if (session?.user) return session.user;
+    // Fallback to localStorage (legacy)
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+      if (!currentUser) return null;
+      return currentUser.user || currentUser;
+    } catch {
+      return null;
+    }
   }
 
   logout() {
     // this.authService.disconnect();
     localStorage.setItem('auth', 'false');
-    localStorage.removeItem('currentUser');
+    this.authService.clearSession();
     this.router.navigate(['/login']);
     this.messageService.add({
       severity: 'success',
@@ -79,8 +88,8 @@ export class HeaderComponent {
   }
 
   private getCurrentUserId(): number | null {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    return currentUser.user?.id || null;
+    const current = this.getCurrentUser();
+    return current?.id || null;
   }
 
   EditProfile() {

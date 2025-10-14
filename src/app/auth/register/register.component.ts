@@ -12,7 +12,7 @@ import { LucideAngularModule, Eye, EyeOff, User, Mail } from 'lucide-angular';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { UserService } from '../../services/user.service';
-// HttpClient é fornecido globalmente via app.config.ts
+import { AuthService } from '../../services/auth.service';
 
 interface UserDto {
   id?: number;
@@ -34,7 +34,7 @@ interface UserDto {
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
-  providers: [MessageService, UserService],
+  providers: [MessageService],
 })
 export class RegisterComponent implements OnInit {
   readonly Eye = Eye;
@@ -57,6 +57,7 @@ export class RegisterComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder,
     private userService: UserService,
+    private authService: AuthService,
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -67,10 +68,8 @@ export class RegisterComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Lê somente o estado de navegação (sem priorizar diálogo)
     const nav = this.router.getCurrentNavigation();
     const st = (nav?.extras?.state as any) ?? (window.history.state as any) ?? {};
-    // Aceita tanto { user: {...} } quanto o objeto direto
     const user: UserDto | undefined = st.user ?? (Object.keys(st).length ? (st as UserDto) : undefined);
 
     if (user) {
@@ -103,14 +102,17 @@ export class RegisterComponent implements OnInit {
     const formData = { name: username, email, password };
 
     if (this.isEditMode) {
-      this.userService.updateUser(formData).subscribe({
-        next: (user) => {
+      this.userService.updateUser(formData as any).subscribe({
+        next: (resp: any) => {
+          const updated = resp?.updatedUser ?? resp;
+          const safeUser = { id: updated?.id, name: updated?.name, email: updated?.email };
+          this.authService.updateUser(safeUser);
+          this.router.navigate(['/home']);
           this.messageService.add({
             severity: 'success',
             summary: 'Sucesso',
             detail: 'Perfil atualizado',
           });
-          this.router.navigate(['/home']);
         },
         error: (err) => {
           this.messageService.add({

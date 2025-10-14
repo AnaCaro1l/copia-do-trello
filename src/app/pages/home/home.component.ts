@@ -5,6 +5,8 @@ import { MenuComponent } from '../../components/menu/menu.component';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Clock } from 'lucide-angular';
 import { CardComponent } from '../../components/card/card.component';
+import { ToastModule } from "primeng/toast";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +17,8 @@ import { CardComponent } from '../../components/card/card.component';
     CommonModule,
     LucideAngularModule,
     CardComponent,
-  ],
+    ToastModule
+],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   animations: [
@@ -39,9 +42,13 @@ import { CardComponent } from '../../components/card/card.component';
 export class HomeComponent {
   readonly clock = Clock;
   @Input() isMenuOpen: boolean = true;
-  @Input() profileOpen: boolean = false;
 
+  constructor(private router: Router) {}
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  onCardClick() {
+    this.router.navigate(['/dashboard']);
   }
 }

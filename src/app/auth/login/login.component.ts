@@ -14,6 +14,7 @@ import { ToastModule } from 'primeng/toast';
 // import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 import { HttpClientModule } from '@angular/common/http';
 
 @Component({
@@ -47,7 +48,8 @@ export class LoginComponent {
     private fb: FormBuilder,
     private router: Router,
     private messageService: MessageService,
-    private userService: UserService
+    private userService: UserService,
+    private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
       email: ['', Validators.required],
@@ -76,9 +78,10 @@ export class LoginComponent {
     const { email, password } = this.loginForm.value;
 
     this.userService.login(email, password).subscribe({
-      next: (user) => {
+      next: (resp: any) => {
+        const { token, user } = resp?.token ? resp : { token: undefined, user: resp };
+        this.authService.setSession({ token, user });
         localStorage.setItem('auth', 'true');
-        localStorage.setItem('currentUser', JSON.stringify(user));
         this.router.navigate(['/home']);
       },
       error: (err) => {

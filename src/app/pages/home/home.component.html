@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <app-header (menuToggle)="toggleMenu()"></app-header>
 <main class="h-screen">
     <div class="flex">
@@ -11,7 +12,7 @@
                     <span class="text-white">Visto Recentemente</span>
                 </div>
                 <div>
-                    <app-card></app-card>
+                    <app-card (click)="onCardClick()"></app-card>
                 </div>
             </div>
         </div>
