@@ -1,6 +1,6 @@
 <div class="h-screen w-screen flex justify-center items-center">
   <div
-    class="flex flex-col gap-5 w-[90vw] sm:w-[70vw] md:w-[50vw] lg:w-[30vw] text-white border border-gray-700 rounded-lg p-10 shadow-lg bg-black/30 backdrop-blur-md"
+    class="flex flex-col gap-5 w-[90vw] sm:w-[70vw] md:w-[50vw] lg:w-[30vw] text-white border border-white/10 rounded-lg p-10 shadow-lg bg-black/30 backdrop-blur-md"
   >
     <div class="flex flex-col gap-2 items-center">
       <h2 *ngIf="!isEditMode" class="text-3xl text-white font-bold">
@@ -149,6 +149,9 @@
       >
         {{ isEditMode ? "Salvar" : "Cadastrar" }}
       </button>
+      <div *ngIf="isEditMode">
+        <button class="w-full" mat-flat-button color="warn" (click)="OutToEditProfile()">Sair</button>
+      </div>
     </form>
   </div>
 </div>
