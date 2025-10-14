@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addUser, showUser } from '../controllers/UserController';
+import { addUser, deleteUser, listUsers, showUser, updateUser } from '../controllers/UserController';
 import { login } from '../controllers/SessionController';
 import { isAuth } from '../middlewares/isAuth';
 
@@ -10,5 +10,11 @@ router.post('/user', addUser);
 router.post('/login', login);
 
 router.get('/user/:id', isAuth, showUser);
+
+router.get('/users', isAuth, listUsers);
+
+router.put('/user', isAuth, updateUser);
+
+router.delete('/user/:id', isAuth, deleteUser);
 
 export default router;

@@ -8,7 +8,10 @@ interface Request {
   password: string;
 }
 
-export const AuthUserService = async ({ email, password }: Request) => {
+export const AuthUserService = async ({
+  email,
+  password,
+}: Request): Promise<string> => {
   const user = await User.findOne({
     where: { email: email },
   });
