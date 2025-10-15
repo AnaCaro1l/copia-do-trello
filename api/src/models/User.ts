@@ -31,4 +31,7 @@ export class User extends Model<User> {
 
   @BelongsToMany(() => Workspace, () => WorkspaceUser)
   collaborations: Workspace[];
+
+  @HasMany(() => WorkspaceUser)
+  workspaceUsers: WorkspaceUser[];
 }

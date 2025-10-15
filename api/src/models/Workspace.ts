@@ -4,6 +4,7 @@ import {
   Column,
   Default,
   ForeignKey,
+  HasMany,
   Model,
   Table,
 } from 'sequelize-typescript';
@@ -19,7 +20,10 @@ export class Workspace extends Model<Workspace> {
   name: string;
 
   @Column
-  background: string;
+  backgroundUrl: string;
+
+  @Column
+  backgroundColor: string;
 
   @Default(false)
   @Column
@@ -34,4 +38,7 @@ export class Workspace extends Model<Workspace> {
 
   @BelongsToMany(() => User, () => WorkspaceUser)
   collaborators: User[];
+
+  @HasMany(() => WorkspaceUser)
+  workspaceUsers: WorkspaceUser[];
 }

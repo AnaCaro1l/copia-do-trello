@@ -6,6 +6,7 @@ interface Request {
   name?: string;
   visibility?: boolean;
   backgroundPath?: string;
+  backgroundColor?: string;
   id: number;
 }
 
@@ -13,6 +14,7 @@ export const UpdateWorkspaceService = async ({
   name,
   visibility,
   backgroundPath,
+  backgroundColor,
   id,
 }: Request) => {
   const workspace = await Workspace.findByPk(id);
@@ -21,15 +23,16 @@ export const UpdateWorkspaceService = async ({
     throw new AppError('Área de trabalho não encontrada');
   }
 
-  let background = null;
+  let backgroundUrl = null;
   if (backgroundPath) {
-    background = await uploadOnCloudinary(backgroundPath);
+    backgroundUrl = await uploadOnCloudinary(backgroundPath);
   }
 
   const updatedWorkspace = await workspace.update({
     name: name ? name : workspace.name,
     visibility: visibility ? visibility : workspace.visibility,
-    background: background ? background : workspace.background,
+    backgroundUrl: backgroundUrl ? backgroundUrl : workspace.backgroundUrl,
+    backgroundColor: backgroundColor ? backgroundColor : workspace.backgroundColor,
     updatedAt: new Date(),
   });
 

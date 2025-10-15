@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
-import http from 'http';
+import http, { Server } from 'http';
 import { sequelize } from './database';
 import { ValidationError } from 'yup';
 import { AppError } from './errors/AppError';

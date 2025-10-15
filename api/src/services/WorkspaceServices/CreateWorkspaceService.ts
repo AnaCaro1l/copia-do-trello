@@ -9,6 +9,7 @@ interface Request {
   visibility?: boolean;
   ownerId: number;
   backgroundPath?: string;
+  backgroundColor?: string;
 }
 
 export const CreateWorkspaceService = async ({
@@ -16,6 +17,7 @@ export const CreateWorkspaceService = async ({
   visibility,
   ownerId,
   backgroundPath,
+  backgroundColor,
 }: Request): Promise<Workspace> => {
   const owner = await User.findByPk(ownerId);
   await WorkspaceSchemas.createWorkspace.validate({ name, visibility });
@@ -23,16 +25,17 @@ export const CreateWorkspaceService = async ({
     throw new AppError('Usuário não encontrado');
   }
 
-  let background = null;
+  let backgroundUrl = null;
   if (backgroundPath) {
-    background = await uploadOnCloudinary(backgroundPath);
+    backgroundUrl = await uploadOnCloudinary(backgroundPath);
   }
 
   const workspace = await Workspace.create({
     name,
     visibility,
     ownerId,
-    background,
+    backgroundUrl,
+    backgroundColor,
   });
   return workspace;
 };

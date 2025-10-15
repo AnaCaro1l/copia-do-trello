@@ -15,10 +15,10 @@ const handleBackgroundOperations = async (
 };
 
 export const insert = async (req: Request, res: Response): Promise<Response> => {
-    const { name, visibility } = req.body;
+    const { name, visibility, backgroundColor } = req.body;
     const ownerId = req.user.id;
     const backgroundPath = req.file?.path;
-    const workspace = await CreateWorkspaceService({ name, visibility, ownerId, backgroundPath });
+    const workspace = await CreateWorkspaceService({ name, visibility, ownerId, backgroundPath, backgroundColor });
 
     return res.status(201).json({
         message: 'Area de trabalho criado com sucesso',
