@@ -1,13 +1,17 @@
 import { AppError } from '../../errors/AppError';
 import { Workspace } from '../../models/Workspace';
-import uploadOnCloudinary from '../../utils/cloudinary';
+import { handleBackgroundOperations } from '../../utils/background';
+import uploadOnCloudinary, {
+  cloudinaryFolderName,
+} from '../../utils/cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 
 interface Request {
   name?: string;
   visibility?: boolean;
   backgroundPath?: string;
   backgroundColor?: string;
-  id: number;
+  id: string;
 }
 
 export const UpdateWorkspaceService = async ({
@@ -23,6 +27,19 @@ export const UpdateWorkspaceService = async ({
     throw new AppError('Área de trabalho não encontrada');
   }
 
+  if (workspace.backgroundUrl && backgroundPath) {
+    const oldBackground = await handleBackgroundOperations(
+      workspace.backgroundUrl
+    );
+    if (oldBackground) {
+      await cloudinary.uploader
+        .destroy(`${cloudinaryFolderName}/${oldBackground}`, {
+          invalidate: true,
+        })
+        .then((result) => console.log(result));
+    }
+  }
+
   let backgroundUrl = null;
   if (backgroundPath) {
     backgroundUrl = await uploadOnCloudinary(backgroundPath);
@@ -32,7 +49,9 @@ export const UpdateWorkspaceService = async ({
     name: name ? name : workspace.name,
     visibility: visibility ? visibility : workspace.visibility,
     backgroundUrl: backgroundUrl ? backgroundUrl : workspace.backgroundUrl,
-    backgroundColor: backgroundColor ? backgroundColor : workspace.backgroundColor,
+    backgroundColor: backgroundColor
+      ? backgroundColor
+      : workspace.backgroundColor,
     updatedAt: new Date(),
   });
 
