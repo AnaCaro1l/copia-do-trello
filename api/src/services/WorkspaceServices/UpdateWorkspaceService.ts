@@ -33,5 +33,5 @@ export const UpdateWorkspaceService = async ({
     updatedAt: new Date(),
   });
 
-  return workspace;
+  return updatedWorkspace;
 };

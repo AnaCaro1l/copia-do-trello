@@ -21,10 +21,7 @@ __decorate([
     __metadata("design:type", String)
 ], List.prototype, "title", void 0);
 __decorate([
-    sequelize_typescript_1.Column,
-    __metadata("design:type", String)
-], List.prototype, "cardIds", void 0);
-__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => Workspace_1.Workspace),
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
 ], List.prototype, "workspaceId", void 0);

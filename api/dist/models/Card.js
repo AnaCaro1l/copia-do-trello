@@ -28,9 +28,15 @@ __decorate([
     __metadata("design:type", String)
 ], Card.prototype, "media", void 0);
 __decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => List_1.List),
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
 ], Card.prototype, "listId", void 0);
+__decorate([
+    (0, sequelize_typescript_1.Default)(false),
+    sequelize_typescript_1.Column,
+    __metadata("design:type", Boolean)
+], Card.prototype, "completed", void 0);
 __decorate([
     sequelize_typescript_1.Column,
     __metadata("design:type", Date)
