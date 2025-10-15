@@ -1,0 +1,39 @@
+<div
+  class="bg-gray-900 rounded-lg w-[272px] cursor-pointer shadow-lg hover:shadow-2xl hover:bg-opacity-95 transition-shadow"
+>
+  <div class="justify-between flex p-4 items-center">
+    <div class="text-white">{{ taskList!.title }}</div>
+    <div>
+      <button
+        class="group text-white hover:bg-white/10 transition-colors p-2 rounded-full"
+      >
+        <lucide-angular
+          [img]="minimize"
+          color="white"
+          size="18"
+        ></lucide-angular>
+      </button>
+      <button
+        class="group text-white hover:bg-white/10 transition-colors p-2 rounded-full"
+      >
+        <lucide-angular
+          [img]="ellipsis"
+          color="white"
+          size="18"
+        ></lucide-angular>
+      </button>
+    </div>
+  </div>
+  <div class="px-3 gap-2 flex flex-col">
+    @for (task of taskList!.tasks; track $index) {
+    <app-task [task]="task"></app-task>
+    }
+  </div>
+  <div class="p-3 flex">
+    <button
+      class="w-full flex text-left text-white/80 hover:bg-gray-800 transition-colors p-1 rounded-lg"
+    >
+      + Adicionar outro cartão
+    </button>
+  </div>
+</div>

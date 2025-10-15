@@ -62,10 +62,8 @@ export class HeaderComponent {
   }
 
   getCurrentUser() {
-    // Prefer reactive session if available
     const session: AuthSession | null = this.authService.sessionValue;
     if (session?.user) return session.user;
-    // Fallback to localStorage (legacy)
     try {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
       if (!currentUser) return null;

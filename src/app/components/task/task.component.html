@@ -1,0 +1,7 @@
+<div
+  *ngIf="task"
+  [ngStyle]="{ backgroundColor: task.coverColor || '#374151' }"
+  class="rounded-lg flex items-center p-2 px-3 cursor-pointer hover:border-2"
+>
+  <p>{{ task!.title }}</p>
+</div>

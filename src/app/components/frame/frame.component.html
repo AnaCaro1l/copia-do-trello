@@ -1,0 +1,84 @@
+<div class="bg-[{{ frame?.coverColor }}] rounded-2xl w-[97vw] h-[87vh] m-5">
+  <div
+    class="bg-white/15 w-full rounded-t-xl p-3 justify-between flex items-center"
+  >
+    <h1
+      [ngClass]="[
+        editable ? 'hover:bg-white/10 transition-colors cursor-text' : 'cursor-default'
+      ]"
+      class="text-black/70 text-xl p-1 rounded-lg font-bold"
+    >
+      {{ frame?.title }}
+    </h1>
+
+    <div class="items-center flex gap-2">
+      <p-avatar
+        (click)="op.toggle($event)"
+        label="U"
+        styleClass="cursor-pointer"
+        matTooltip="Perfil"
+        [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }"
+        shape="circle"
+      />
+      <button
+        class="group text-white hover:bg-white/10 transition-colors p-2 rounded-full"
+        aria-label="Configurações"
+        matTooltip="Configurações"
+      >
+        <lucide-angular
+          [img]="usersRound"
+          color="black"
+          size="22"
+        ></lucide-angular>
+      </button>
+      <button
+        class="group flex items-center gap-1 text-black hover:bg-white/90 bg-white/80 transition-colors p-2 rounded-lg"
+        aria-label="Configurações"
+        matTooltip="Configurações"
+      >
+        <lucide-angular
+          [img]="userRoundPlus"
+          color="black"
+          size="18"
+        ></lucide-angular>
+        compartilhar
+      </button>
+      <button
+        class="group text-white hover:bg-white/10 transition-colors p-2 rounded-full"
+        aria-label="Configurações"
+        matTooltip="Configurações"
+      >
+        <lucide-angular
+          [img]="ellipsis"
+          color="black"
+          size="22"
+        ></lucide-angular>
+      </button>
+    </div>
+    
+  </div>
+  <div class="flex gap-4 p-4">
+    @for (tasklist of frame?.taskLists; track $index) {
+      <app-task-list [taskList]="tasklist"></app-task-list>
+    }
+  </div>
+</div>
+
+<p-overlayPanel styleClass="bg-gray-800 text-white" #op>
+  <div class="p-2 w-48">
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-3">
+        <p-avatar
+          label="U"
+          styleClass="mr-2"
+          [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }"
+          shape="circle"
+        />
+        <div class="flex flex-col">
+          <span class="text-sm font-semibold">{{ getCurrentUser()?.name }}</span>
+          <span class="text-xs text-gray-400">{{ getCurrentUser()?.email }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-overlayPanel>

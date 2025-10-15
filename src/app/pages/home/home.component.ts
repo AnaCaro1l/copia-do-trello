@@ -4,9 +4,9 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { MenuComponent } from '../../components/menu/menu.component';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Clock } from 'lucide-angular';
-import { CardComponent } from '../../components/card/card.component';
 import { ToastModule } from "primeng/toast";
 import { Router } from '@angular/router';
+import { CardComponent } from "../../components/card/card.component";
 
 @Component({
   selector: 'app-home',
@@ -16,8 +16,8 @@ import { Router } from '@angular/router';
     MenuComponent,
     CommonModule,
     LucideAngularModule,
-    CardComponent,
-    ToastModule
+    ToastModule,
+    CardComponent
 ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
