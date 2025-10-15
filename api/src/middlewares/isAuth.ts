@@ -10,7 +10,6 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
   }
 
   const [, token] = authHeader.split(' ');
-  console.log(token)
   if (!token) {
     throw new AppError('Token inválido', 401);
   }

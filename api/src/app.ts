@@ -5,6 +5,7 @@ import { sequelize } from './database';
 import { ValidationError } from 'yup';
 import { AppError } from './errors/AppError';
 import routes from './appRoutes';
+import { MulterError } from 'multer';
 
 const app = express();
 const port = 3333;
@@ -31,6 +32,13 @@ app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
     return res.status(err.statusCode).json({
       message: err.message,
       status: err.statusCode,
+    });
+  }
+
+  if (err instanceof MulterError) {
+    return res.status(400).json({
+      message: err.message,
+      status: 'Multer error',
     });
   }
 

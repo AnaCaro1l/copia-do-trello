@@ -7,9 +7,6 @@ export class List extends Model<List> {
   @Column
   title: string;
 
-  @Column
-  cardIds: string;
-
   @ForeignKey(() => Workspace)
   @Column
   workspaceId: number;
