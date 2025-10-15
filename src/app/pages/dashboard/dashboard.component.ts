@@ -18,15 +18,15 @@ export class DashboardComponent {
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
-
+  
   getFrameData() {
     return {
       id: '1',
       title: 'Project Alpha',
       createdAt: new Date(),
       updatedAt: new Date(),
-      coverImageUrl: null,
-      coverColor: '#0b75a7',
+      coverImageUrl: 'linear-gradient( 135deg, #6B73FF 10%, #000DFF 100%)',
+      coverColor: null,
       taskLists: [
         {
           id: '1',
