@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
   LucideAngularModule,
   PanelLeftClose,
@@ -18,7 +18,7 @@ import { Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { UserService } from '../../services/user.service';
 import { MatDialog } from '@angular/material/dialog';
-import { RegisterComponent } from '../../auth/register/register.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-header',
@@ -31,7 +31,8 @@ import { RegisterComponent } from '../../auth/register/register.component';
     OverlayPanelModule,
     MatButtonModule,
     HttpClientModule,
-  ],
+    CommonModule
+],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   providers: [MessageService, UserService],
@@ -43,6 +44,9 @@ export class HeaderComponent {
   readonly bell = Bell;
   readonly settings = Settings;
   readonly circleUser = CircleUser;
+
+  @Input() showMenuButton: boolean = true;
+  @Input() showHomeButton: boolean = true;
 
   @Output() menuToggle = new EventEmitter<boolean>();
   @Output() profileOpen = new EventEmitter<void>();

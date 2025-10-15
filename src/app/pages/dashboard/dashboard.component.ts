@@ -18,8 +18,8 @@ export class DashboardComponent {
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
-  
-  getFrameData() {
+
+   getFrameData() {
     return {
       id: '1',
       title: 'Project Alpha',

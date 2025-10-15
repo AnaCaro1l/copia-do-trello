@@ -17,7 +17,7 @@ import { CardComponent } from "../../components/card/card.component";
     CommonModule,
     LucideAngularModule,
     ToastModule,
-    CardComponent
+    CardComponent,
 ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -51,4 +51,5 @@ export class HomeComponent {
   onCardClick() {
     this.router.navigate(['/dashboard']);
   }
+
 }
