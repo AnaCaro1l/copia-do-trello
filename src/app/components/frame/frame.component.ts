@@ -63,7 +63,14 @@ export class FrameComponent {
             label: 'Excluir',
             icon: 'pi pi-trash',
             command: () => {
-              this.workspaceService.deleteWorkspace(this.frame.id);
+              this.workspaceService.deleteWorkspace(this.frame.id).subscribe({
+                next: () => {
+                  console.log('Workspace deleted');
+                },
+                error: (err) => {
+                  console.error('Error deleting workspace:', err);
+                },
+              });
             },
           },
         ],

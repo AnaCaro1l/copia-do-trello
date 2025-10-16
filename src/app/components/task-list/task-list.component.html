@@ -16,6 +16,7 @@
         ></lucide-angular>
       </button>
       <button
+        (click)="menu.toggle($event)"
         class="group text-white hover:bg-white/10 transition-colors p-2 rounded-full"
       >
         <lucide-angular
@@ -24,6 +25,7 @@
           size="18"
         ></lucide-angular>
       </button>
+      <p-menu #menu [model]="items" [popup]="true" />
     </div>
   </div>
   <div class="px-3 gap-2 flex flex-col">
