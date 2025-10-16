@@ -7,6 +7,7 @@ import { LucideAngularModule, Clock } from 'lucide-angular';
 import { ToastModule } from "primeng/toast";
 import { Router } from '@angular/router';
 import { CardComponent } from "../../components/card/card.component";
+import { DefaultCardComponent } from "../../components/default-card/default-card.component";
 
 @Component({
   selector: 'app-home',
@@ -18,6 +19,7 @@ import { CardComponent } from "../../components/card/card.component";
     LucideAngularModule,
     ToastModule,
     CardComponent,
+    DefaultCardComponent
 ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

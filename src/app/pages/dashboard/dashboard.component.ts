@@ -122,7 +122,7 @@ export class DashboardComponent {
           coverImageUrl: null,
           coverColor: null,
           archived: false,
-          isOpen: true,
+          isOpen: false,
         },
       ],
       members: ['user1', 'user2'],

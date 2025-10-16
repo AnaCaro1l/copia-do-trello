@@ -1,10 +1,12 @@
 <div
+  *ngIf="isOpen()"
   class="bg-gray-900 rounded-lg w-[272px] cursor-pointer shadow-lg hover:shadow-2xl hover:bg-opacity-95 transition-shadow"
 >
   <div class="justify-between flex p-4 items-center">
     <div class="text-white">{{ taskList!.title }}</div>
     <div>
       <button
+        (click)="toggleOpen()"
         class="group text-white hover:bg-white/10 transition-colors p-2 rounded-full"
       >
         <lucide-angular
@@ -35,5 +37,17 @@
     >
       + Adicionar outro cartão
     </button>
+  </div>
+</div>
+
+<div *ngIf="!isOpen()" class="w-15 [writing-mode:vertical-rl]">
+  <div class="bg-gray-900 rounded-lg p-2 flex items-center">
+    <button
+      (click)="toggleOpen()"
+      class="group text-white hover:bg-white/10 transition-colors p-2 rounded-full"
+    >
+      <lucide-angular [img]="maximize" color="white" size="18"></lucide-angular>
+    </button>
+    <div class="text-white py-2">{{ taskList!.title }}</div>
   </div>
 </div>
