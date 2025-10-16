@@ -16,7 +16,7 @@
           <span class="text-white">Visto Recentemente</span>
         </div>
         <div class="flex gap-3">
-          <app-card (click)="onCardClick()"></app-card>
+          <app-card (click)="onCardClick(frame.id)" *ngFor="let frame of frames" [frame]="frame"></app-card>
           <app-default-card ></app-default-card>
         </div>
       </div>

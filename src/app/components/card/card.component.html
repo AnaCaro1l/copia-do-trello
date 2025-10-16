@@ -1,7 +1,15 @@
-<div class="bg-blue-500 relative w-[200px] h-[120px] rounded-lg shadow-lg hover:shadow-2xl hover:bg-opacity-80 transition-shadow cursor-pointer">
-    <div class="bg-black/90 w-full absolute bottom-0 left-0 rounded-b-md">
-        <span class="text-white p-2 block text-sm">
-            nome do card
-        </span>
-    </div>
+<div
+  [ngStyle]="
+    frame.backgroundColor ? { 'background-color': frame.backgroundColor } : {}
+  "
+  [ngStyle]="
+    frame.backgroundUrl ? { 'background-image': frame.backgroundUrl } : {}
+  "
+  class="bg-[#374151] relative w-[200px] h-[120px] rounded-lg shadow-lg hover:shadow-2xl hover:bg-opacity-80 transition-shadow cursor-pointer"
+>
+  <div class="bg-black/90 w-full absolute bottom-0 left-0 rounded-b-md">
+    <span class="text-white p-2 block text-sm">
+      {{ frame.name }}
+    </span>
+  </div>
 </div>

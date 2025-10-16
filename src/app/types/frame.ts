@@ -1,13 +1,13 @@
 import { TaskList } from "./tasklist";
 
 export interface Frame {
-  id?: string;
+  id: number;
   name: string;
   createdAt?: Date;
   updatedAt?: Date;
-  coverImageUrl?: string | null;
-  coverColor?: string | null;
-  taskLists?: TaskList[] | null;
+  backgroundUrl?: string | null;
+  backgroundColor?: string | null;
+  lists?: TaskList[] | null;
   members?: string[] | null;
   visibility: 0 | 1;
   favorite?: boolean | false;

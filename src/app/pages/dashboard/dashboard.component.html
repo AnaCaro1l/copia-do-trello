@@ -1,4 +1,8 @@
 <p-toast></p-toast>
 <app-header [showMenuButton]="false"></app-header>
 
-<app-frame [frame]="getFrameData()" [editable]="false"></app-frame>
+<app-frame *ngIf="frame" [frame]="frame"></app-frame>
+
+<div *ngIf="!frame">
+  <p>Carregando quadro...</p>
+</div>
