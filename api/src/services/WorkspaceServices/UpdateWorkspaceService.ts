@@ -56,8 +56,14 @@ export const UpdateWorkspaceService = async ({
     updatedAt: new Date(),
   });
 
-  io.to(`user_${workspace.collaborators}`).emit('show_updated_workspace', updatedWorkspace)
-  io.to(`user_${workspace.ownerId}`).emit('show_updated_workspace', updatedWorkspace)
+  io.to(`user_${workspace.collaborators}`).emit(
+    'show_updated_workspace',
+    updatedWorkspace
+  );
+  io.to(`user_${workspace.ownerId}`).emit(
+    'show_updated_workspace',
+    updatedWorkspace
+  );
 
   return updatedWorkspace;
 };

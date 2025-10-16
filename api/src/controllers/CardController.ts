@@ -36,10 +36,10 @@ export const showCard = async (req: Request, res: Response): Promise<Response> =
 
 export const updateCard = async (req: Request, res: Response): Promise<Response> => {
     const id = req.params.id;
-    const { title, description } = req.body;
+    const { title, description, completed } = req.body;
     const mediaPath = req.file?.path;
 
-    const card = await UpdateCardService({ title, description, mediaPath, id });
+    const card = await UpdateCardService({ title, description, mediaPath, id, completed });
 
     return res.status(200).json({
         message: 'Card atualizado com sucesso',

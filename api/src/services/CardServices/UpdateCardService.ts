@@ -7,6 +7,7 @@ interface Request {
   description?: string;
   mediaPath?: string;
   id: string;
+  completed?: boolean;
 }
 
 export const UpdateCardService = async ({
@@ -14,6 +15,7 @@ export const UpdateCardService = async ({
   description,
   mediaPath,
   id,
+  completed
 }: Request): Promise<Card> => {
   const card = await Card.findByPk(id);
   if (!card) {
@@ -29,6 +31,7 @@ export const UpdateCardService = async ({
     title: title ? title : card.title,
     description: description ? description : card.description,
     media: media ? media : card.media,
+    completed: completed ? completed : card.completed,
     updatedAt: new Date(),
   });
 

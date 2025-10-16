@@ -41,6 +41,6 @@ export const CreateWorkspaceService = async ({
 
   await workspace.$set('collaborators', [ownerId]);
 
-  io.to(`user_${ownerId}`).emit('show_new_workspace', workspace)
+  io.to(`user_${ownerId}`).emit('show_new_workspace', workspace);
   return workspace;
 };
