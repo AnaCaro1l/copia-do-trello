@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCard, listCards, showCard, updateCard } from "../controllers/CardController";
+import { createCard, deleteCard, listCards, showCard, updateCard } from "../controllers/CardController";
 
 const router = Router();
 
@@ -10,5 +10,7 @@ router.get('/cards/:listId', listCards);
 router.get('/card/:id', showCard);
 
 router.put('/card/:id', updateCard);
+
+router.delete('/card/:id', deleteCard);
 
 export default router;

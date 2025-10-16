@@ -5,12 +5,21 @@ import { v2 as cloudinary } from 'cloudinary';
 import { cloudinaryFolderName } from '../../utils/cloudinary';
 import { WorkspaceUser } from '../../models/WorkspaceUser';
 import io from '../../app';
+import { List } from '../../models/List';
 
 export const DeleteWorkspaceService = async (id: string): Promise<void> => {
   const workspace = await Workspace.findByPk(id);
 
   if (!workspace) {
     throw new AppError('Área de trabalho não encontrada');
+  }
+
+  const lists = await List.findAll({
+    where: { workspaceId: id },
+  });
+
+  for (const list of lists) {
+    await list.destroy();
   }
 
   if (workspace.backgroundUrl) {
