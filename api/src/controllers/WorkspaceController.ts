@@ -4,6 +4,7 @@ import { ListWorkspacesServices } from '../services/WorkspaceServices/ListWorksp
 import { ShowWorkspaceService } from '../services/WorkspaceServices/ShowWorkspaceService';
 import { UpdateWorkspaceService } from '../services/WorkspaceServices/UpdateWorkspaceService';
 import { DeleteWorkspaceService } from '../services/WorkspaceServices/DeleteWorkspaceService';
+import { AddCollaboratorsService } from '../services/WorkspaceServices/AddCollaboratorsService';
 
 export const insert = async (
   req: Request,
@@ -43,7 +44,8 @@ export const showWorkspace = async (
   res: Response
 ): Promise<Response> => {
   const id = req.params.id;
-  const workspace = await ShowWorkspaceService(id);
+  const userId = req.user.id;
+  const workspace = await ShowWorkspaceService({ id, userId });
 
   return res.status(200).json({
     message: 'Área de trabalho encontrada com sucesso',
@@ -83,3 +85,11 @@ export const deleteWorkspace = async (
     message: 'Área de trabalho deletada com sucesso',
   });
 };
+
+export const addCollaborators = async (req: Request, res: Response): Promise<Response> => {
+    const { workspaceId, userIds } = req.body;
+    await AddCollaboratorsService({ workspaceId, userIds });
+    return res.status(204).json({
+        message: 'Colaboradores adicionados com sucesso',
+    });
+}

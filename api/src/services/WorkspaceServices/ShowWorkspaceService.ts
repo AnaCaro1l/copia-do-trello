@@ -1,12 +1,47 @@
+import { IncludeOptions, Op } from 'sequelize';
 import { Workspace } from '../../models/Workspace';
+import { List } from '../../models/List';
+import { WorkspaceUser } from '../../models/WorkspaceUser';
+import { AppError } from '../../errors/AppError';
 
-export const ShowWorkspaceService = async (id: string): Promise<Workspace> => {
+interface Request {
+  id: string;
+  userId: number;
+}
+
+export const ShowWorkspaceService = async ({
+  id,
+  userId,
+}: Request): Promise<Workspace> => {
+  let includeOptions: IncludeOptions[] = [];
   const workspace = await Workspace.findOne({
     where: { id: id },
-    include: ['lists', 'collaborators'],
+    include: ['collaborators', ...includeOptions],
   });
+
   if (!workspace) {
-    throw new Error('Área de trabalho não encontrada');
+    throw new AppError('Área de trabalho não encontrada');
   }
+
+  const validate = await WorkspaceUser.findOne({
+    where: {
+      [Op.and]: [{ workspaceId: workspace.id }, { userId: userId }],
+    },
+  });
+
+  if (!validate) {
+    throw new AppError(
+      'Você não tem permissão para acessar esta área de trabalho'
+    );
+  }
+
+  const lists = await List.findAll({
+    where: { workspaceId: workspace.id },
+  });
+
+  if (lists.length > 0) {
+    includeOptions.push({ model: List, as: 'lists', include: ['cards'] });
+  }
+
   return workspace;
 };
