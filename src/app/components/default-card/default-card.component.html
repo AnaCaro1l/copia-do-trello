@@ -1,0 +1,49 @@
+<div
+  (click)="showDialog()"
+  class="bg-gray-800 relative w-[200px] h-[120px] rounded-lg shadow-lg hover:shadow-2xl hover:bg-opacity-80 transition-shadow cursor-pointer text-center flex items-center justify-center"
+>
+  <span class="text-white/70 p-2 text-sm"> Criar novo quadro </span>
+</div>
+<p-dialog
+  header="Criar novo quadro"
+  [(visible)]="display"
+  [modal]="true"
+  [style]="{ width: '300px' }"
+  [draggable]="false"
+>
+  <ng-template pTemplate="content">
+    <form [formGroup]="frameForm" class="flex flex-col gap-3">
+      <input
+        formControlName="name"
+        type="text"
+        placeholder="Nome do Quadro"
+        class="p-2 rounded-lg bg-transparent border border-gray-700 text-white w-full placeholder:!text-white/40 focus:outline-none"
+      />
+      <label for="state" class="text-white/80">Visibilidade</label>
+      <div class="card">
+        <p-selectButton
+          formControlName="visibility"
+          [options]="stateOptions"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+      <!-- <label for="state" class="text-white/80">Escolha sua imagem de fundo</label>
+      <p-fileUpload
+        mode="basic"
+        chooseLabel="Choose"
+        chooseIcon="pi pi-upload"
+        name="demo[]"
+        url="https://www.primefaces.org/cdn/api/upload.php"
+        accept="image/*"
+        maxFileSize="1000000"
+      /> -->
+    </form>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button mat-flat-button color="warn" class="mr-2" (click)="display = false">
+      Cancelar
+    </button>
+    <button mat-flat-button (click)="createBoard()">Criar</button>
+  </ng-template>
+</p-dialog>
