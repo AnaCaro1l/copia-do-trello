@@ -1,3 +1,4 @@
+import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { Workspace } from '../../models/Workspace';
 import { handleBackgroundOperations } from '../../utils/background';
@@ -54,6 +55,9 @@ export const UpdateWorkspaceService = async ({
       : workspace.backgroundColor,
     updatedAt: new Date(),
   });
+
+  io.to(`user_${workspace.collaborators}`).emit('show_updated_workspace', updatedWorkspace)
+  io.to(`user_${workspace.ownerId}`).emit('show_updated_workspace', updatedWorkspace)
 
   return updatedWorkspace;
 };

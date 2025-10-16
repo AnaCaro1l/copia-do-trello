@@ -1,3 +1,4 @@
+import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { Card } from '../../models/Card';
 import uploadOnCloudinary from '../../utils/cloudinary';
@@ -33,6 +34,8 @@ export const CreateCardService = async ({
     listId,
     media,
   });
+
+  io.to(`list_${listId}`).emit('show_new_card', card);
 
   return card;
 };

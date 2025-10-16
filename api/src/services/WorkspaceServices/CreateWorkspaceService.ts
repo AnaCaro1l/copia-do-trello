@@ -1,3 +1,4 @@
+import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { User } from '../../models/User';
 import { Workspace } from '../../models/Workspace';
@@ -37,5 +38,7 @@ export const CreateWorkspaceService = async ({
     backgroundUrl,
     backgroundColor,
   });
+
+  io.to(`user_${ownerId}`).emit('show_new_workspace', workspace)
   return workspace;
 };

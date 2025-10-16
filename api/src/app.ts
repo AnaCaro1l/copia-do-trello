@@ -1,11 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
-import http, { Server } from 'http';
+import http from 'http';
 import { sequelize } from './database';
 import { ValidationError } from 'yup';
 import { AppError } from './errors/AppError';
 import routes from './appRoutes';
 import { MulterError } from 'multer';
+import { Server } from 'socket.io';
 
 const app = express();
 const port = 3333;
@@ -18,7 +19,7 @@ app.use(
 );
 
 app.use(express.json());
-app.use(routes)
+app.use(routes);
 
 app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
   if (err instanceof ValidationError) {
@@ -49,6 +50,20 @@ app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
 });
 
 const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  },
+});
+
+io.on('connection', (socket) => {
+  console.log('Um usuário conectou');
+
+  socket.on('disconnect', () => {
+    console.log('Um usuário desconectado');
+  });
+});
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
@@ -63,3 +78,4 @@ async function syncDb() {
 }
 
 syncDb();
+export default io;

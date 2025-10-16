@@ -5,6 +5,7 @@ export const ListListsService = async (
 ): Promise<List[]> => {
   const lists = await List.findAll({
     where: { workspaceId: workspaceId },
+    include: ['cards'],
   });
   return lists;
 };
