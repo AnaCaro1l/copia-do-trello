@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { CreateCardService } from "../services/CardServices/CreateCardService";
 import { ListCardsService } from "../services/CardServices/ListCardsService";
 import { ShowCardService } from "../services/CardServices/ShowCardService";
+import { UpdateCardService } from "../services/CardServices/UpdateCardService";
 
 export const createCard = async (req: Request, res: Response): Promise<Response> => {
     const { title, description, listId } = req.body;
@@ -31,4 +32,17 @@ export const showCard = async (req: Request, res: Response): Promise<Response> =
         message: 'Card encontrado com sucesso',
         card
     });
+}
+
+export const updateCard = async (req: Request, res: Response): Promise<Response> => {
+    const id = req.params.id;
+    const { title, description } = req.body;
+    const mediaPath = req.file?.path;
+
+    const card = await UpdateCardService({ title, description, mediaPath, id });
+
+    return res.status(200).json({
+        message: 'Card atualizado com sucesso',
+        card
+    })
 }
