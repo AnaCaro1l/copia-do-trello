@@ -1,7 +1,12 @@
 <div
-  [ngStyle]="frame.backgroundColor ? { 'background-color': frame.backgroundColor } : {}"
-  [ngStyle]="frame.backgroundUrl ? { 'background-image': frame.backgroundUrl } : {}"
-  class="bg-[#374151] rounded-2xl w-[97vw] h-[87vh] m-5"
+  [ngClass]="{ 'bg-gray-200': !frame.backgroundColor }"
+  [style.background-color]="frame.backgroundColor"
+  [ngStyle]="
+    frame.backgroundUrl
+      ? { 'background-image': 'url(' + frame.backgroundUrl + ')' }
+      : {}
+  "
+  class="bg-[#374151] rounded-2xl w-[97vw] h-[87vh] m-5 frame"
 >
   <div
     class="bg-white/10 w-full rounded-t-xl p-3 justify-between flex items-center"
@@ -68,6 +73,7 @@
     @for (tasklist of frame.lists; track $index) {
     <app-task-list [taskList]="tasklist"></app-task-list>
     }
+    <app-task-list-default></app-task-list-default>
   </div>
 </div>
 

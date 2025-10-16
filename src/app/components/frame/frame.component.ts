@@ -14,6 +14,7 @@ import {
 import { WorkspaceService } from '../../services/workspace.service';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { TaskListDefaultComponent } from "../task-list-default/task-list-default.component";
 
 @Component({
   selector: 'app-frame',
@@ -25,7 +26,8 @@ import { MenuItem } from 'primeng/api';
     OverlayPanelModule,
     LucideAngularModule,
     MenuModule,
-  ],
+    TaskListDefaultComponent
+],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
 })
@@ -47,6 +49,7 @@ export class FrameComponent {
   ngOnInit() {
     console.log('FrameComponent initialized with frame:', this.frame);
     console.log('lists', this.frame.lists);
+    console.log(this.frame.backgroundColor)
 
     this.items = [
       {
