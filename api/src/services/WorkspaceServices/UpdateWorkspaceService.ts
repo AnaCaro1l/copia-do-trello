@@ -60,10 +60,6 @@ export const UpdateWorkspaceService = async ({
     'show_updated_workspace',
     updatedWorkspace
   );
-  io.to(`user_${workspace.ownerId}`).emit(
-    'show_updated_workspace',
-    updatedWorkspace
-  );
 
   return updatedWorkspace;
 };
