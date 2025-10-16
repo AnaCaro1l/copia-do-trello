@@ -70,9 +70,7 @@ export class HomeComponent implements OnInit {
   }
 
   onCardClick(frameId?: number) {
-    // if frameId is not provided, do nothing
     if (!frameId) return;
-    // navigate to dashboard using path param: /dashboard/:frameId
     this.router.navigate(['/dashboard', frameId]);
   }
 }

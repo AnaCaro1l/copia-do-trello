@@ -1,0 +1,40 @@
+<div
+  class="flex gap-3 bg-white/15 p-2 rounded-lg shadow-lg cursor-pointer hover:bg-white/20 transition-colors"
+>
+    <div *ngIf="!isEditMode()" class="flex gap-1 items-center" (click)="AddList()">
+      <lucide-angular [img]="plus" color="white" size="18"></lucide-angular>
+
+      <div class="text-white p-1">Adicionar outra lista</div>
+    </div>
+    <form
+      [formGroup]="formTask"
+      (ngSubmit)="Submit()"
+      *ngIf="isEditMode()"
+      class="flex gap-2 items-center px-1"
+    >
+      <input
+        type="text"
+        formControlName="title"
+        class="bg-transparent text-white p-1 rounded-lg w-40 outline-none border-none"
+        placeholder="Título da lista"
+      />
+      <div class="flex gap-1 items-center">
+        <button type="submit">
+          <lucide-angular
+            [img]="check"
+            color="white"
+            size="20"
+            class="hover:bg-white/15 rounded-full transition-colors"
+          ></lucide-angular>
+        </button>
+        <button (click)="isEditMode.set(false)" type="button">
+          <lucide-angular
+            [img]="x"
+            color="red"
+            size="20"
+            class="hover:bg-white/15 rounded-full transition-colors"
+          ></lucide-angular>
+        </button>
+      </div>
+    </form>
+</div>

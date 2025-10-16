@@ -2,6 +2,7 @@ import { Task } from "./task";
 
 export interface TaskList {
   id: string;
+  workspaceId: number;
   title: string;
   createdAt: Date;
   updatedAt: Date;
