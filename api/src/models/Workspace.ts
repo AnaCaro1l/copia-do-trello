@@ -10,6 +10,7 @@ import {
 } from 'sequelize-typescript';
 import { User } from './User';
 import { WorkspaceUser } from './WorkspaceUser';
+import { List } from './List';
 
 @Table({
   tableName: 'Workspaces',
@@ -41,4 +42,7 @@ export class Workspace extends Model<Workspace> {
 
   @HasMany(() => WorkspaceUser)
   workspaceUsers: WorkspaceUser[];
+
+  @HasMany(() => List)
+  lists: List[];
 }

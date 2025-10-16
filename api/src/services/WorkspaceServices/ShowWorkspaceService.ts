@@ -1,4 +1,4 @@
-import { IncludeOptions, Op } from 'sequelize';
+import { Op } from 'sequelize';
 import { Workspace } from '../../models/Workspace';
 import { List } from '../../models/List';
 import { WorkspaceUser } from '../../models/WorkspaceUser';
@@ -13,10 +13,12 @@ export const ShowWorkspaceService = async ({
   id,
   userId,
 }: Request): Promise<Workspace> => {
-  let includeOptions: IncludeOptions[] = [];
   const workspace = await Workspace.findOne({
     where: { id: id },
-    include: ['collaborators', ...includeOptions],
+    include: [
+      'collaborators',
+      { model: List, as: 'lists', include: ['cards'] },
+    ],
   });
 
   if (!workspace) {
@@ -33,14 +35,6 @@ export const ShowWorkspaceService = async ({
     throw new AppError(
       'Você não tem permissão para acessar esta área de trabalho'
     );
-  }
-
-  const lists = await List.findAll({
-    where: { workspaceId: workspace.id },
-  });
-
-  if (lists.length > 0) {
-    includeOptions.push({ model: List, as: 'lists', include: ['cards'] });
   }
 
   return workspace;
