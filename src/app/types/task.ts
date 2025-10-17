@@ -1,6 +1,6 @@
 export interface Task {
   id: number;
-  tasklistId: number;
+  listId: number;
   title: string;
   createdAt: Date;
   updatedAt: Date;

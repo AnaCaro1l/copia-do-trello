@@ -51,7 +51,6 @@ export class TaskListDefaultComponent {
     
     this.listService.createList(newList as TaskList).subscribe({
       next: (list: TaskList) => {
-        console.log('List created:', list);
         this.onListCreated.emit(list);
         this.formTask.reset();
         this.isEditMode.set(false);
@@ -61,6 +60,5 @@ export class TaskListDefaultComponent {
         console.log('workspaceId:', this.workspaceId);
       }
     });
-   
   }
 }

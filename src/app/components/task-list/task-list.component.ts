@@ -6,6 +6,9 @@ import {
   Minimize2,
   Ellipsis,
   Maximize2,
+  Plus,
+  X,
+  Check
 } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { TaskList } from '../../types/tasklist';
@@ -17,6 +20,9 @@ import { ListService } from '../../services/list.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
+import { CardService } from '../../services/card.service';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Task } from '../../types/task';
 
 @Component({
   selector: 'app-task-list',
@@ -31,7 +37,8 @@ import { ButtonModule } from 'primeng/button';
     MenuModule,
     ConfirmDialogModule,
     ToastModule,
-    ButtonModule
+    ButtonModule,
+    ReactiveFormsModule
   ],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
@@ -41,23 +48,41 @@ export class TaskListComponent {
   readonly minimize = Minimize2;
   readonly ellipsis = Ellipsis;
   readonly maximize = Maximize2;
+  readonly plus = Plus;
+  readonly x = X;
+  readonly check = Check;
 
   items: MenuItem[] | undefined;
 
   @Input() taskList: TaskList | null = null;
 
+  formTask = this.buildForm();
+
   isOpen = signal(true);
+  isEditMode = signal(false);
 
   constructor(
     private cdr: ChangeDetectorRef,
     private listService: ListService,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cardService: CardService,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit() {
     this.isOpen.set(this.taskList?.isOpen ?? true);
 
+    // Ensure tasks array exists to prevent runtime errors when pushing
+    if (this.taskList && !Array.isArray(this.taskList.tasks)) {
+      this.taskList.tasks = [];
+    }
+    
+    // If tasks are not loaded/populated, fetch them from API
+    if (this.taskList && (!this.taskList.tasks || this.taskList.tasks.length === 0)) {
+      this.loadTasks(this.taskList.id);
+    }
+    
     this.items = [
       {
         label: 'Options',
@@ -76,6 +101,30 @@ export class TaskListComponent {
         ],
       },
     ];
+  }
+
+  private loadTasks(listId: number) {
+    this.cardService.getCards(listId).subscribe({
+      next: (tasks) => {
+        if (!this.taskList) return;
+        this.taskList.tasks = tasks ?? [];
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Failed to load tasks', err);
+      },
+    });
+  }
+
+  buildForm() {
+    return this.fb.group({
+      title: ['', [Validators.required, this.nonWhitespaceValidator]],
+    });
+  }
+
+  nonWhitespaceValidator(control: AbstractControl): ValidationErrors | null {
+    const value: string = control.value ?? '';
+    return value.trim().length > 0 ? null : { whitespace: true };
   }
 
   confirm2(event: Event) {
@@ -118,5 +167,38 @@ export class TaskListComponent {
     const newValue = !this.isOpen();
     this.isOpen.set(newValue);
     this.taskList!.isOpen = newValue;
+  }
+
+  AddCard() {
+    this.isEditMode.set(true);
+  }
+
+  Submit() {
+    if (this.formTask.invalid) return;
+
+    const newCard: Partial<Task> = {
+      title: this.formTask.value.title!,
+      listId: this.taskList!.id,
+    };
+    this.cardService.createCard(newCard as Task).subscribe({
+      next: (task) => {
+        if (!this.taskList) return;
+        if (!Array.isArray(this.taskList.tasks)) {
+          this.taskList.tasks = [];
+        }
+        this.taskList.tasks.push(task);
+        this.formTask.reset();
+        this.isEditMode.set(false);
+      },
+      error: (error) => {
+        console.error('Error adding card:', error);
+        console.log('Card created:', newCard.listId);
+      },
+    });
+  }
+
+  close() {
+    this.formTask.reset();
+    this.isEditMode.set(false);
   }
 }

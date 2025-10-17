@@ -31,16 +31,56 @@
     </div>
   </div>
   <div class="px-3 gap-2 flex flex-col">
-    @for (task of taskList!.tasks; track $index) {
+    @for (task of taskList?.tasks ?? []; track $index) {
     <app-task [task]="task"></app-task>
     }
   </div>
-  <div class="p-3 flex">
-    <button
-      class="w-full flex text-left text-white/80 hover:bg-gray-800 transition-colors p-1 rounded-lg"
+  <div class="p-3">
+    <div
+      [ngClass]="isEditMode() ? 'bg-white/10' : ''"
+      class="flex gap-3 p-1 rounded-lg shadow-lg cursor-pointer hover:bg-white/10 transition-colors min-w-[200px]"
     >
-      + Adicionar outro cartão
-    </button>
+      <div
+        *ngIf="!isEditMode()"
+        class="flex gap-1 items-center"
+        (click)="AddCard()"
+      >
+        <lucide-angular [img]="plus" color="white" size="18"></lucide-angular>
+
+        <div class="text-white p-1">Adicionar card</div>
+      </div>
+      <form
+        [formGroup]="formTask"
+        (ngSubmit)="Submit()"
+        *ngIf="isEditMode()"
+        class="flex gap-2 items-center px-1 "
+      >
+        <input
+          type="text"
+          formControlName="title"
+          class="text-white bg-transparent p-1 rounded-lg w-40 outline-none border-none"
+          placeholder="Título da lista"
+        />
+        <div class="flex gap-1 items-center">
+          <button type="submit">
+            <lucide-angular
+              [img]="check"
+              color="white"
+              size="20"
+              class="hover:bg-white/15 rounded-full transition-colors"
+            ></lucide-angular>
+          </button>
+          <button (click)="close()" type="button">
+            <lucide-angular
+              [img]="x"
+              color="red"
+              size="20"
+              class="hover:bg-white/15 rounded-full transition-colors"
+            ></lucide-angular>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
