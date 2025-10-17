@@ -8,7 +8,7 @@
   header="Criar novo quadro"
   [(visible)]="display"
   [modal]="true"
-  [style]="{ width: '300px' }"
+  [style]="{ width: '300px', height: 'auto' }"
   [draggable]="false"
 >
   <ng-template pTemplate="content">
@@ -28,6 +28,10 @@
           optionValue="value"
         />
       </div>
+      <!-- <label for="state" class="text-white/80">Cor de fundo</label> -->
+      <!-- <div class="card flex justify-content-center">
+        <p-colorPicker formControlName="backgroundColor" />
+      </div> -->
       <!-- <label for="state" class="text-white/80">Escolha sua imagem de fundo</label>
       <p-fileUpload
         mode="basic"

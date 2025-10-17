@@ -6,6 +6,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Frame } from '../../types/frame';
 import { WorkspaceService } from '../../services/workspace.service';
+import { ColorPickerModule } from 'primeng/colorpicker';
 
 @Component({
   selector: 'app-default-card',
@@ -16,6 +17,7 @@ import { WorkspaceService } from '../../services/workspace.service';
     SelectButtonModule,
     FileUploadModule,
     ReactiveFormsModule,
+    ColorPickerModule,
   ],
   templateUrl: './default-card.component.html',
   styleUrl: './default-card.component.scss',
@@ -32,6 +34,7 @@ export class DefaultCardComponent {
     return this.fb.group({
       name: ['', Validators.required],
       visibility: [1, Validators.required],
+      // backgroundColor: ['#374151', Validators.required],
     });
   }
   stateOptions: any[] = [
