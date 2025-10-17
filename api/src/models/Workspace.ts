@@ -11,6 +11,7 @@ import {
 import { User } from './User';
 import { WorkspaceUser } from './WorkspaceUser';
 import { List } from './List';
+import { Invite } from './Invite';
 
 @Table({
   tableName: 'Workspaces',
@@ -45,4 +46,7 @@ export class Workspace extends Model<Workspace> {
 
   @HasMany(() => List)
   lists: List[];
+
+  @HasMany(() => Invite)
+  invites: Invite[];
 }

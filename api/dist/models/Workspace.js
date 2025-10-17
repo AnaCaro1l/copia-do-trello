@@ -13,6 +13,8 @@ exports.Workspace = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
 const User_1 = require("./User");
 const WorkspaceUser_1 = require("./WorkspaceUser");
+const List_1 = require("./List");
+const Invite_1 = require("./Invite");
 let Workspace = class Workspace extends sequelize_typescript_1.Model {
 };
 exports.Workspace = Workspace;
@@ -23,7 +25,11 @@ __decorate([
 __decorate([
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
-], Workspace.prototype, "background", void 0);
+], Workspace.prototype, "backgroundUrl", void 0);
+__decorate([
+    sequelize_typescript_1.Column,
+    __metadata("design:type", String)
+], Workspace.prototype, "backgroundColor", void 0);
 __decorate([
     (0, sequelize_typescript_1.Default)(false),
     sequelize_typescript_1.Column,
@@ -42,6 +48,18 @@ __decorate([
     (0, sequelize_typescript_1.BelongsToMany)(() => User_1.User, () => WorkspaceUser_1.WorkspaceUser),
     __metadata("design:type", Array)
 ], Workspace.prototype, "collaborators", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => WorkspaceUser_1.WorkspaceUser),
+    __metadata("design:type", Array)
+], Workspace.prototype, "workspaceUsers", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => List_1.List),
+    __metadata("design:type", Array)
+], Workspace.prototype, "lists", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => Invite_1.Invite),
+    __metadata("design:type", Array)
+], Workspace.prototype, "invites", void 0);
 exports.Workspace = Workspace = __decorate([
     (0, sequelize_typescript_1.Table)({
         tableName: 'Workspaces',

@@ -8,6 +8,7 @@ import {
 } from 'sequelize-typescript';
 import { Workspace } from './Workspace';
 import { WorkspaceUser } from './WorkspaceUser';
+import { Invite } from './Invite';
 
 @Table({
   tableName: 'Users',
@@ -34,4 +35,10 @@ export class User extends Model<User> {
 
   @HasMany(() => WorkspaceUser)
   workspaceUsers: WorkspaceUser[];
+
+  @HasMany(() => Invite, 'senderId')
+  sentInvites: Invite[];
+
+  @HasMany(() => Invite, 'receiverId')
+  receivedInvites: Invite[];
 }

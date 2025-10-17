@@ -13,6 +13,7 @@ exports.User = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
 const Workspace_1 = require("./Workspace");
 const WorkspaceUser_1 = require("./WorkspaceUser");
+const Invite_1 = require("./Invite");
 let User = class User extends sequelize_typescript_1.Model {
 };
 exports.User = User;
@@ -40,6 +41,18 @@ __decorate([
     (0, sequelize_typescript_1.BelongsToMany)(() => Workspace_1.Workspace, () => WorkspaceUser_1.WorkspaceUser),
     __metadata("design:type", Array)
 ], User.prototype, "collaborations", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => WorkspaceUser_1.WorkspaceUser),
+    __metadata("design:type", Array)
+], User.prototype, "workspaceUsers", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => Invite_1.Invite, 'senderId'),
+    __metadata("design:type", Array)
+], User.prototype, "sentInvites", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => Invite_1.Invite, 'receiverId'),
+    __metadata("design:type", Array)
+], User.prototype, "receivedInvites", void 0);
 exports.User = User = __decorate([
     (0, sequelize_typescript_1.Table)({
         tableName: 'Users',
