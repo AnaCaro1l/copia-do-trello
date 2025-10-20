@@ -87,9 +87,9 @@
   <div class="w-48">
     <p>Alterar Visibilidade</p>
   </div>
-  <div class="py-2">
+  <div class="py-2 gap-2 flex flex-col">
     <div
-      (click)="changeVisibility()"
+      (click)="changeVisibility(true)"
       [ngClass]="frame.visibility === true ? 'bg-gray-800' : ''"
       class="p-2 cursor-pointer hover:bg-gray-800 rounded-lg transition-colors"
     >
@@ -109,7 +109,7 @@
       </div>
     </div>
     <div
-      (click)="changeVisibility()"
+      (click)="changeVisibility(false)"
       [ngClass]="frame.visibility === false ? 'bg-gray-800' : ''"
       class="p-2 cursor-pointer hover:bg-gray-800 rounded-lg transition-colors"
     >

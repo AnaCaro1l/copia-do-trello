@@ -141,33 +141,33 @@ export class FrameComponent {
     }
   }
 
-  changeVisibility() {
-    const newVisibility = !this.frame.visibility;
+  changeVisibility(type: false | true) {
+    if (this.frame.visibility !== type) {
+      this.frame.visibility = type;
 
-    this.frame.visibility = newVisibility;
-
-    this.workspaceService
-      .updateWorkspace(this.frame.id, { visibility: newVisibility })
-      .subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'info',
-            summary: 'Visibilidade Alterada',
-            detail: newVisibility
-              ? 'O quadro agora é público.'
-              : 'O quadro agora é privado.',
-          });
-          console.log('Frame visibility updated in DB:', newVisibility);
-        },
-        error: (err) => {
-          this.frame.visibility = !newVisibility;
-          console.error('Erro ao atualizar visibilidade:', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Não foi possível atualizar a visibilidade no servidor.',
-          });
-        },
-      });
+      this.workspaceService
+        .updateWorkspace(this.frame.id, { visibility: type })
+        .subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'info',
+              summary: 'Visibilidade Alterada',
+              detail: type
+                ? 'O quadro agora é público.'
+                : 'O quadro agora é privado.',
+            });
+            console.log('Frame visibility updated in DB:', type);
+          },
+          error: (err) => {
+            this.frame.visibility = !type;
+            console.error('Erro ao atualizar visibilidade:', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erro',
+              detail: 'Não foi possível atualizar a visibilidade no servidor.',
+            });
+          },
+        });
+    }
   }
 }
