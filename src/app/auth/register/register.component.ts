@@ -57,7 +57,7 @@ export class RegisterComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder,
     private userService: UserService,
-    private authService: AuthService,
+    private authService: AuthService
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -69,10 +69,22 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     const nav = this.router.getCurrentNavigation();
-    const st = (nav?.extras?.state as any) ?? (window.history.state as any) ?? {};
-    const user: UserDto | undefined = st.user ?? (Object.keys(st).length ? (st as UserDto) : undefined);
+    const stateFromNav = (nav?.extras?.state as any) ?? undefined;
+    const stateFromHistory = (window.history.state as any) ?? undefined;
 
-    if (user) {
+    const user: UserDto | undefined =
+      (stateFromNav && 'user' in stateFromNav
+        ? (stateFromNav.user as UserDto)
+        : undefined) ??
+      (stateFromHistory && 'user' in stateFromHistory
+        ? (stateFromHistory.user as UserDto)
+        : undefined);
+
+    if (
+      user &&
+      typeof user.name === 'string' &&
+      typeof user.email === 'string'
+    ) {
       this.isEditMode = true;
       this.originalUsername = user.name;
 
@@ -84,7 +96,6 @@ export class RegisterComponent implements OnInit {
       });
     }
   }
-
 
   onSubmit(): void {
     const { email, username, password, confirmPassword } =
@@ -105,7 +116,11 @@ export class RegisterComponent implements OnInit {
       this.userService.updateUser(formData as any).subscribe({
         next: (resp: any) => {
           const updated = resp?.updatedUser ?? resp;
-          const safeUser = { id: updated?.id, name: updated?.name, email: updated?.email };
+          const safeUser = {
+            id: updated?.id,
+            name: updated?.name,
+            email: updated?.email,
+          };
           this.authService.updateUser(safeUser);
           this.router.navigate(['/home']);
           this.messageService.add({
