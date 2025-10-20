@@ -1,6 +1,7 @@
 import io from "../../app";
 import { AppError } from "../../errors/AppError";
 import { Invite } from "../../models/Invite";
+import { InviteSchemas } from "./schemas";
 
 interface Request {
     senderId: number;
@@ -9,18 +10,7 @@ interface Request {
 }
 
 export const CreateInviteService = async({ senderId, receiverId, workspaceId }: Request): Promise<Invite> => {
-    
-    if (!senderId) {
-        throw new AppError("Remetente não encontrado")
-    }
-
-    if (!receiverId) {
-        throw new AppError("Destinatário não encontrado")
-    }
-
-    if (!workspaceId) {
-        throw new AppError("Área de trabalho não encontrada")
-    }
+    await InviteSchemas.createInvite.validate({ senderId, receiverId, workspaceId });
 
     const invite = await Invite.create({
         senderId,

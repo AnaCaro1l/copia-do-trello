@@ -1,6 +1,8 @@
 import { AppError } from '../../errors/AppError';
+import { Invite } from '../../models/Invite';
 import { User } from '../../models/User';
 import { Workspace } from '../../models/Workspace';
+import { DeleteInviteService } from '../InviteServices/DeleteInviteService';
 
 interface Request {
   userId: number;
@@ -23,18 +25,32 @@ export const RemoveCollaboratorsService = async ({
     where: { id: userIds },
   });
 
+  const invites = await Invite.findAll({
+    where: { receiverId: userIds, workspaceId: workspaceId },
+  });
+
   if (users.length === 0) {
     throw new AppError('Nenhum usuário válido encontrado');
   }
 
-  if(userIds.includes(workspace.ownerId)) {
-    throw new AppError('O proprietário da área de trabalho não pode ser removido como colaborador');
+  if (userIds.includes(workspace.ownerId)) {
+    throw new AppError(
+      'O proprietário da área de trabalho não pode ser removido como colaborador'
+    );
   }
 
   if (workspace.ownerId !== userId) {
     throw new AppError(
       'Apenas o proprietário da área de trabalho pode remover colaboradores'
     );
+  }
+
+  if (invites.length > 0) {
+    for (const invite of invites) {
+      if (invite.status === 'pending') {
+        await DeleteInviteService(invite.id);
+      }
+    }
   }
 
   await workspace.$remove('collaborators', users);
