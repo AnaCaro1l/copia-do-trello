@@ -38,6 +38,7 @@ export class DefaultCardComponent {
       name: ['', Validators.required],
       visibility: [1, Validators.required],
       backgroundColor: ['#374151', Validators.required],
+      // backgroundUrl: [''],
     });
   }
   stateOptions: any[] = [

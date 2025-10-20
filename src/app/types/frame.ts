@@ -9,6 +9,6 @@ export interface Frame {
   backgroundColor?: string | null;
   lists?: TaskList[] | null;
   members?: string[] | null;
-  visibility: 0 | 1;
+  visibility: 0 | 1 | false | true;
   favorite?: boolean | false;
 }

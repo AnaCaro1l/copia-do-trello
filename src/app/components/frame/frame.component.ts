@@ -10,6 +10,8 @@ import {
   UsersRound,
   UserRoundPlus,
   Ellipsis,
+  Earth,
+  LockKeyhole,
 } from 'lucide-angular';
 import { WorkspaceService } from '../../services/workspace.service';
 import { MenuModule } from 'primeng/menu';
@@ -32,7 +34,7 @@ import { TaskList } from '../../types/tasklist';
     MenuModule,
     TaskListDefaultComponent,
     ConfirmDialogModule,
-    ToastModule
+    ToastModule,
   ],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
@@ -42,6 +44,8 @@ export class FrameComponent {
   readonly usersRound = UsersRound;
   readonly userRoundPlus = UserRoundPlus;
   readonly ellipsis = Ellipsis;
+  readonly earth = Earth;
+  readonly lockKeyhole = LockKeyhole;
 
   @Input() frame!: Frame;
   editable: boolean = false;
@@ -58,7 +62,7 @@ export class FrameComponent {
 
   ngOnInit() {
     console.log('FrameComponent initialized with frame:', this.frame);
-    
+
     this.items = [
       {
         label: 'Options',
@@ -135,5 +139,35 @@ export class FrameComponent {
     } catch {
       return null;
     }
+  }
+
+  changeVisibility() {
+    const newVisibility = !this.frame.visibility;
+
+    this.frame.visibility = newVisibility;
+
+    this.workspaceService
+      .updateWorkspace(this.frame.id, { visibility: newVisibility })
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Visibilidade Alterada',
+            detail: newVisibility
+              ? 'O quadro agora é público.'
+              : 'O quadro agora é privado.',
+          });
+          console.log('Frame visibility updated in DB:', newVisibility);
+        },
+        error: (err) => {
+          this.frame.visibility = !newVisibility;
+          console.error('Erro ao atualizar visibilidade:', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Não foi possível atualizar a visibilidade no servidor.',
+          });
+        },
+      });
   }
 }

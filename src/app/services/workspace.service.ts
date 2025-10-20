@@ -24,8 +24,8 @@ export class WorkspaceService {
     return this.http.get<Frame>(`${this.apiUrl}/workspace/${id}`);
   }
 
-  updateWorkspace(id: number, workspace: Frame): Observable<Frame> {
-    return this.http.put<Frame>(`${this.apiUrl}/workspace/${id}`, workspace);
+  updateWorkspace(id: number, data: Partial<Frame>): Observable<Frame> {
+    return this.http.put<Frame>(`${this.apiUrl}/workspace/${id}`, data);
   }
 
   deleteWorkspace(id: number): Observable<Frame> {
