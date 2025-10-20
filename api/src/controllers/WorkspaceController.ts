@@ -5,6 +5,7 @@ import { ShowWorkspaceService } from '../services/WorkspaceServices/ShowWorkspac
 import { UpdateWorkspaceService } from '../services/WorkspaceServices/UpdateWorkspaceService';
 import { DeleteWorkspaceService } from '../services/WorkspaceServices/DeleteWorkspaceService';
 import { AddCollaboratorsService } from '../services/WorkspaceServices/AddCollaboratorsService';
+import { RemoveCollaboratorsService } from '../services/WorkspaceServices/RemoveCollaboratorsService';
 
 export const insert = async (
   req: Request,
@@ -86,11 +87,26 @@ export const deleteWorkspace = async (
   });
 };
 
-export const addCollaborators = async (req: Request, res: Response): Promise<Response> => {
-    const { workspaceId, userIds } = req.body;
-    const userId = req.user.id;
-    await AddCollaboratorsService({ userId, workspaceId, userIds });
-    return res.status(204).json({
-        message: 'Colaboradores adicionados com sucesso',
-    });
-}
+export const addCollaborators = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { workspaceId, userIds } = req.body;
+  const userId = req.user.id;
+  await AddCollaboratorsService({ userId, workspaceId, userIds });
+  return res.status(200).json({
+    message: 'Convites enviados com sucesso',
+  });
+};
+
+export const removeCollaborators = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { workspaceId, userIds } = req.body;
+  const userId = req.user.id;
+  await RemoveCollaboratorsService({ userId, workspaceId, userIds });
+  return res.status(204).json({
+    message: 'Colaboradores removidos com sucesso',
+  });
+};

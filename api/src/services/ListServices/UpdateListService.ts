@@ -18,7 +18,8 @@ export const UpdateListService = async ({ id, title }: Request): Promise<List> =
     }
 
     const updatedList = await list.update({
-        title: title ? title : list.title
+        title: title ? title : list.title,
+        updatedAt: new Date(),
     })
 
     io.to(`workspace_${list.workspaceId}`).emit('show_updated_list', updatedList);
