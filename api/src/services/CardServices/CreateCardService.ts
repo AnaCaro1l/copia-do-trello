@@ -35,7 +35,5 @@ export const CreateCardService = async ({
     media,
   });
 
-  io.to(`list_${listId}`).emit('show_new_card', card);
-
   return card;
 };
