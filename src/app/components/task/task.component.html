@@ -1,12 +1,12 @@
 <div
   *ngIf="task"
   [ngStyle]="{ backgroundColor: task.coverColor || '#374151' }"
-  class="group rounded-lg flex items-center gap-2 p-2 px-3 cursor-pointer hover:border-2"
+  class="group rounded-lg flex items-center p-2 px-3 cursor-pointer hover:border-2"
 >
-  <div class="checkbox-wrap flex items-center justify-center w-6 h-6 overflow-hidden">
+  <div class="checkbox-wrap flex items-center justify-center w-0 h-6 overflow-hidden shrink-0 mr-0 transition-all duration-200 ease-in-out group-hover:w-6 group-hover:mr-2">
     <div class="checkbox-inner opacity-0 transform scale-90 -translate-x-2 transition-all duration-200 ease-in-out group-hover:opacity-100 group-hover:scale-100 group-hover:translate-x-0">
         <p-checkbox [(ngModel)]="task.completed" binary="true"></p-checkbox>
     </div>
   </div>
-  <p class="transition-transform duration-200 ease-in-out group-hover:translate-x-1">{{ task!.title }}</p>
+  <p class="flex-1 min-w-0">{{ task!.title }}</p>
 </div>
