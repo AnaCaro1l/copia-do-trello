@@ -48,8 +48,7 @@ export const UpdateWorkspaceService = async ({
 
   const updatedWorkspace = await workspace.update({
     name: name ? name : workspace.name,
-    visibility:
-      typeof visibility !== 'undefined' ? visibility : workspace.visibility,
+    visibility: visibility ?? workspace.visibility,
     backgroundUrl: backgroundUrl ? backgroundUrl : workspace.backgroundUrl,
     backgroundColor: backgroundColor
       ? backgroundColor
