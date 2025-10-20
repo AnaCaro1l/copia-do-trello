@@ -25,11 +25,13 @@ export class TaskListDefaultComponent {
 
   @Output() onListCreated = new EventEmitter<TaskList>();
 
-  constructor(private listService: ListService, private fb: FormBuilder, private workSpaceService: WorkspaceService) {}
+  constructor(
+    private listService: ListService,
+    private fb: FormBuilder,
+    private workSpaceService: WorkspaceService
+  ) {}
 
-  ngOnInit() {
-    console.log(this.isEditMode());
-  }
+  ngOnInit() {}
 
   buildForm() {
     return this.fb.group({
@@ -48,7 +50,7 @@ export class TaskListDefaultComponent {
       title: this.formTask.value.title!,
       workspaceId: this.workspaceId!,
     };
-    
+
     this.listService.createList(newList as TaskList).subscribe({
       next: (list: TaskList) => {
         this.onListCreated.emit(list);
@@ -58,7 +60,7 @@ export class TaskListDefaultComponent {
       error: (error) => {
         console.error('Error creating list:', error);
         console.log('workspaceId:', this.workspaceId);
-      }
+      },
     });
   }
 }

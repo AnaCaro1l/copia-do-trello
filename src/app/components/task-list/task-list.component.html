@@ -5,7 +5,7 @@
   class="bg-gray-900 rounded-lg w-[272px] cursor-pointer shadow-lg hover:shadow-2xl hover:bg-opacity-95 transition-shadow"
 >
   <div class="justify-between flex p-4 items-center">
-    <div class="text-white">{{ taskList!.title }}</div>
+  <div class="text-white">{{ taskList?.title || 'Sem nome' }}</div>
     <div>
       <button
         (click)="toggleOpen()"
@@ -92,6 +92,6 @@
     >
       <lucide-angular [img]="maximize" color="white" size="18"></lucide-angular>
     </button>
-    <div class="text-white py-2">{{ taskList!.title }}</div>
+  <div class="text-white py-2">{{ taskList?.title || 'Sem nome' }}</div>
   </div>
 </div>

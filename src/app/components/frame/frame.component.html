@@ -75,7 +75,7 @@
     @for (tasklist of frame.lists; track $index) {
     <app-task-list [taskList]="tasklist"></app-task-list>
     }
-    <app-task-list-default [workspaceId]="frame.id"></app-task-list-default>
+    <app-task-list-default [workspaceId]="frame.id" (onListCreated)="onListCreated($event)"></app-task-list-default>
   </div>
 </div>
 

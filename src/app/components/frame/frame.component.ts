@@ -18,6 +18,7 @@ import { TaskListDefaultComponent } from '../task-list-default/task-list-default
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
+import { TaskList } from '../../types/tasklist';
 
 @Component({
   selector: 'app-frame',
@@ -57,9 +58,7 @@ export class FrameComponent {
 
   ngOnInit() {
     console.log('FrameComponent initialized with frame:', this.frame);
-    console.log('lists', this.frame.lists);
-    console.log(this.frame.backgroundColor);
-
+    
     this.items = [
       {
         label: 'Options',
@@ -78,6 +77,13 @@ export class FrameComponent {
         ],
       },
     ];
+  }
+
+  onListCreated(list: TaskList) {
+    if (!Array.isArray(this.frame.lists)) {
+      this.frame.lists = [];
+    }
+    this.frame.lists.push(list);
   }
 
   confirm2(event: Event) {

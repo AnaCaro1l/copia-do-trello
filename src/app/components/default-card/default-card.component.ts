@@ -7,6 +7,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Frame } from '../../types/frame';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ColorPickerModule } from 'primeng/colorpicker';
+import { LucideAngularModule, Palette } from 'lucide-angular';
 
 @Component({
   selector: 'app-default-card',
@@ -18,11 +19,13 @@ import { ColorPickerModule } from 'primeng/colorpicker';
     FileUploadModule,
     ReactiveFormsModule,
     ColorPickerModule,
+    LucideAngularModule
   ],
   templateUrl: './default-card.component.html',
   styleUrl: './default-card.component.scss',
 })
 export class DefaultCardComponent {
+  readonly palette = Palette
   frameForm = this.buildForm();
 
   constructor(
@@ -34,7 +37,7 @@ export class DefaultCardComponent {
     return this.fb.group({
       name: ['', Validators.required],
       visibility: [1, Validators.required],
-      // backgroundColor: ['#374151', Validators.required],
+      backgroundColor: ['#374151', Validators.required],
     });
   }
   stateOptions: any[] = [
@@ -50,20 +53,23 @@ export class DefaultCardComponent {
 
   closeDialog() {
     this.display = false;
+    this.frameForm.reset({ visibility: 1, backgroundColor: '#374151', name: '' });
   }
 
   createBoard() {
     if (this.frameForm.invalid) return;
 
-    this.workspaceService.createWorkspace(this.frameForm.value as Frame).subscribe({
-      next: (workspace: Frame) => {
-        console.log('Workspace created:', workspace);
-        this.closeDialog();
-        this.frameForm.reset({ visibility: 1 });
-      },
-      error: (error) => {
-        console.error('Error creating workspace:', error);
-      },
-    });
+    this.workspaceService
+      .createWorkspace(this.frameForm.value as Frame)
+      .subscribe({
+        next: (workspace: Frame) => {
+          console.log('Workspace created:', workspace);
+          this.closeDialog();
+          this.frameForm.reset({ visibility: 1, backgroundColor: '#374151', name: '' });
+        },
+        error: (error) => {
+          console.error('Error creating workspace:', error);
+        },
+      });
   }
 }

@@ -8,7 +8,7 @@
   header="Criar novo quadro"
   [(visible)]="display"
   [modal]="true"
-  [style]="{ width: '300px', height: 'auto' }"
+  [style]="{ width: '300px', height: '500px' }"
   [draggable]="false"
 >
   <ng-template pTemplate="content">
@@ -28,12 +28,23 @@
           optionValue="value"
         />
       </div>
-      <!-- <label for="state" class="text-white/80">Cor de fundo</label> -->
-      <!-- <div class="card flex justify-content-center">
-        <p-colorPicker formControlName="backgroundColor" />
-      </div> -->
-      <!-- <label for="state" class="text-white/80">Escolha sua imagem de fundo</label>
+      <label for="state" class="text-white/80">Cor de fundo</label>
+      <div class="flex items-center justify-center p-2 rounded-lg w-[40px]" [style.background]="frameForm.value.backgroundColor" (click)="inputColor.click()">
+        <input
+          #inputColor
+          type="color"
+          name="color"
+          id="color"
+          class="h-0 w-0 opacity-0 absolute"
+          formControlName="backgroundColor"
+        />
+        <lucide-angular [img]="palette" color="white" size="20"></lucide-angular>
+      </div>
+      <label for="state" class="text-white/80"
+        >Escolha sua imagem de fundo</label
+      >
       <p-fileUpload
+        formControlName="backgroundUrl"
         mode="basic"
         chooseLabel="Choose"
         chooseIcon="pi pi-upload"
@@ -41,13 +52,13 @@
         url="https://www.primefaces.org/cdn/api/upload.php"
         accept="image/*"
         maxFileSize="1000000"
-      /> -->
+      />
     </form>
   </ng-template>
   <ng-template pTemplate="footer">
-    <button mat-flat-button color="warn" class="mr-2" (click)="display = false">
+    <button mat-flat-button color="warn" class="mr-2" (click)="closeDialog()">
       Cancelar
     </button>
-    <button mat-flat-button (click)="createBoard()">Criar</button>
+    <button mat-flat-button [disabled]="frameForm.invalid" (click)="createBoard()">Criar</button>
   </ng-template>
 </p-dialog>
