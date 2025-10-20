@@ -73,12 +73,10 @@ export class TaskListComponent {
   ngOnInit() {
     this.isOpen.set(this.taskList?.isOpen ?? true);
 
-    // Ensure tasks array exists to prevent runtime errors when pushing
     if (this.taskList && !Array.isArray(this.taskList.tasks)) {
       this.taskList.tasks = [];
     }
     
-    // If tasks are not loaded/populated, fetch them from API
     if (this.taskList && (!this.taskList.tasks || this.taskList.tasks.length === 0)) {
       this.loadTasks(this.taskList.id);
     }
