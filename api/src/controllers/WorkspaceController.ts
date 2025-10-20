@@ -88,7 +88,8 @@ export const deleteWorkspace = async (
 
 export const addCollaborators = async (req: Request, res: Response): Promise<Response> => {
     const { workspaceId, userIds } = req.body;
-    await AddCollaboratorsService({ workspaceId, userIds });
+    const userId = req.user.id;
+    await AddCollaboratorsService({ userId, workspaceId, userIds });
     return res.status(204).json({
         message: 'Colaboradores adicionados com sucesso',
     });

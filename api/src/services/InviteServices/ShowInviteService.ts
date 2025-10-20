@@ -1,7 +1,7 @@
 import { AppError } from "../../errors/AppError";
 import { Invite } from "../../models/Invite"
 
-export const ShowInviteService = async (id: number) => {
+export const ShowInviteService = async (id: string) => {
     const invite = await Invite.findByPk(id);
 
     if(!invite) {

@@ -1,13 +1,17 @@
+import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { User } from '../../models/User';
 import { Workspace } from '../../models/Workspace';
+import { CreateInviteService } from '../InviteServices/CreateInviteService';
 
 interface Request {
+  userId: number;
   workspaceId: number;
   userIds: number[];
 }
 
 export const AddCollaboratorsService = async ({
+  userId,
   workspaceId,
   userIds,
 }: Request): Promise<void> => {
@@ -28,6 +32,16 @@ export const AddCollaboratorsService = async ({
 
   if (users.length === 0) {
     throw new AppError('Nenhum usuário válido encontrado');
+  }
+
+  for (const user of users) {
+    const invite = await CreateInviteService({
+      senderId: userId,
+      receiverId: user.id,
+      workspaceId: workspace.id,
+    });
+
+    io.to(`user_${user.id}`).emit('new_invite', invite);
   }
 
   await workspace.$add('collaborators', users);
