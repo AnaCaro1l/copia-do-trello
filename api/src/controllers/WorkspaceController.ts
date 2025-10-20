@@ -91,9 +91,9 @@ export const addCollaborators = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { workspaceId, userIds } = req.body;
+  const { workspaceId, emails } = req.body;
   const userId = req.user.id;
-  await AddCollaboratorsService({ userId, workspaceId, userIds });
+  await AddCollaboratorsService({ userId, workspaceId, emails });
   return res.status(200).json({
     message: 'Convites enviados com sucesso',
   });

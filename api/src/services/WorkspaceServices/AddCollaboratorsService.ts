@@ -7,14 +7,15 @@ import { CreateInviteService } from '../InviteServices/CreateInviteService';
 interface Request {
   userId: number;
   workspaceId: number;
-  userIds: number[];
+  emails: string[];
 }
 
 export const AddCollaboratorsService = async ({
   userId,
   workspaceId,
-  userIds,
+  emails,
 }: Request): Promise<void> => {
+  const userIds: number[] = [];
   const workspace = await Workspace.findByPk(workspaceId);
   if (!workspace) {
     throw new AppError('Área de trabalho não encontrada');
@@ -24,6 +25,13 @@ export const AddCollaboratorsService = async ({
     throw new AppError(
       'Não é possível adicionar colaboradores a uma área de trabalho privada'
     );
+  }
+
+  for (const email of emails) {
+    const user = await User.findOne({ where: { email } });
+    if (user) {
+      userIds.push(user.id);
+    }
   }
 
   const users = await User.findAll({
