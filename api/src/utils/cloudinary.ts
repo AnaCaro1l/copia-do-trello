@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import { AppError } from '../errors/AppError';
-import 'dotenv/config'
+import 'dotenv/config';
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,

@@ -6,7 +6,6 @@ import uploadOnCloudinary, {
   cloudinaryFolderName,
 } from '../../utils/cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
-import { AddUploadJobService } from '../JobServices/AddUploadJobService';
 
 interface Request {
   name?: string;
@@ -42,16 +41,15 @@ export const UpdateWorkspaceService = async ({
     }
   }
 
+  let backgroundUrl = null;
   if (backgroundPath) {
-      await AddUploadJobService({
-        filePath: backgroundPath,
-        workspaceId: workspace.id,
-      });
-    }
+    backgroundUrl = await uploadOnCloudinary(backgroundPath);
+  }
 
   const updatedWorkspace = await workspace.update({
     name: name ? name : workspace.name,
     visibility: visibility ?? workspace.visibility,
+    backgroundUrl: backgroundUrl ? backgroundUrl : workspace.backgroundUrl,
     backgroundColor: backgroundColor
       ? backgroundColor
       : workspace.backgroundColor,
