@@ -60,6 +60,18 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('Um usuário conectou');
 
+  socket.on('join_workspace', (workspaceId: number) => {
+    const room = `workspace_${workspaceId}`;
+    socket.join(room);
+    console.log(`Socket ${socket.id} entrou na sala ${room}`);
+  });
+
+  socket.on('leave_workspace', (workspaceId: number) => {
+    const room = `workspace_${workspaceId}`;
+    socket.leave(room);
+    console.log(`Socket ${socket.id} saiu da sala ${room}`);
+  });
+
   socket.on('disconnect', () => {
     console.log('Um usuário desconectado');
   });
