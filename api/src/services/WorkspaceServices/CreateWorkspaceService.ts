@@ -3,6 +3,7 @@ import { AppError } from '../../errors/AppError';
 import { User } from '../../models/User';
 import { Workspace } from '../../models/Workspace';
 import uploadOnCloudinary from '../../utils/cloudinary';
+import { AddUploadJobService } from '../JobServices/AddUploadJobService';
 import { WorkspaceSchemas } from './schemas';
 
 interface Request {
@@ -26,20 +27,22 @@ export const CreateWorkspaceService = async ({
     throw new AppError('Usuário não encontrado');
   }
 
-  let backgroundUrl = null;
-  if (backgroundPath) {
-    backgroundUrl = await uploadOnCloudinary(backgroundPath);
-  }
-
   const workspace = await Workspace.create({
     name,
     visibility,
     ownerId,
-    backgroundUrl,
+    backgroundUrl: null,
     backgroundColor,
   });
 
   await workspace.$set('collaborators', [ownerId]);
+
+  if (backgroundPath) {
+    await AddUploadJobService({
+      filePath: backgroundPath,
+      workspaceId: workspace.id,
+    });
+  }
 
   io.to(`user_${ownerId}`).emit('show_new_workspace', workspace);
   return workspace;

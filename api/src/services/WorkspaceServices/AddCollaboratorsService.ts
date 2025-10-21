@@ -26,7 +26,6 @@ export const AddCollaboratorsService = async ({
       'Não é possível adicionar colaboradores a uma área de trabalho privada'
     );
   }
-
   for (const email of emails) {
     const user = await User.findOne({ where: { email } });
     if (user) {

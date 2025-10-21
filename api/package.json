@@ -6,7 +6,8 @@
     "build": "rimraf dist && tsc",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "db:migrate": "sequelize-cli db:migrate",
-    "db:migrate:undo": "sequelize-cli db:migrate:undo"
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "worker": "ts-node src/workers/uploadWorker.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,10 +22,12 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "bullmq": "^5.61.0",
     "cloudinary": "^2.7.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "mysql2": "^3.15.2",
