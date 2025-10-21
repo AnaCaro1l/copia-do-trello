@@ -7,6 +7,7 @@ import { AppError } from './errors/AppError';
 import routes from './appRoutes';
 import { MulterError } from 'multer';
 import { Server } from 'socket.io';
+import { uploadWorker } from './workers/uploadWorker';
 
 const app = express();
 const port = 3333;
