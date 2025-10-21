@@ -2,6 +2,7 @@
 
 # Compiled output
 /api/dist
+/api/.env
 /dist
 /tmp
 /out-tsc
@@ -9,6 +10,7 @@
 
 # Node
 /node_modules
+/api/node_modules
 npm-debug.log
 yarn-error.log
 
