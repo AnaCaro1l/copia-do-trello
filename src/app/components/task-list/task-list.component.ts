@@ -144,7 +144,6 @@ export class TaskListComponent {
         });
         this.listService.deleteList(this.taskList!.id).subscribe({
           next: () => {
-            console.log('List deleted');
           },
           error: (error) => {
             console.error('Error deleting list:', error);

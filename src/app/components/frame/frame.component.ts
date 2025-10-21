@@ -21,6 +21,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
 import { TaskList } from '../../types/tasklist';
+import { DialogModule } from 'primeng/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { InviteService } from '../../services/invite.service';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-frame',
@@ -35,6 +39,8 @@ import { TaskList } from '../../types/tasklist';
     TaskListDefaultComponent,
     ConfirmDialogModule,
     ToastModule,
+    DialogModule,
+    MatButtonModule
   ],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
@@ -50,6 +56,8 @@ export class FrameComponent {
   @Input() frame!: Frame;
   editable: boolean = false;
 
+  visible: boolean = false;
+
   items: MenuItem[] | undefined;
 
   constructor(
@@ -57,11 +65,19 @@ export class FrameComponent {
     private workspaceService: WorkspaceService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private inviteService: InviteService,
+    private socketService: SocketService
   ) {}
 
   ngOnInit() {
+
     console.log('FrameComponent initialized with frame:', this.frame);
+
+    // Entrar na sala do workspace para receber eventos (como delete_list)
+    if (this.frame?.id) {
+      this.socketService.joinWorkspace(this.frame.id);
+    }
 
     this.items = [
       {
@@ -81,6 +97,19 @@ export class FrameComponent {
         ],
       },
     ];
+
+    this.socketService.onListDeleted().subscribe((deletedList: TaskList) => {
+      console.log('List deleted:', deletedList);
+      if (Array.isArray(this.frame.lists)) {
+        this.frame.lists = this.frame.lists.filter(list => list.id !== deletedList.id);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.frame?.id) {
+      this.socketService.leaveWorkspace(this.frame.id);
+    }
   }
 
   onListCreated(list: TaskList) {
@@ -169,5 +198,26 @@ export class FrameComponent {
           },
         });
     }
+  }
+  sendInvite() {
+    const emails = (document.querySelector('input[formControlName="email"]') as HTMLInputElement).value;
+    this.inviteService.addCollaborators(this.frame.id, [emails]).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Convite Enviado',
+          detail: 'O convite foi enviado com sucesso.',
+        });
+      },
+      error: (err) => {
+        console.log(emails);
+        console.error('Erro ao enviar convite:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Não foi possível enviar o convite.',
+        });
+      },
+    });
   }
 }

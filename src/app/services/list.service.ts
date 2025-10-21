@@ -40,7 +40,6 @@ export class ListService {
   }
 
   deleteList(id: number): Observable<TaskList> {
-    // API returns 204 with message; we don't need the body
     return this.http.delete<TaskList>(`${this.apiUrl}/list/${id}`);
   }
 }

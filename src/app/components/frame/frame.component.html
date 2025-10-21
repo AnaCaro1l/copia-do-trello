@@ -46,6 +46,7 @@
         ></lucide-angular>
       </button>
       <button
+        (click)="visible = true"
         class="group flex items-center gap-1 text-black hover:bg-white/90 bg-white/80 transition-colors p-2 rounded-lg"
         aria-label="Configurações"
         matTooltip="Configurações"
@@ -146,3 +147,31 @@
     </div>
   </div>
 </p-overlayPanel>
+
+<p-dialog header="Compartilhar quadro" [modal]="true" [(visible)]="visible" [style]="{ width: '400px' }">
+  <ng-template pTemplate="content">
+    <div class="flex flex-col gap-3">
+      <label for="email" class="text-white/80">Adicionar pessoas ao quadro</label>
+      <input
+        formControlName="email"
+        type="email"
+        id="email"
+        placeholder="Digite o email"
+        class="p-2 rounded-lg bg-transparent border border-gray-700 text-white w-full placeholder:!text-white/40 focus:outline-none"
+      />
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button mat-flat-button color="warn" class="mr-2" (click)="visible = false">
+      Fechar
+
+    </button>
+    <button
+        (click)="sendInvite()"
+        mat-flat-button
+        color="primary"
+      >
+        Adicionar
+      </button>
+  </ng-template>
+</p-dialog>

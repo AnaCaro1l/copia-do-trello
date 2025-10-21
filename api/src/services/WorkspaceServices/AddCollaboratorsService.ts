@@ -15,6 +15,7 @@ export const AddCollaboratorsService = async ({
   workspaceId,
   emails,
 }: Request): Promise<void> => {
+  console.log(emails);
   const userIds: number[] = [];
   const workspace = await Workspace.findByPk(workspaceId);
   if (!workspace) {

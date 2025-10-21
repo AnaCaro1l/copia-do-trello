@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import {
   LucideAngularModule,
   PanelLeftClose,
@@ -19,6 +19,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { UserService } from '../../services/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
+import { SocketService } from '../../services/socket.service';
+import { InviteService } from '../../services/invite.service';
+import { TabViewModule } from 'primeng/tabview';
+import { Invite } from '../../types/invite';
 
 @Component({
   selector: 'app-header',
@@ -31,13 +35,14 @@ import { CommonModule } from '@angular/common';
     OverlayPanelModule,
     MatButtonModule,
     HttpClientModule,
-    CommonModule
-],
+    CommonModule,
+    TabViewModule
+  ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   providers: [MessageService, UserService],
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   readonly panelLeftClose = PanelLeftClose;
   readonly panelLeftOpen = PanelLeftOpen;
   readonly house = House;
@@ -51,15 +56,25 @@ export class HeaderComponent {
   @Output() menuToggle = new EventEmitter<boolean>();
   @Output() profileOpen = new EventEmitter<void>();
 
+  invites: Invite[] = [];
+
+  isMenuOpen = true;
+
+
   constructor(
     private authService: AuthService,
     private messageService: MessageService,
     private router: Router,
     private userService: UserService,
     private dialog: MatDialog,
+    private socketService: SocketService,
+    private inviteService: InviteService
   ) {}
 
-  isMenuOpen = true;
+  ngOnInit() {
+    this.getInvites();
+  }
+
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
     this.menuToggle.emit(this.isMenuOpen);
@@ -78,7 +93,7 @@ export class HeaderComponent {
   }
 
   logout() {
-    // this.authService.disconnect();
+    this.socketService.disconnect();
     localStorage.setItem('auth', 'false');
     this.authService.clearSession();
     this.router.navigate(['/login']);
@@ -114,5 +129,17 @@ export class HeaderComponent {
 
   goToHome() {
     this.router.navigate(['/home']);
+  }
+
+  getInvites() {
+    this.inviteService.listInvites().subscribe({
+      next: (invites) => {
+        this.invites = invites;
+        console.log('Convites carregados:', this.invites);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar convites:', err);
+      },
+    });
   }
 }
