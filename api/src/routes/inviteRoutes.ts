@@ -12,6 +12,6 @@ router.post('/invite/validate', isAuth, validateInvite);
 
 router.get('/invite/:id', isAuth, showInvite);
 
-router.get('/invites/:id', isAuth, listInvites);
+router.get('/invites', isAuth, listInvites);
 
 export default router;
