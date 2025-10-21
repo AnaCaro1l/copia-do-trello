@@ -8,10 +8,10 @@
       ? { 'background-image': 'url(' + frame.backgroundUrl + ')' }
       : {}
   "
-  class="bg-[#374151] rounded-2xl w-[97vw] h-[87vh] m-5 frame overflow-x-auto"
+  class="bg-[#374151] rounded-2xl w-[98vw] md:w-[97vw] h-[89vh] md:h-[87vh] m-2 md:m-5 frame overflow-x-auto"
 >
   <div
-    class="bg-white/10 w-full rounded-t-xl p-3 justify-between flex items-center"
+    class="bg-white/10 w-full rounded-t-xl p-2 md:p-3 justify-between flex flex-wrap items-center gap-2"
   >
     <h1
       [ngClass]="[
@@ -24,7 +24,7 @@
       {{ frame.name }}
     </h1>
 
-    <div class="items-center flex gap-2">
+    <div class="items-center flex gap-1 md:gap-2 flex-wrap">
       <p-avatar
         (click)="op.toggle($event)"
         label="U"
@@ -54,7 +54,7 @@
           color="black"
           size="18"
         ></lucide-angular>
-        compartilhar
+        <span class="hidden sm:inline">compartilhar</span>
       </button>
       <button
         (click)="menu.toggle($event)"
@@ -70,14 +70,18 @@
       <p-menu #menu [model]="items" [popup]="true" />
     </div>
   </div>
-  <div class="flex gap-4 p-2 m-2 overflow-x-auto max-w-[95vw] h-[76vh]">
+  <div class="flex gap-3 md:gap-4 p-2 md:p-2 m-1 md:m-2 overflow-x-auto max-w-[96vw] md:max-w-[95vw] h-[80vh] md:h-[76vh]">
     @for (tasklist of frame.lists; track $index) {
-    <app-task-list [taskList]="tasklist"></app-task-list>
+    <div class="snap-start">
+      <app-task-list [taskList]="tasklist"></app-task-list>
+    </div>
     }
-    <app-task-list-default
-      [workspaceId]="frame.id"
-      (onListCreated)="onListCreated($event)"
-    ></app-task-list-default>
+    <div class="snap-start">
+      <app-task-list-default
+        [workspaceId]="frame.id"
+        (onListCreated)="onListCreated($event)"
+      ></app-task-list-default>
+    </div>
   </div>
 </div>
 
@@ -145,7 +149,7 @@
   </div>
 </p-overlayPanel>
 
-<p-dialog header="Compartilhar quadro" [modal]="true" [(visible)]="visible" [style]="{ width: '400px' }">
+<p-dialog header="Compartilhar quadro" [modal]="true" [(visible)]="visible" [style]="{ width: '90vw', maxWidth: '400px' }">
   <ng-template pTemplate="content">
     <div class="flex flex-col gap-3">
       <label for="email" class="text-white/80">Adicionar pessoas ao quadro</label>

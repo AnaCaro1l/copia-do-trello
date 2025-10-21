@@ -1,6 +1,6 @@
 <div
   (click)="showDialog()"
-  class="bg-gray-800 relative w-[200px] h-[120px] rounded-lg shadow-lg hover:shadow-2xl hover:bg-opacity-80 transition-shadow cursor-pointer text-center flex items-center justify-center"
+  class="bg-gray-800 relative w-[180px] sm:w-[240px] md:w-[200px] h-[110px] sm:h-[120px] rounded-lg shadow-lg hover:shadow-2xl hover:bg-opacity-80 transition-shadow cursor-pointer text-center flex items-center justify-center"
 >
   <span class="text-white/70 p-2 text-sm"> Criar novo quadro </span>
 </div>
@@ -8,7 +8,7 @@
   header="Criar novo quadro"
   [(visible)]="display"
   [modal]="true"
-  [style]="{ width: '300px', height: '500px' }"
+  [style]="{ width: '90vw', maxWidth: '360px', height: 'auto' }"
   [draggable]="false"
 >
   <ng-template pTemplate="content">
