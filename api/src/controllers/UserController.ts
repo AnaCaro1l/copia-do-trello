@@ -50,12 +50,15 @@ export const deleteUser = async (
   });
 };
 
-export const updateUser = async (req: Request, res: Response): Promise<Response> => {
-    const id = req.user.id;
-    const { name, email, password } = req.body
-    const updatedUser = await UpdateUserService({ id, name, email, password })
-    return res.status(200).json({
-        message: 'Usuário atualizado com sucesso',
-        updatedUser,
-    })
-}
+export const updateUser = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const id = req.user.id;
+  const { name, email, password } = req.body;
+  const updatedUser = await UpdateUserService({ id, name, email, password });
+  return res.status(200).json({
+    message: 'Usuário atualizado com sucesso',
+    updatedUser,
+  });
+};

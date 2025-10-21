@@ -1,9 +1,9 @@
-import { number, object } from "yup";
+import { number, object } from 'yup';
 
 export class InviteSchemas {
-    static createInvite = object({
-        senderId: number().required(),
-        receiverId: number().required(),
-        workspaceId: number().required(),
-    })
+  static createInvite = object({
+    senderId: number().required(),
+    receiverId: number().required(),
+    workspaceId: number().required(),
+  });
 }

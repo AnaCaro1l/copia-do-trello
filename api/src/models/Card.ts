@@ -1,4 +1,11 @@
-import { BelongsTo, Column, Default, ForeignKey, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  Default,
+  ForeignKey,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { List } from './List';
 
 @Table

@@ -51,5 +51,4 @@ export const AddCollaboratorsService = async ({
 
     io.to(`user_${user.id}`).emit('new_invite', invite);
   }
-  
 };

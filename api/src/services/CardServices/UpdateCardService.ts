@@ -17,7 +17,7 @@ export const UpdateCardService = async ({
   mediaPath,
   id,
   completed,
-  listId
+  listId,
 }: Request): Promise<Card> => {
   const card = await Card.findByPk(id);
   if (!card) {

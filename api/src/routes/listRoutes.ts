@@ -1,6 +1,12 @@
-import { Router } from "express";
-import { createList, deleteList, listLists, showList, updateList } from "../controllers/ListController";
-import { isAuth } from "../middlewares/isAuth";
+import { Router } from 'express';
+import {
+  createList,
+  deleteList,
+  listLists,
+  showList,
+  updateList,
+} from '../controllers/ListController';
+import { isAuth } from '../middlewares/isAuth';
 
 const router = Router();
 

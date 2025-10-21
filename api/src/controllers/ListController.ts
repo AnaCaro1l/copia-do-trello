@@ -43,15 +43,18 @@ export const showList = async (
   });
 };
 
-export const updateList = async (req: Request, res:Response): Promise<Response> => {
-    const id = req.params.id;
-    const { title } = req.body;
-    const list = await UpdateListService({ id, title });
-    return res.status(200).json({
-        message: 'Lista atualizada com sucesso',
-        list,
-    });
-}
+export const updateList = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const id = req.params.id;
+  const { title } = req.body;
+  const list = await UpdateListService({ id, title });
+  return res.status(200).json({
+    message: 'Lista atualizada com sucesso',
+    list,
+  });
+};
 
 export const deleteList = async (
   req: Request,

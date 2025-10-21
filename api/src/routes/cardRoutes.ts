@@ -1,6 +1,12 @@
-import { Router } from "express";
-import { createCard, deleteCard, listCards, showCard, updateCard } from "../controllers/CardController";
-import { isAuth } from "../middlewares/isAuth";
+import { Router } from 'express';
+import {
+  createCard,
+  deleteCard,
+  listCards,
+  showCard,
+  updateCard,
+} from '../controllers/CardController';
+import { isAuth } from '../middlewares/isAuth';
 
 const router = Router();
 
