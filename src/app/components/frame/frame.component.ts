@@ -25,6 +25,7 @@ import { DialogModule } from 'primeng/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { InviteService } from '../../services/invite.service';
 import { SocketService } from '../../services/socket.service';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-frame',
@@ -40,7 +41,8 @@ import { SocketService } from '../../services/socket.service';
     ConfirmDialogModule,
     ToastModule,
     DialogModule,
-    MatButtonModule
+    MatButtonModule,
+    MatTooltip
   ],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
@@ -74,7 +76,6 @@ export class FrameComponent {
 
     console.log('FrameComponent initialized with frame:', this.frame);
 
-    // Entrar na sala do workspace para receber eventos (como delete_list)
     if (this.frame?.id) {
       this.socketService.joinWorkspace(this.frame.id);
     }
@@ -99,7 +100,6 @@ export class FrameComponent {
     ];
 
     this.socketService.onListDeleted().subscribe((deletedList: TaskList) => {
-      console.log('List deleted:', deletedList);
       if (Array.isArray(this.frame.lists)) {
         this.frame.lists = this.frame.lists.filter(list => list.id !== deletedList.id);
       }
