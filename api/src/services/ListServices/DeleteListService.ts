@@ -1,3 +1,4 @@
+import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { Card } from '../../models/Card';
 import { List } from '../../models/List';
@@ -18,6 +19,8 @@ export const DeleteListService = async (id: string): Promise<void> => {
   for (const card of cards) {
     await card.destroy();
   }
+
+  io.to(`workspace_${list.workspaceId}`).emit('delete_list', list);
 
   await list.destroy();
 };

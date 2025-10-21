@@ -1,4 +1,3 @@
-import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { List } from '../../models/List';
 import { ListSchemas } from './schemas';
@@ -23,6 +22,6 @@ export const CreateListService = async ({
     workspaceId,
   });
 
-  io.to(`workspace_${workspaceId}`).emit('show_new_list', list);
+  
   return list;
 };
