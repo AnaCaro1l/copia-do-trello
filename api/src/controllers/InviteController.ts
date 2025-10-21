@@ -21,7 +21,7 @@ export const listInvites = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const id = req.params.id;
+  const id = req.user.id;
 
   const invites = await ListInvitesService(id);
 
