@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { HeaderComponent } from '../../components/header/header.component';
 import { MenuComponent } from '../../components/menu/menu.component';
@@ -10,6 +10,8 @@ import { CardComponent } from '../../components/card/card.component';
 import { DefaultCardComponent } from '../../components/default-card/default-card.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { Frame } from '../../types/frame';
+import { SocketService } from '../../services/socket.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -43,15 +45,18 @@ import { Frame } from '../../types/frame';
     ]),
   ],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   readonly clock = Clock;
   @Input() isMenuOpen: boolean = true;
 
   frames: Frame[] = [];
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private router: Router,
-    private workspaceService: WorkspaceService
+    private workspaceService: WorkspaceService,
+    private socketService: SocketService
   ) {}
 
   ngOnInit() {
@@ -64,6 +69,17 @@ export class HomeComponent implements OnInit {
         this.frames = [];
       },
     });
+    
+    const user = this.socketService.getCurrentUser();
+
+    this.socketService.joinUserRoom(user.id);
+
+    this.socketService.onFrameCreated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((frame: Frame) => {
+        console.log('Novo frame recebido:', frame);
+        this.frames.push(frame);
+      });
   }
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
@@ -72,5 +88,10 @@ export class HomeComponent implements OnInit {
   onCardClick(frameId?: number) {
     if (!frameId) return;
     this.router.navigate(['/dashboard', frameId]);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

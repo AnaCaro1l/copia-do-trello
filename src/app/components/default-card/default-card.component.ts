@@ -38,7 +38,7 @@ export class DefaultCardComponent {
       name: ['', Validators.required],
       visibility: [1, Validators.required],
       backgroundColor: ['#374151', Validators.required],
-      // backgroundUrl: [''],
+      backgroundUrl: [''],
     });
   }
   stateOptions: any[] = [
@@ -64,7 +64,7 @@ export class DefaultCardComponent {
       .createWorkspace(this.frameForm.value as Frame)
       .subscribe({
         next: (workspace: Frame) => {
-          console.log('Workspace created:', workspace);
+          console.log('Workspace created:', workspace.backgroundUrl);
           this.closeDialog();
           this.frameForm.reset({ visibility: 1, backgroundColor: '#374151', name: '' });
         },
