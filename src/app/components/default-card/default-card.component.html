@@ -43,16 +43,13 @@
       <label for="state" class="text-white/80"
         >Escolha sua imagem de fundo</label
       >
-      <!-- <p-fileUpload
+      <input
+        type="file"
+        accept=".png, .jpg, .jpeg"
+        placeholder="URL da imagem de fundo"
         formControlName="backgroundUrl"
-        mode="basic"
-        chooseLabel="Choose"
-        chooseIcon="pi pi-upload"
-        name="demo[]"
-        url="https://www.primefaces.org/cdn/api/upload.php"
-        accept="image/*"
-        maxFileSize="1000000"
-      /> -->
+        class="p-2 rounded-lg bg-transparent border border-gray-700 text-white w-full placeholder:!text-white/40 focus:outline-none"
+      />
     </form>
   </ng-template>
   <ng-template pTemplate="footer">

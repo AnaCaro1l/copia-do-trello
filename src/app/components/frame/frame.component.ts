@@ -42,7 +42,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     ToastModule,
     DialogModule,
     MatButtonModule,
-    MatTooltip
+    MatTooltip,
   ],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
@@ -73,7 +73,6 @@ export class FrameComponent {
   ) {}
 
   ngOnInit() {
-
     console.log('FrameComponent initialized with frame:', this.frame);
 
     if (this.frame?.id) {
@@ -101,7 +100,9 @@ export class FrameComponent {
 
     this.socketService.onListDeleted().subscribe((deletedList: TaskList) => {
       if (Array.isArray(this.frame.lists)) {
-        this.frame.lists = this.frame.lists.filter(list => list.id !== deletedList.id);
+        this.frame.lists = this.frame.lists.filter(
+          (list) => list.id !== deletedList.id
+        );
       }
     });
   }
@@ -200,7 +201,11 @@ export class FrameComponent {
     }
   }
   sendInvite() {
-    const emails = (document.querySelector('input[formControlName="email"]') as HTMLInputElement).value;
+    const emails = (
+      document.querySelector(
+        'input[formControlName="email"]'
+      ) as HTMLInputElement
+    ).value;
     this.inviteService.addCollaborators(this.frame.id, [emails]).subscribe({
       next: () => {
         this.messageService.add({

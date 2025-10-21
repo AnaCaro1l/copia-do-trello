@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { HttpClientModule } from '@angular/common/http';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-login',
@@ -49,7 +50,8 @@ export class LoginComponent {
     private router: Router,
     private messageService: MessageService,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private socketService: SocketService
   ) {
     this.loginForm = this.fb.group({
       email: ['', Validators.required],
@@ -82,6 +84,7 @@ export class LoginComponent {
         const { token, user } = resp?.token ? resp : { token: undefined, user: resp };
         this.authService.setSession({ token, user });
         localStorage.setItem('auth', 'true');
+        this.socketService.connect();
         this.router.navigate(['/home']);
       },
       error: (err) => {
