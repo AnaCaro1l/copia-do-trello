@@ -35,5 +35,7 @@ export const CreateCardService = async ({
     media,
   });
 
+  io.to(`workspace_${card.listId}`).emit('show_new_card', card);
+
   return card;
 };

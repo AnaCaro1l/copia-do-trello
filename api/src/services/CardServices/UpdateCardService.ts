@@ -38,6 +38,6 @@ export const UpdateCardService = async ({
     updatedAt: new Date(),
   });
 
-  io.to(`list_${card.listId}`).emit('show_updated_card', updatedCard);
+  io.to(`workspace_${card.listId}`).emit('show_updated_card', updatedCard);
   return updatedCard;
 };

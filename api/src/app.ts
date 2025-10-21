@@ -73,6 +73,18 @@ io.on('connection', (socket) => {
     console.log(`Socket ${socket.id} saiu da sala ${room}`);
   });
 
+  socket.on('join_user', (userId: number) => {
+    const room = `user_${userId}`;
+    socket.join(room);
+    console.log(`Socket ${socket.id} entrou na sala ${room}`);
+  });
+
+  socket.on('leave_user', (userId: number) => {
+    const room = `user_${userId}`;
+    socket.leave(room);
+    console.log(`Socket ${socket.id} saiu da sala ${room}`);
+  });
+
   socket.on('disconnect', () => {
     console.log('Um usuário desconectado');
   });
