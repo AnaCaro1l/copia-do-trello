@@ -95,3 +95,22 @@
   <div class="text-white py-2">{{ taskList?.title || 'Sem nome' }}</div>
   </div>
 </div>
+
+<p-dialog header="Editar Lista" [(visible)]="visible">
+  <ng-template pTemplate="content">
+    <form [formGroup]="formTaskEdit" class="flex flex-col gap-3">
+      <input
+        formControlName="title"
+        type="text"
+        placeholder="Título da Lista"
+        class="p-2 rounded-lg bg-transparent border border-gray-700 text-white w-full placeholder:!text-white/40 focus:outline-none"
+      />
+    </form>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button mat-flat-button color="warn" class="mr-2" (click)="this.visible = false">
+      Cancelar
+    </button>
+    <button mat-flat-button [disabled]="formTaskEdit.invalid" (click)="onEditList()">Salvar</button>
+  </ng-template>
+</p-dialog>

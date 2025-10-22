@@ -26,6 +26,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { InviteService } from '../../services/invite.service';
 import { SocketService } from '../../services/socket.service';
 import { MatTooltip } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-frame',
@@ -43,6 +44,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     DialogModule,
     MatButtonModule,
     MatTooltip,
+    FormsModule,
   ],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
@@ -57,6 +59,9 @@ export class FrameComponent {
 
   @Input() frame!: Frame;
   editable: boolean = false;
+
+  isEditingTitle = false;
+  tempTitle = '';
 
   visible: boolean = false;
 
@@ -103,6 +108,53 @@ export class FrameComponent {
         this.frame.lists = this.frame.lists.filter(
           (list) => list.id !== deletedList.id
         );
+      }
+    });
+  }
+
+  startEditTitle() {
+    this.tempTitle = this.frame?.name ?? '';
+    this.isEditingTitle = true;
+    setTimeout(() => {
+      const input = document.getElementById('frame-title-input') as HTMLInputElement | null;
+      if (input) input.focus();
+    });
+  }
+
+  cancelEditTitle() {
+    this.isEditingTitle = false;
+    this.tempTitle = '';
+  }
+
+  saveTitle() {
+    const newTitle = (this.tempTitle ?? '').trim();
+    const oldTitle = this.frame.name ?? '';
+
+    if (!newTitle || newTitle === oldTitle) {
+      this.cancelEditTitle();
+      return;
+    }
+
+    const previous = this.frame.name;
+    this.frame.name = newTitle;
+    this.isEditingTitle = false;
+
+    this.workspaceService.updateWorkspace(this.frame.id, { name: newTitle }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Quadro atualizado',
+          detail: 'Título alterado com sucesso.'
+        });
+      },
+      error: (err) => {
+        this.frame.name = previous;
+        console.error('Erro ao atualizar título do quadro:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Não foi possível atualizar o título do quadro.'
+        });
       }
     });
   }

@@ -8,7 +8,7 @@ import {
   Maximize2,
   Plus,
   X,
-  Check
+  Check,
 } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { TaskList } from '../../types/tasklist';
@@ -21,8 +21,15 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
 import { CardService } from '../../services/card.service';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Task } from '../../types/task';
+import { DialogModule } from 'primeng/dialog';
 
 @Component({
   selector: 'app-task-list',
@@ -38,7 +45,8 @@ import { Task } from '../../types/task';
     ConfirmDialogModule,
     ToastModule,
     ButtonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    DialogModule,
   ],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
@@ -57,9 +65,12 @@ export class TaskListComponent {
   @Input() taskList: TaskList | null = null;
 
   formTask = this.buildForm();
+  formTaskEdit = this.buildForm();
 
   isOpen = signal(true);
   isEditMode = signal(false);
+
+  visible: boolean = false;
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -76,11 +87,14 @@ export class TaskListComponent {
     if (this.taskList && !Array.isArray(this.taskList.tasks)) {
       this.taskList.tasks = [];
     }
-    
-    if (this.taskList && (!this.taskList.tasks || this.taskList.tasks.length === 0)) {
+
+    if (
+      this.taskList &&
+      (!this.taskList.tasks || this.taskList.tasks.length === 0)
+    ) {
       this.loadTasks(this.taskList.id);
     }
-    
+
     this.items = [
       {
         label: 'Options',
@@ -88,6 +102,11 @@ export class TaskListComponent {
           {
             label: 'Editar',
             icon: 'pi pi-pencil',
+            command: () => {
+              const currentTitle = this.taskList?.title ?? '';
+              this.formTaskEdit.patchValue({ title: currentTitle });
+              this.visible = true;
+            }
           },
           {
             label: 'Excluir',
@@ -143,8 +162,7 @@ export class TaskListComponent {
           detail: 'Lista excluída',
         });
         this.listService.deleteList(this.taskList!.id).subscribe({
-          next: () => {
-          },
+          next: () => {},
           error: (error) => {
             console.error('Error deleting list:', error);
           },
@@ -197,5 +215,27 @@ export class TaskListComponent {
   close() {
     this.formTask.reset();
     this.isEditMode.set(false);
+  }
+
+  onEditList() {
+    const newList = {
+      title: this.formTaskEdit.value.title,
+    };
+    this.listService
+      .updateList(this.taskList?.id!, newList as TaskList)
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Lista atualizada',
+          });
+          this.taskList!.title = newList.title!;
+          this.visible = false;
+        },
+        error: (error) => {
+          console.error('Error updating list:', error);
+        },
+      });
   }
 }
