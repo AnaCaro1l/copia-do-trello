@@ -15,7 +15,6 @@ export const AddCollaboratorsService = async ({
   workspaceId,
   emails,
 }: Request): Promise<void> => {
-  console.log(emails);
   const userIds: number[] = [];
   const workspace = await Workspace.findByPk(workspaceId);
   if (!workspace) {
@@ -27,6 +26,11 @@ export const AddCollaboratorsService = async ({
       'Não é possível adicionar colaboradores a uma área de trabalho privada'
     );
   }
+
+  if(userId !== workspace.ownerId){
+    throw new AppError('Apenas o proprietário da área de trabalho pode adicionar colaboradores');
+  }
+
   for (const email of emails) {
     const user = await User.findOne({ where: { email } });
     if (user) {
