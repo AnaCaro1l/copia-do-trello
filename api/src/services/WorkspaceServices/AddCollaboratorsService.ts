@@ -35,6 +35,8 @@ export const AddCollaboratorsService = async ({
     const user = await User.findOne({ where: { email } });
     if (user) {
       userIds.push(user.id);
+    } else {
+      throw new AppError(`Usuário com email ${email} não encontrado`);
     }
   }
 
