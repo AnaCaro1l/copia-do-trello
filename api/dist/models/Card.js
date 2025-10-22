@@ -40,6 +40,14 @@ __decorate([
 __decorate([
     sequelize_typescript_1.Column,
     __metadata("design:type", Date)
+], Card.prototype, "dueDate", void 0);
+__decorate([
+    sequelize_typescript_1.Column,
+    __metadata("design:type", String)
+], Card.prototype, "color", void 0);
+__decorate([
+    sequelize_typescript_1.Column,
+    __metadata("design:type", Date)
 ], Card.prototype, "createdAt", void 0);
 __decorate([
     sequelize_typescript_1.Column,

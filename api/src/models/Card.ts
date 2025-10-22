@@ -28,6 +28,12 @@ export class Card extends Model<Card> {
   completed: boolean;
 
   @Column
+  dueDate: Date;
+
+  @Column
+  color: string;
+
+  @Column
   createdAt: Date;
 
   @Column
