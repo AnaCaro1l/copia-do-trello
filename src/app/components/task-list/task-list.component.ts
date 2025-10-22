@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, computed, signal } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { MatCardModule } from '@angular/material/card';
 import {
@@ -30,6 +30,7 @@ import {
 } from '@angular/forms';
 import { Task } from '../../types/task';
 import { DialogModule } from 'primeng/dialog';
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-task-list',
@@ -47,6 +48,7 @@ import { DialogModule } from 'primeng/dialog';
     ButtonModule,
     ReactiveFormsModule,
     DialogModule,
+    DragDropModule,
   ],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
@@ -63,6 +65,7 @@ export class TaskListComponent {
   items: MenuItem[] | undefined;
 
   @Input() taskList: TaskList | null = null;
+  @Input() connectedDropLists: string[] = [];
 
   formTask = this.buildForm();
   formTaskEdit = this.buildForm();
@@ -118,6 +121,10 @@ export class TaskListComponent {
         ],
       },
     ];
+  }
+
+  get dropListId(): string {
+    return `list-${this.taskList?.id ?? 'unknown'}`;
   }
 
   private loadTasks(listId: number) {
@@ -236,5 +243,45 @@ export class TaskListComponent {
           console.error('Error updating list:', error);
         },
       });
+  }
+
+  drop(event: CdkDragDrop<Task[]>) {
+    if (!this.taskList) return;
+
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return; 
+    }
+
+    const movedTask = event.previousContainer.data[event.previousIndex] as Task;
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex
+    );
+
+    const updated: Task = { ...movedTask, listId: this.taskList.id } as Task;
+    this.cardService.updateCard(movedTask.id, updated).subscribe({
+      next: () => {
+        const list = this.taskList as TaskList;
+        const idx = (list.tasks || []).findIndex(t => t.id === movedTask.id);
+        if (idx > -1 && list.tasks) list.tasks[idx].listId = list.id;
+      },
+      error: (err) => {
+        console.error('Erro ao mover card de lista:', err);
+        transferArrayItem(
+          event.container.data,
+          event.previousContainer.data,
+          event.currentIndex,
+          event.previousIndex
+        );
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Não foi possível mover a tarefa.',
+        });
+      },
+    });
   }
 }

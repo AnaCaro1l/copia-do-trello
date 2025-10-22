@@ -41,7 +41,7 @@ export const UpdateCardService = async ({
     title: title ? title : card.title,
     description: description ? description : card.description,
     media: media ? media : card.media,
-    completed: completed ? completed : card.completed,
+    completed: completed ?? card.completed,
     listId: listId ? listId : card.listId,
     dueDate: dueDate ? dueDate : card.dueDate,
     color: color ? color : card.color,
