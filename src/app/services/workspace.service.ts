@@ -12,7 +12,6 @@ export class WorkspaceService {
 
   constructor(private http: HttpClient) {}
 
-  // Creates a workspace. If a File is present in backgroundUrl, send as multipart (field name: backgroundPath).
   createWorkspace(data: Partial<Frame> & { backgroundUrl?: File | string | null }): Observable<Frame> {
   const hasFile = !!data && !!data.backgroundUrl && typeof data.backgroundUrl !== 'string';
 
@@ -21,7 +20,6 @@ export class WorkspaceService {
       if (data.name !== undefined) form.append('name', String(data.name));
       if (data.visibility !== undefined) form.append('visibility', String(Number(data.visibility)));
       if (data.backgroundColor !== undefined) form.append('backgroundColor', String(data.backgroundColor));
-      // Backend expects multer field name 'backgroundPath'
       form.append('backgroundPath', data.backgroundUrl as File);
 
       return this.http
@@ -29,7 +27,6 @@ export class WorkspaceService {
         .pipe(map((res) => res.workspace));
     }
 
-    // JSON fallback (no file provided)
     return this.http
       .post<{ message: string; workspace: Frame }>(`${this.apiUrl}/workspace`, data)
       .pipe(map((res) => res.workspace));
