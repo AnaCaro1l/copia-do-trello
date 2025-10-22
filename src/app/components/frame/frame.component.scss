@@ -2,3 +2,9 @@
     background-size: cover;
     background-repeat: no-repeat;
 }
+
+@media screen and (max-width: 768px) {
+    .frame {
+        background-position: center !important;
+    }
+}
