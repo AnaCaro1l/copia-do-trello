@@ -38,7 +38,7 @@
     [cdkDropListConnectedTo]="connectedDropLists"
     (cdkDropListDropped)="drop($event)"
   >
-    @for (task of taskList?.tasks ?? []; track $index) {
+  @for (task of taskList?.tasks ?? []; track task.id) {
     <app-task [task]="task"></app-task>
     }
     <div
