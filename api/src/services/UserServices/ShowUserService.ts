@@ -5,7 +5,7 @@ export const ShowUserService = async (id: string): Promise<User> => {
   const user = await User.findOne({
     where: { id: id },
     attributes: { exclude: ['passwordHash'] },
-    include: ['workspaces', 'invites'],
+    include: ['workspaces', 'sentInvites', 'receivedInvites'],
   });
 
   if (!user) {
