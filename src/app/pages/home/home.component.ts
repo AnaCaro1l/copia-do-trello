@@ -81,7 +81,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         if (!Array.isArray(this.frames)) {
           this.frames = [];
         }
-        this.frames.push(frame);
+        this.frames.unshift(frame);
       });
   }
   toggleMenu() {

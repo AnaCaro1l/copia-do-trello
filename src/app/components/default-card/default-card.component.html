@@ -29,7 +29,11 @@
         />
       </div>
       <label for="state" class="text-white/80">Cor de fundo</label>
-      <div class="flex items-center justify-center p-2 rounded-lg w-[40px]" [style.background]="frameForm.value.backgroundColor" (click)="inputColor.click()">
+      <div
+        class="flex items-center justify-center p-2 rounded-lg w-[40px]"
+        [style.background]="frameForm.value.backgroundColor"
+        (click)="inputColor.click()"
+      >
         <input
           #inputColor
           type="color"
@@ -38,7 +42,11 @@
           class="h-0 w-0 opacity-0 absolute"
           formControlName="backgroundColor"
         />
-        <lucide-angular [img]="palette" color="white" size="20"></lucide-angular>
+        <lucide-angular
+          [img]="palette"
+          color="white"
+          size="20"
+        ></lucide-angular>
       </div>
       <label for="state" class="text-white/80"
         >Escolha sua imagem de fundo</label
@@ -52,9 +60,26 @@
     </form>
   </ng-template>
   <ng-template pTemplate="footer">
-    <button mat-flat-button color="warn" class="mr-2" (click)="closeDialog()">
+    <button mat-flat-button color="warn" class="mr-2" (click)="closeDialog()" [disabled]="isCreating">
       Cancelar
     </button>
-    <button mat-flat-button [disabled]="frameForm.invalid" (click)="createBoard()">Criar</button>
+    <button
+      mat-flat-button
+      [disabled]="frameForm.invalid || isCreating"
+      (click)="createBoard()"
+    >
+      <ng-container *ngIf="!isCreating; else creatingTpl">Criar</ng-container>
+    </button>
+    <ng-template #creatingTpl>
+      <div class="flex items-center gap-2">
+        <p-progressSpinner
+          styleClass="w-4 h-4"
+          strokeWidth="8"
+          fill="transparent"
+          animationDuration=".5s"
+        ></p-progressSpinner>
+        <span>Criando…</span>
+      </div>
+    </ng-template>
   </ng-template>
 </p-dialog>

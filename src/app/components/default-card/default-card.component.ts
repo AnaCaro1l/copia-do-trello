@@ -3,11 +3,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { DialogModule } from 'primeng/dialog';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FileUploadModule } from 'primeng/fileupload';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Frame } from '../../types/frame';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { LucideAngularModule, Palette } from 'lucide-angular';
+import { finalize } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-default-card',
@@ -17,9 +20,11 @@ import { LucideAngularModule, Palette } from 'lucide-angular';
     MatButtonModule,
     SelectButtonModule,
     FileUploadModule,
+    ProgressSpinnerModule,
     ReactiveFormsModule,
     ColorPickerModule,
-    LucideAngularModule
+    LucideAngularModule,
+    CommonModule
   ],
   templateUrl: './default-card.component.html',
   styleUrl: './default-card.component.scss',
@@ -27,6 +32,7 @@ import { LucideAngularModule, Palette } from 'lucide-angular';
 export class DefaultCardComponent {
   readonly palette = Palette
   frameForm = this.buildForm();
+  isCreating = false;
 
   constructor(
     private fb: FormBuilder,
@@ -60,8 +66,10 @@ export class DefaultCardComponent {
   createBoard() {
     if (this.frameForm.invalid) return;
 
+    this.isCreating = true;
     this.workspaceService
       .createWorkspace(this.frameForm.value as Frame)
+      .pipe(finalize(() => (this.isCreating = false)))
       .subscribe({
         next: (workspace: Frame) => {
           console.log('Workspace created:', workspace.backgroundUrl);
