@@ -17,6 +17,7 @@ export const AddCollaboratorsService = async ({
 }: Request): Promise<void> => {
   const userIds: number[] = [];
   const workspace = await Workspace.findByPk(workspaceId);
+  const userOn = await User.findByPk(userId);
   if (!workspace) {
     throw new AppError('Área de trabalho não encontrada');
   }
@@ -27,17 +28,21 @@ export const AddCollaboratorsService = async ({
     );
   }
 
-  if(userId !== workspace.ownerId){
-    throw new AppError('Apenas o proprietário da área de trabalho pode adicionar colaboradores');
+  if (userId !== workspace.ownerId) {
+    throw new AppError(
+      'Apenas o proprietário da área de trabalho pode adicionar colaboradores'
+    );
   }
 
   for (const email of emails) {
     const user = await User.findOne({ where: { email } });
-    if (user) {
-      userIds.push(user.id);
-    } else {
+    if (!user) {
       throw new AppError(`Usuário com email ${email} não encontrado`);
     }
+    if (user.id === userOn.id) {
+      throw new AppError('Você não pode mandar um convite para você mesmo');
+    }
+    userIds.push(user.id);
   }
 
   const users = await User.findAll({

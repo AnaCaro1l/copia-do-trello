@@ -2,8 +2,6 @@ import multer, { MulterError } from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// Ensure upload directory exists at project root: uploads/backgrounds
-// __dirname -> api/src/middlewares => go up 3 to repo root
 const uploadDir = path.resolve(__dirname, '..', '..', '..', 'uploads', 'backgrounds');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
