@@ -86,7 +86,7 @@
   <div class="flex gap-3 md:gap-4 p-2 md:p-2 m-1 md:m-2 overflow-x-auto max-w-[96vw] md:max-w-[95vw] h-[80vh] md:h-[76vh]">
     @for (tasklist of frame.lists; track $index) {
     <div class="snap-start">
-      <app-task-list [taskList]="tasklist"></app-task-list>
+      <app-task-list [taskList]="tasklist" [connectedDropLists]="dropListIds"></app-task-list>
     </div>
     }
     <div class="snap-start">

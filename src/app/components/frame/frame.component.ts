@@ -112,6 +112,11 @@ export class FrameComponent {
     });
   }
 
+  get dropListIds(): string[] {
+    const lists = this.frame?.lists ?? [];
+    return lists.map((l) => `list-${l.id}`);
+  }
+
   startEditTitle() {
     this.tempTitle = this.frame?.name ?? '';
     this.isEditingTitle = true;
