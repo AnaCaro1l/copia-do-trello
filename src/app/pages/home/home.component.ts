@@ -77,7 +77,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.socketService.onFrameCreated()
       .pipe(takeUntil(this.destroy$))
       .subscribe((frame: Frame) => {
-        console.log('Novo frame recebido:', frame);
         if (!Array.isArray(this.frames)) {
           this.frames = [];
         }

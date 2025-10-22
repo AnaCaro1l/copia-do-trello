@@ -59,7 +59,6 @@ export class TaskListDefaultComponent {
       },
       error: (error) => {
         console.error('Error creating list:', error);
-        console.log('workspaceId:', this.workspaceId);
       },
     });
   }

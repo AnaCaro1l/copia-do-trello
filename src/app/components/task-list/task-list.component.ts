@@ -207,7 +207,6 @@ export class TaskListComponent {
       },
       error: (error) => {
         console.error('Error adding card:', error);
-        console.log('Card created:', newCard.listId);
       },
     });
   }

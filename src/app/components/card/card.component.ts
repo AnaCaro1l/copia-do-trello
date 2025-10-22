@@ -11,8 +11,4 @@ import { CommonModule } from '@angular/common';
 })
 export class CardComponent {
   @Input() frame!: Frame;
-
-  ngOnInit() {
-    console.log('CardComponent frame input:', this.frame);
-  }
 }

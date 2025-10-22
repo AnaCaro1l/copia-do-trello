@@ -56,7 +56,6 @@ export class AuthService {
       const raw = localStorage.getItem(this.STORAGE_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
-      // Normalize: accept either { token, user } or { user, token } or legacy { updatedUser }
       const user: AuthUser | undefined = parsed.user || parsed.updatedUser || parsed;
       if (!user) return null;
       return { token: parsed.token, user } as AuthSession;
@@ -70,27 +69,4 @@ export class AuthService {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
     } catch (_) {}
   }
-  //  socket: Socket | null = null;
-  // constructor() {
-  //   this.socket = io(this.apiUrl, {});
-
-  //   this.socket.on('connect', () => {
-  //     console.log('Conectado ao servidor', this.socket?.id);
-  //   });
-
-  //   this.socket.on('disconnect', (reason) => {
-  //     console.log('Desconectado do servidor:', reason);
-  //   });
-  // }
-
-  // listen(event: string, callback: (data: any) => void) {
-  //   this.socket?.on(event, callback);
-  // }
-
-  // disconnect() {
-  //   console.log(this.socket);
-  //   if (this.socket) {
-  //     this.socket.disconnect();
-  //   }
-  // }
 }

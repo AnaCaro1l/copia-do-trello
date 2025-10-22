@@ -116,7 +116,9 @@ export class FrameComponent {
     this.tempTitle = this.frame?.name ?? '';
     this.isEditingTitle = true;
     setTimeout(() => {
-      const input = document.getElementById('frame-title-input') as HTMLInputElement | null;
+      const input = document.getElementById(
+        'frame-title-input'
+      ) as HTMLInputElement | null;
       if (input) input.focus();
     });
   }
@@ -139,24 +141,26 @@ export class FrameComponent {
     this.frame.name = newTitle;
     this.isEditingTitle = false;
 
-    this.workspaceService.updateWorkspace(this.frame.id, { name: newTitle }).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Quadro atualizado',
-          detail: 'Título alterado com sucesso.'
-        });
-      },
-      error: (err) => {
-        this.frame.name = previous;
-        console.error('Erro ao atualizar título do quadro:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: 'Não foi possível atualizar o título do quadro.'
-        });
-      }
-    });
+    this.workspaceService
+      .updateWorkspace(this.frame.id, { name: newTitle })
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Quadro atualizado',
+            detail: 'Título alterado com sucesso.',
+          });
+        },
+        error: (err) => {
+          this.frame.name = previous;
+          console.error('Erro ao atualizar título do quadro:', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Não foi possível atualizar o título do quadro.',
+          });
+        },
+      });
   }
 
   ngOnDestroy() {
@@ -184,15 +188,14 @@ export class FrameComponent {
       rejectIcon: 'none',
 
       accept: () => {
-        this.messageService.add({
-          severity: 'info',
-          summary: 'Sucesso',
-          detail: 'Workspace excluído',
-        });
         this.workspaceService.deleteWorkspace(this.frame.id).subscribe({
           next: () => {
-            console.log('Workspace deleted');
             this.router.navigate(['/home']);
+            this.messageService.add({
+              severity: 'info',
+              summary: 'Sucesso',
+              detail: 'Workspace excluído',
+            });
           },
           error: (err) => {
             console.error('Error deleting workspace:', err);
@@ -238,7 +241,6 @@ export class FrameComponent {
                 ? 'O quadro agora é público.'
                 : 'O quadro agora é privado.',
             });
-            console.log('Frame visibility updated in DB:', type);
           },
           error: (err) => {
             this.frame.visibility = !type;
@@ -264,13 +266,13 @@ export class FrameComponent {
         this.visible = false;
       },
       error: (err) => {
-        console.log(emails);
         console.error('Erro ao enviar convite:', err);
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
-          detail: (err.error?.message || 'Não foi possível enviar o convite.') as string,
-          life: 3000
+          detail: (err.error?.message ||
+            'Não foi possível enviar o convite.') as string,
+          life: 3000,
         });
         this.visible = false;
       },
