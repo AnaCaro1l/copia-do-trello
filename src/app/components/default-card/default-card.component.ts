@@ -38,7 +38,7 @@ export class DefaultCardComponent {
       name: ['', Validators.required],
       visibility: [1, Validators.required],
       backgroundColor: ['#374151', Validators.required],
-      backgroundUrl: [''],
+      backgroundUrl: [null as File | string | null],
     });
   }
   stateOptions: any[] = [
@@ -72,5 +72,12 @@ export class DefaultCardComponent {
           console.error('Error creating workspace:', error);
         },
       });
+  }
+
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.frameForm.patchValue({ backgroundUrl: file });
+    }
   }
 }

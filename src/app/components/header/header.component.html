@@ -114,8 +114,8 @@
           {{ invite.workspace.name }}
         </p>
         <div class="flex gap-1">
-          <button mat-flat-button color="primary">Aceitar</button>
-          <button mat-flat-button color="warn">Recusar</button>
+          <button mat-flat-button color="primary" (click)="acceptInvite(invite.id)">Aceitar</button>
+          <button mat-flat-button color="warn" (click)="declineInvite(invite.id)">Recusar</button>
         </div>
         <p class="text-xs text-gray-400">
           {{ invite.createdAt | date : "short" }}

@@ -142,4 +142,38 @@ export class HeaderComponent implements OnInit {
       },
     });
   }
+
+  acceptInvite(inviteId: number) {
+    console.log('Aceitando convite com ID:', inviteId);
+    this.inviteService.validateInvite('accepted', inviteId).subscribe({
+      next: (invite) => {
+        const success = !!invite;
+        this.messageService.add({
+          severity: success ? 'success' : 'error',
+          summary: success ? 'Convite Aceito' : 'Erro',
+          detail: success ? 'Você aceitou o convite com sucesso.' : 'Erro ao aceitar o convite.',
+        });
+        console.log('Convite aceito com sucesso:', invite);
+        if (success) this.getInvites();
+      },
+      error: (err) => {
+        console.error('Erro ao aceitar convite:', err);
+      },
+    });
+  }
+
+  declineInvite(inviteId: number) {
+    this.inviteService.validateInvite('declined', inviteId).subscribe({
+      next: (valid) => {
+        this.messageService.add({
+          severity: valid ? 'success' : 'error',
+          summary: valid ? 'Convite Recusado' : 'Erro',
+          detail: valid ? 'Você recusou o convite com sucesso.' : 'Erro ao recusar o convite.',
+        });
+      },
+      error: (err) => {
+        console.error('Erro ao recusar convite:', err);
+      },
+    });
+  }
 }

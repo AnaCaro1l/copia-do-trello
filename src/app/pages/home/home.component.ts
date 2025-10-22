@@ -61,8 +61,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.workspaceService.getWorkspaces().subscribe({
-      next: (response: any) => {
-        this.frames = response.workspaces;
+      next: (frames: Frame[]) => {
+        this.frames = Array.isArray(frames) ? frames : [];
       },
       error: (err) => {
         console.error('Erro ao buscar workspaces:', err);
@@ -78,6 +78,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((frame: Frame) => {
         console.log('Novo frame recebido:', frame);
+        if (!Array.isArray(this.frames)) {
+          this.frames = [];
+        }
         this.frames.push(frame);
       });
   }

@@ -41,8 +41,8 @@ export class DashboardComponent implements OnInit {
 
   getFrameData(frameId: number) {
     this.workspaceService.getWorkspaceById(frameId).subscribe({
-      next: (data: any) => {
-        this.frame = data.workspace;
+      next: (frame: Frame) => {
+        this.frame = frame;
       },
       error: (err) => {
         console.error('Error fetching frame data:', err);

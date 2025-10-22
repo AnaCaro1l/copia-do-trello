@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Frame } from '../types/frame';
 
 @Injectable({
@@ -12,24 +12,63 @@ export class WorkspaceService {
 
   constructor(private http: HttpClient) {}
 
-  createWorkspace(workspace: Frame): Observable<Frame> {
-    return this.http.post<Frame>(`${this.apiUrl}/workspace`, workspace);
+  // Creates a workspace. If a File is present in backgroundUrl, send as multipart (field name: backgroundPath).
+  createWorkspace(data: Partial<Frame> & { backgroundUrl?: File | string | null }): Observable<Frame> {
+  const hasFile = !!data && !!data.backgroundUrl && typeof data.backgroundUrl !== 'string';
+
+    if (hasFile) {
+      const form = new FormData();
+      if (data.name !== undefined) form.append('name', String(data.name));
+      if (data.visibility !== undefined) form.append('visibility', String(Number(data.visibility)));
+      if (data.backgroundColor !== undefined) form.append('backgroundColor', String(data.backgroundColor));
+      // Backend expects multer field name 'backgroundPath'
+      form.append('backgroundPath', data.backgroundUrl as File);
+
+      return this.http
+        .post<{ message: string; workspace: Frame }>(`${this.apiUrl}/workspace`, form)
+        .pipe(map((res) => res.workspace));
+    }
+
+    // JSON fallback (no file provided)
+    return this.http
+      .post<{ message: string; workspace: Frame }>(`${this.apiUrl}/workspace`, data)
+      .pipe(map((res) => res.workspace));
   }
 
   getWorkspaces(): Observable<Frame[]> {
-    return this.http.get<Frame[]>(`${this.apiUrl}/workspaces`);
+    return this.http
+      .get<{ message: string; workspaces: Frame[] }>(`${this.apiUrl}/workspaces`)
+      .pipe(map((res) => res.workspaces));
   }
 
   getWorkspaceById(id: number): Observable<Frame> {
-    return this.http.get<Frame>(`${this.apiUrl}/workspace/${id}`);
+    return this.http
+      .get<{ message: string; workspace: Frame }>(`${this.apiUrl}/workspace/${id}`)
+      .pipe(map((res) => res.workspace));
   }
 
-  updateWorkspace(id: number, data: Partial<Frame>): Observable<Frame> {
-    return this.http.put<Frame>(`${this.apiUrl}/workspace/${id}`, data);
+  updateWorkspace(id: number, data: Partial<Frame> & { backgroundUrl?: File | string | null }): Observable<Frame> {
+  const hasFile = !!data && !!data.backgroundUrl && typeof data.backgroundUrl !== 'string';
+
+    if (hasFile) {
+      const form = new FormData();
+      if (data.name !== undefined) form.append('name', String(data.name));
+      if (data.visibility !== undefined) form.append('visibility', String(Number(data.visibility)));
+      if (data.backgroundColor !== undefined) form.append('backgroundColor', String(data.backgroundColor));
+      form.append('backgroundPath', data.backgroundUrl as File);
+
+      return this.http
+        .put<{ message: string; workspace: Frame }>(`${this.apiUrl}/workspace/${id}`, form)
+        .pipe(map((res) => res.workspace));
+    }
+
+    return this.http
+      .put<{ message: string; workspace: Frame }>(`${this.apiUrl}/workspace/${id}`, data)
+      .pipe(map((res) => res.workspace));
   }
 
-  deleteWorkspace(id: number): Observable<Frame> {
-    return this.http.delete<Frame>(`${this.apiUrl}/workspace/${id}`);
+  deleteWorkspace(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/workspace/${id}`);
   }
 }
  

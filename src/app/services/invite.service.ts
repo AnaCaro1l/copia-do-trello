@@ -17,11 +17,6 @@ export class InviteService {
       .post<{ message: string; invite: any }>(`${this.apiUrl}/workspace/collaborators`, { workspaceId, emails })
       .pipe(map((res) => res.invite));
   }
-
-  deleteInvite(id: number) {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/invite/${id}`);
-  }
-
   listInvites() {
     return this.http
       .get<{ message: string; invites: any[] }>(`${this.apiUrl}/invites`)
@@ -34,16 +29,11 @@ export class InviteService {
       .pipe(map((res) => res.invite));
   }
 
-  updateInvite(id: number, changes: Partial<any>) {
-    return this.http
-      .put<{ message: string; invite: any }>(`${this.apiUrl}/invite/${id}`, changes)
-      .pipe(map((res) => res.invite));
-  }
-
   validateInvite(status: string, inviteId: number) {
+    // Backend returns { message, invite }, not { valid }
     return this.http
-      .post<{ message: string; valid: boolean }>(`${this.apiUrl}/invite/validate`, { status, inviteId })
-      .pipe(map((res) => res.valid));
+      .post<{ message: string; invite: any }>(`${this.apiUrl}/invite/validate`, { status, inviteId })
+      .pipe(map((res) => res.invite));
   }
 
 }
