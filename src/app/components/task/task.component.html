@@ -13,7 +13,7 @@
       class="checkbox-inner opacity-0 transform scale-90 -translate-x-2 transition-all duration-200 ease-in-out group-hover:opacity-100 group-hover:scale-100 group-hover:translate-x-0"
     >
       <p-checkbox
-        [(ngModel)]="checked"
+        [(ngModel)]="task!.completed"
         (ngModelChange)="onCheckboxChange()"
         binary="true"
       ></p-checkbox>
@@ -34,7 +34,7 @@
       <div class="flex flex-col gap-3 w-full">
         <div class="flex items-center gap-2">
           <p-checkbox
-            [(ngModel)]="checked"
+            [(ngModel)]="task!.completed"
             (ngModelChange)="onCheckboxChange()"
             binary="true"
           ></p-checkbox>
