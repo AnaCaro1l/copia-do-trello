@@ -2,14 +2,76 @@
   cdkDrag
   [cdkDragData]="task"
   *ngIf="task"
-
+  (click)="displayEditDialog = true"
   [ngStyle]="{ backgroundColor: task.coverColor || '#374151' }"
   class="group rounded-lg flex items-center p-2 px-3 cursor-pointer hover:border-2"
 >
-  <div class="checkbox-wrap flex items-center justify-center w-0 h-6 overflow-hidden shrink-0 mr-0 transition-all duration-200 ease-in-out group-hover:w-6 group-hover:mr-2">
-    <div class="checkbox-inner opacity-0 transform scale-90 -translate-x-2 transition-all duration-200 ease-in-out group-hover:opacity-100 group-hover:scale-100 group-hover:translate-x-0">
-        <p-checkbox [(ngModel)]="checked" (ngModelChange)="onCheckboxChange()" binary="true"></p-checkbox>
+  <div
+    class="checkbox-wrap flex items-center justify-center w-0 h-6 overflow-hidden shrink-0 mr-0 transition-all duration-200 ease-in-out group-hover:w-6 group-hover:mr-2"
+  >
+    <div
+      class="checkbox-inner opacity-0 transform scale-90 -translate-x-2 transition-all duration-200 ease-in-out group-hover:opacity-100 group-hover:scale-100 group-hover:translate-x-0"
+    >
+      <p-checkbox
+        [(ngModel)]="checked"
+        (ngModelChange)="onCheckboxChange()"
+        binary="true"
+      ></p-checkbox>
     </div>
   </div>
   <p class="flex-1 min-w-0">{{ task!.title }}</p>
 </div>
+
+<p-dialog
+  header="{{ task!.title }}"
+  [(visible)]="displayEditDialog"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{  height: 'auto', minWidth: '30vw' }"
+>
+  <ng-template pTemplate="content">
+    <div class="w-full flex">
+      <div class="flex flex-col gap-3 w-full">
+        <div class="flex items-center gap-2">
+          <p-checkbox
+            [(ngModel)]="checked"
+            (ngModelChange)="onCheckboxChange()"
+            binary="true"
+          ></p-checkbox>
+
+          <ng-container *ngIf="!isEditingTitle; else editTitle">
+            <h3
+              (click)="startEditTitle()"
+              class="text-white/90 font-semibold cursor-text hover:bg-white/10 rounded px-1 transition-colors"
+            >
+              {{ task!.title }}
+            </h3>
+          </ng-container>
+          <ng-template #editTitle>
+            <input
+              id="task-title-input"
+              type="text"
+              [(ngModel)]="tempTitle"
+              (keydown.enter)="saveTitle()"
+              (keydown.escape)="cancelEditTitle()"
+              (blur)="saveTitle()"
+              class="text-white/90 font-semibold bg-transparent border-b border-white/30 focus:border-white/70 outline-none"
+            />
+          </ng-template>
+        </div>
+
+        <div class="flex flex-col gap-2 w-full">
+          <label class="text-white/70 text-sm">Descrição</label>
+          <textarea
+            [(ngModel)]="task!.description"
+            (blur)="saveDescription()"
+            (keydown.enter)="saveDescription()"
+            placeholder="Adicione uma descrição..."
+            class="w-full min-h-28 p-2 rounded-lg bg-transparent border border-gray-700 text-white placeholder:!text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 resize-y"
+          ></textarea>
+          <small class="text-white/40">Pressione Enter para salvar</small>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
