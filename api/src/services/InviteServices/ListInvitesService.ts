@@ -3,10 +3,10 @@ import { Invite } from '../../models/Invite';
 import { User } from '../../models/User';
 import { Workspace } from '../../models/Workspace';
 
-export const ListInvitesService = async (id: number) => {
+export const ListInvitesService = async (receiverId: number) => {
   const invites = await Invite.findAll({
     where: {
-      receiverId: id,
+      receiverId: receiverId,
     },
     include: [
       {
