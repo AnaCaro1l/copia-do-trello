@@ -253,11 +253,7 @@ export class FrameComponent {
     }
   }
   sendInvite() {
-    const emails = (
-      document.querySelector(
-        'input[formControlName="email"]'
-      ) as HTMLInputElement
-    ).value;
+    const emails = (document.querySelector('#email') as HTMLInputElement).value;
     this.inviteService.addCollaborators(this.frame.id, [emails]).subscribe({
       next: () => {
         this.messageService.add({
