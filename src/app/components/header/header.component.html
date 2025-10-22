@@ -113,6 +113,24 @@
           {{ invite.sender.name }} convidou você para o workspace
           {{ invite.workspace.name }}
         </p>
+        <div *ngIf="invite.status === 'pending'" class="flex gap-1">
+          <button mat-flat-button color="primary" (click)="acceptInvite(invite.id)">Aceitar</button>
+          <button mat-flat-button color="warn" (click)="declineInvite(invite.id)">Recusar</button>
+        </div>
+        <p class="text-xs text-gray-400">
+          {{ invite.createdAt | date : "short" }}
+        </p>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="Não lidos">
+      <div
+        *ngFor="let invite of invitesUnread"
+        class="p-1 border-b border-t border-gray-700 w-full gap-2 flex flex-col"
+      >
+        <p class="text-sm">
+          {{ invite.sender.name }} convidou você para o workspace
+          {{ invite.workspace.name }}
+        </p>
         <div class="flex gap-1">
           <button mat-flat-button color="primary" (click)="acceptInvite(invite.id)">Aceitar</button>
           <button mat-flat-button color="warn" (click)="declineInvite(invite.id)">Recusar</button>
@@ -122,8 +140,20 @@
         </p>
       </div>
     </p-tabPanel>
-    <p-tabPanel header="Não lidos"></p-tabPanel>
-    <p-tabPanel header="Lidos"> </p-tabPanel>
+    <p-tabPanel header="Lidos"> 
+      <div
+        *ngFor="let invite of invitesRead"
+        class="p-1 border-b border-t border-gray-700 w-full gap-2 flex flex-col"
+      >
+        <p class="text-sm">
+          {{ invite.sender.name }} convidou você para o workspace
+          {{ invite.workspace.name }}
+        </p>
+        <p class="text-xs text-gray-400">
+          {{ invite.createdAt | date : "short" }}
+        </p>
+      </div>
+    </p-tabPanel>
   </p-tabView>
 
   <div class=""></div>

@@ -213,6 +213,7 @@ export class FrameComponent {
           summary: 'Convite Enviado',
           detail: 'O convite foi enviado com sucesso.',
         });
+        this.visible = false;
       },
       error: (err) => {
         console.log(emails);
@@ -220,8 +221,10 @@ export class FrameComponent {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
-          detail: 'Não foi possível enviar o convite.',
+          detail: (err.error?.message || 'Não foi possível enviar o convite.') as string,
+          life: 3000
         });
+        this.visible = false;
       },
     });
   }

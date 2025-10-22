@@ -57,6 +57,8 @@ export class HeaderComponent implements OnInit {
   @Output() profileOpen = new EventEmitter<void>();
 
   invites: Invite[] = [];
+  invitesUnread: Invite[] = [];
+  invitesRead: Invite[] = [];
 
   isMenuOpen = true;
 
@@ -139,6 +141,24 @@ export class HeaderComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao carregar convites:', err);
+      },
+    });
+
+    this.inviteService.listInvites().subscribe({
+      next: (invites) => {
+        this.invitesUnread = invites.filter(invite => invite.status === 'pending');
+      },
+      error: (err) => {
+        console.error('Erro ao carregar convites não lidos:', err);
+      },
+    });
+
+    this.inviteService.listInvites().subscribe({
+      next: (invites) => {
+        this.invitesRead = invites.filter(invite => invite.status !== 'pending');
+      },
+      error: (err) => {
+        console.error('Erro ao carregar convites lidos:', err);
       },
     });
   }
