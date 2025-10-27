@@ -38,11 +38,10 @@ export const UpdateCardService = async ({
     media = await uploadOnCloudinary(mediaPath);
   }
 
-  if(dueDate) {
+  if (dueDate) {
     dueDate = new Date(dueDate);
   }
 
- 
   const oldListId = card.listId;
   const oldPos = card.position;
   const targetListId = typeof listId === 'number' ? listId : oldListId;
@@ -50,9 +49,7 @@ export const UpdateCardService = async ({
   let newPos = typeof position === 'number' ? position : undefined;
 
   const updatedCard = await sequelize.transaction(async (t) => {
-
     if (targetListId !== oldListId) {
-      
       await Card.increment('position', {
         by: -1,
         where: {
@@ -66,11 +63,13 @@ export const UpdateCardService = async ({
         where: { listId: targetListId },
         transaction: t,
       })) as number | null;
-      const endPos = Number.isFinite(maxTargetPos as number) && maxTargetPos !== null ? (maxTargetPos as number) + 1 : 0;
+      const endPos =
+        Number.isFinite(maxTargetPos as number) && maxTargetPos !== null
+          ? (maxTargetPos as number) + 1
+          : 0;
       if (newPos === undefined || newPos > endPos) newPos = endPos;
       if (newPos < 0) newPos = 0;
 
-      // 3) Make room in target list from newPos onwards
       await Card.increment('position', {
         by: 1,
         where: {
@@ -80,7 +79,6 @@ export const UpdateCardService = async ({
         transaction: t,
       });
 
-      // 4) Update the card
       return await card.update(
         {
           title: title ?? card.title,
@@ -97,19 +95,19 @@ export const UpdateCardService = async ({
       );
     }
 
-    // Same list: handle reorder if position provided
     if (typeof newPos === 'number' && newPos !== oldPos) {
-      // Determine bounds in current list
       const maxPos = (await Card.max('position', {
         where: { listId: oldListId },
         transaction: t,
       })) as number | null;
-      const endPos = Number.isFinite(maxPos as number) && maxPos !== null ? (maxPos as number) : 0;
+      const endPos =
+        Number.isFinite(maxPos as number) && maxPos !== null
+          ? (maxPos as number)
+          : 0;
       if (newPos > endPos) newPos = endPos;
       if (newPos < 0) newPos = 0;
 
       if (newPos > oldPos) {
-        // shift down those between oldPos+1 .. newPos
         await Card.increment('position', {
           by: -1,
           where: {
@@ -119,7 +117,6 @@ export const UpdateCardService = async ({
           transaction: t,
         });
       } else if (newPos < oldPos) {
-        // shift up those between newPos .. oldPos-1
         await Card.increment('position', {
           by: 1,
           where: {
@@ -145,7 +142,6 @@ export const UpdateCardService = async ({
       );
     }
 
-    // Fallback: no move/reorder, just update fields
     return await card.update(
       {
         title: title ?? card.title,
