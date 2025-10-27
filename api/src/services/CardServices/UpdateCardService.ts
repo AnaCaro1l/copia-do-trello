@@ -52,7 +52,7 @@ export const UpdateCardService = async ({
   const updatedCard = await sequelize.transaction(async (t) => {
 
     if (targetListId !== oldListId) {
-      // 1) Close gap in old list
+      
       await Card.increment('position', {
         by: -1,
         where: {
@@ -62,7 +62,6 @@ export const UpdateCardService = async ({
         transaction: t,
       });
 
-      // 2) Determine insert position in target list
       const maxTargetPos = (await Card.max('position', {
         where: { listId: targetListId },
         transaction: t,
