@@ -34,6 +34,9 @@ export class Card extends Model<Card> {
   color: string;
 
   @Column
+  position: number;
+
+  @Column
   createdAt: Date;
 
   @Column

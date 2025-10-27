@@ -3,6 +3,7 @@ import { AppError } from '../../errors/AppError';
 import { Card } from '../../models/Card';
 import uploadOnCloudinary from '../../utils/cloudinary';
 import { CardSchemas } from './schemas';
+import { Op } from 'sequelize';
 
 interface Request {
   title: string;
@@ -28,11 +29,16 @@ export const CreateCardService = async ({
     media = await uploadOnCloudinary(mediaPath);
   }
 
+  // position: append to the end of the list
+  const maxPosition = (await Card.max('position', { where: { listId } })) as number | null;
+  const nextPosition = Number.isFinite(maxPosition as number) && maxPosition !== null ? (maxPosition as number) + 1 : 0;
+
   const card = await Card.create({
     title,
     description,
     listId,
     media,
+    position: nextPosition,
   });
 
   io.to(`workspace_${card.listId}`).emit('show_new_card', card);

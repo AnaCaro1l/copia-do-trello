@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import { Workspace } from '../../models/Workspace';
 import { List } from '../../models/List';
 import { WorkspaceUser } from '../../models/WorkspaceUser';
+import { Card } from '../../models/Card';
 import { AppError } from '../../errors/AppError';
 
 interface Request {
@@ -18,6 +19,11 @@ export const ShowWorkspaceService = async ({
     include: [
       'collaborators',
       { model: List, as: 'lists', include: ['cards'] },
+    ],
+    order: [
+      [{ model: List, as: 'lists' }, 'createdAt', 'ASC'],
+      [{ model: List, as: 'lists' }, { model: Card, as: 'cards' }, 'position', 'ASC'],
+      [{ model: List, as: 'lists' }, { model: Card, as: 'cards' }, 'createdAt', 'ASC'],
     ],
   });
 

@@ -249,8 +249,23 @@ export class TaskListComponent {
     if (!this.taskList) return;
 
     if (event.previousContainer === event.container) {
+      // Reorder within the same list: update UI first, then persist new position
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      return; 
+      const movedTask = event.container.data[event.currentIndex] as Task;
+      const payload: Task = { ...movedTask, listId: this.taskList.id, position: event.currentIndex } as Task;
+      this.cardService.updateCard(movedTask.id, payload).subscribe({
+        error: (err) => {
+          console.error('Erro ao reordenar card:', err);
+          // rollback UI
+          moveItemInArray(event.container.data, event.currentIndex, event.previousIndex);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Não foi possível reordenar a tarefa.',
+          });
+        },
+      });
+      return;
     }
 
     const movedTask = event.previousContainer.data[event.previousIndex] as Task;
@@ -261,7 +276,7 @@ export class TaskListComponent {
       event.currentIndex
     );
 
-    const updated: Task = { ...movedTask, listId: this.taskList.id } as Task;
+    const updated: Task = { ...movedTask, listId: this.taskList.id, position: event.currentIndex } as Task;
     this.cardService.updateCard(movedTask.id, updated).subscribe({
       next: () => {
         const list = this.taskList as TaskList;
