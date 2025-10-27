@@ -29,6 +29,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Task } from '../../types/task';
+import { SocketService } from '../../services/socket.service';
 import { DialogModule } from 'primeng/dialog';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
@@ -81,7 +82,8 @@ export class TaskListComponent {
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private cardService: CardService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private socketService: SocketService
   ) {}
 
   ngOnInit() {
@@ -202,6 +204,16 @@ export class TaskListComponent {
       title: this.formTask.value.title!,
       listId: this.taskList!.id,
     };
+
+    this.socketService.onCardDeleted().subscribe((deletedCard: Task) => {
+      if (!this.taskList) return;
+      if (deletedCard.listId === this.taskList.id) {
+        this.taskList.tasks = (this.taskList.tasks || []).filter(
+          (t) => t.id !== deletedCard.id
+        );
+        this.cdr.markForCheck();
+      }
+    });
     this.cardService.createCard(newCard as Task).subscribe({
       next: (task) => {
         if (!this.taskList) return;

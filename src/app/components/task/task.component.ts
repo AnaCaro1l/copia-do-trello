@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CardService } from '../../services/card.service';
 import { DialogModule } from 'primeng/dialog';
+import { MessageService } from 'primeng/api';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-task',
@@ -22,7 +24,7 @@ export class TaskComponent {
   isEditingTitle = false;
   tempTitle = '';
 
-  constructor(private cardService: CardService) {}
+  constructor(private cardService: CardService, private messageService: MessageService, private socketService: SocketService) {}
 
   onCheckboxChange() {
     const newCard = { ...this.task };
@@ -71,6 +73,20 @@ export class TaskComponent {
       next: () => {},
       error: (err) => {
         console.error('Erro ao atualizar descrição da tarefa:', err);
+      },
+    });
+  }
+
+  deleteTask() {
+    if (!this.task) return;
+    this.cardService.deleteCard(this.task.id).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Task deleted successfully' });
+        this.displayEditDialog = false;
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error deleting task' });
+        this.displayEditDialog = false;
       },
     });
   }

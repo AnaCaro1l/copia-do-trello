@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { TaskList } from '../types/tasklist';
 import { Frame } from '../types/frame';
 import { AuthService, AuthSession } from './auth.service';
+import { Task } from '../types/task';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,19 @@ export class SocketService {
 
   constructor(private authService: AuthService) {
     this.socket = io(environment.apiUrl);
+
+    this.socket.on('connect', () => {
+      console.log('[SocketService] connected', this.socket.id);
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('[SocketService] disconnected', reason);
+    });
+
+    const current = this.getCurrentUser();
+    if (current) {
+      this.connect();
+    }
   }
 
   getCurrentUser() {
@@ -45,7 +59,14 @@ export class SocketService {
   }
 
   joinWorkspace(workspaceId: number): void {
-    this.socket.emit('join_workspace', workspaceId);
+    if (this.socket.connected) {
+      this.socket.emit('join_workspace', workspaceId);
+    } else {
+      // wait for connection then join
+      this.socket.once('connect', () => {
+        this.socket.emit('join_workspace', workspaceId);
+      });
+    }
   }
 
   leaveWorkspace(workspaceId: number): void {
@@ -64,6 +85,15 @@ export class SocketService {
     return new Observable<Frame>((observer) => {
       this.socket.on('show_new_workspace', (frame: Frame) => {
         observer.next(frame);
+      });
+    });
+  }
+
+  onCardDeleted(): Observable<Task> {
+    return new Observable<Task>((observer) => {
+      this.socket.on('delete_card', (card: Task) => {
+        console.log('[SocketService] received delete_card', card);
+        observer.next(card);
       });
     });
   }
