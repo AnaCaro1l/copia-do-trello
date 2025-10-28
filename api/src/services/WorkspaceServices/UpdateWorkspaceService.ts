@@ -44,8 +44,12 @@ export const UpdateWorkspaceService = async ({
   let backgroundUrl = null;
   if (backgroundPath) {
     backgroundUrl = await uploadOnCloudinary(backgroundPath);
+    backgroundColor = null;
   }
 
+  if(backgroundColor) {
+    backgroundUrl = null;
+  }
   const updatedWorkspace = await workspace.update({
     name: name ? name : workspace.name,
     visibility: visibility ?? workspace.visibility,

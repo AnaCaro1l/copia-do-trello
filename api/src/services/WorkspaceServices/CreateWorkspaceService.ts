@@ -29,8 +29,13 @@ export const CreateWorkspaceService = async ({
   let backgroundUrl = null;
   if (backgroundPath) {
     backgroundUrl = await uploadOnCloudinary(backgroundPath);
+    backgroundColor = null;
   }
 
+  if (backgroundColor) {
+    backgroundUrl = null;
+  }
+  
   const workspace = await Workspace.create({
     name,
     visibility,
