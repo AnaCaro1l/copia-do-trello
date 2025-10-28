@@ -30,7 +30,7 @@ import {
 } from '@angular/forms';
 import { Task } from '../../types/task';
 import { SocketService } from '../../services/socket.service';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { DialogModule } from 'primeng/dialog';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
@@ -125,19 +125,79 @@ export class TaskListComponent {
       },
     ];
 
-    this.cardDeletedSub = this.socketService.onCardDeleted().subscribe((deletedCard: Task) => {
-      if (!this.taskList) return;
-      if (deletedCard.listId === this.taskList.id) {
-        this.taskList.tasks = (this.taskList.tasks || []).filter((t) => t.id !== deletedCard.id);
+    // Card deleted
+    this.cardDeletedSub = this.socketService
+      .onCardDeleted()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((deletedCard: Task) => {
+        if (!this.taskList) return;
+        if (deletedCard.listId === this.taskList.id) {
+          this.taskList.tasks = (this.taskList.tasks || []).filter((t) => t.id !== deletedCard.id);
+          this.cdr.markForCheck();
+        }
+      });
+
+    // Card created
+    this.socketService
+      .onCardCreated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((card: Task) => {
+        if (!this.taskList) return;
+        if (card.listId !== this.taskList.id) return;
+        if (!Array.isArray(this.taskList.tasks)) this.taskList.tasks = [];
+        const exists = this.taskList.tasks.some((t) => t.id === card.id);
+        if (!exists) {
+          this.taskList.tasks.push(card);
+          this.sortTasksByPosition();
+          this.cdr.markForCheck();
+        }
+      });
+
+    // Card updated (may include position or list change)
+    this.socketService
+      .onCardUpdated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((card: Task) => {
+        if (!this.taskList) return;
+
+        const isInThisList = card.listId === this.taskList.id;
+        const idx = (this.taskList.tasks || []).findIndex((t) => t.id === card.id);
+
+        if (isInThisList) {
+          if (idx > -1 && this.taskList.tasks) {
+            this.taskList.tasks[idx] = { ...this.taskList.tasks[idx], ...card };
+          } else {
+            if (!Array.isArray(this.taskList.tasks)) this.taskList.tasks = [];
+            this.taskList.tasks.push(card);
+          }
+          this.sortTasksByPosition();
+        } else {
+          // moved to another list: remove from here if exists
+          if (idx > -1 && this.taskList.tasks) {
+            this.taskList.tasks.splice(idx, 1);
+          }
+        }
         this.cdr.markForCheck();
-      }
-    });
+      });
+
+    // List updated (e.g., title changes by another user)
+    this.socketService
+      .onListUpdated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((list) => {
+        if (!this.taskList) return;
+        if (list.id !== this.taskList.id) return;
+        this.taskList = { ...this.taskList, ...list } as TaskList;
+        this.cdr.markForCheck();
+      });
   }
 
   private cardDeletedSub?: Subscription;
 
   ngOnDestroy() {
     this.cardDeletedSub?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get dropListId(): string {
@@ -221,11 +281,13 @@ export class TaskListComponent {
     };
     this.cardService.createCard(newCard as Task).subscribe({
       next: (task) => {
-        if (!this.taskList) return;
-        if (!Array.isArray(this.taskList.tasks)) {
-          this.taskList.tasks = [];
-        }
-        this.taskList.tasks.push(task);
+        // Antes: atualizávamos a UI localmente empurrando o card recém-criado.
+        // Agora os sockets (show_new_card) vão inserir o card para evitar duplicação.
+        // if (!this.taskList) return;
+        // if (!Array.isArray(this.taskList.tasks)) {
+        //   this.taskList.tasks = [];
+        // }
+        // this.taskList.tasks.push(task);
         this.formTask.reset();
         this.isEditMode.set(false);
       },
@@ -321,4 +383,11 @@ export class TaskListComponent {
       },
     });
   }
+
+  private sortTasksByPosition() {
+    if (!this.taskList || !Array.isArray(this.taskList.tasks)) return;
+    this.taskList.tasks.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  }
+
+  private destroy$ = new Subject<void>();
 }

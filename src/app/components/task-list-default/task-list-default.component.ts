@@ -53,7 +53,9 @@ export class TaskListDefaultComponent {
 
     this.listService.createList(newList as TaskList).subscribe({
       next: (list: TaskList) => {
-        this.onListCreated.emit(list);
+        // Antes: emitíamos o evento para o pai adicionar a lista imediatamente.
+        // Agora os sockets (show_new_list) irão adicionar a lista para evitar duplicação.
+        // this.onListCreated.emit(list);
         this.formTask.reset();
         this.isEditMode.set(false);
       },
