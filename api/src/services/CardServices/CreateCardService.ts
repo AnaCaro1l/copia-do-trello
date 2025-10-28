@@ -1,6 +1,8 @@
 import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { Card } from '../../models/Card';
+import { List } from '../../models/List';
+import { Workspace } from '../../models/Workspace';
 import uploadOnCloudinary from '../../utils/cloudinary';
 import { CardSchemas } from './schemas';
 import { Op } from 'sequelize';
@@ -29,12 +31,14 @@ export const CreateCardService = async ({
     media = await uploadOnCloudinary(mediaPath);
   }
 
-  const maxPosition = (await Card.max('position', { where: { listId } })) as
-    | number
+  const maxPosition = (await Card.max('position', { where: { listId } })) as   
     | null;
   const nextPosition =
+   
     Number.isFinite(maxPosition as number) && maxPosition !== null
+     
       ? (maxPosition as number) + 1
+     
       : 0;
 
   const card = await Card.create({
@@ -45,7 +49,7 @@ export const CreateCardService = async ({
     position: nextPosition,
   });
 
-  io.to(`workspace_${card.list.workspaceId}`).emit('show_new_card', card);
-
+    io.to(`workspace_${card.list.workspaceId}`).emit('show_new_card', card);
+  
   return card;
 };

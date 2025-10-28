@@ -1,6 +1,7 @@
 import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { List } from '../../models/List';
+import { Workspace } from '../../models/Workspace';
 
 interface Request {
   id: string;
@@ -13,6 +14,12 @@ export const UpdateListService = async ({
 }: Request): Promise<List> => {
   const list = await List.findOne({
     where: { id: id },
+    include: [
+      {
+        model: Workspace,
+        as: 'workspace',
+      },
+    ],
   });
 
   if (!list) {

@@ -1,4 +1,5 @@
 import { TaskList } from "./tasklist";
+import { User } from "./user";
 
 export interface Frame {
   id: number;
@@ -8,7 +9,7 @@ export interface Frame {
   backgroundUrl?: string | null;
   backgroundColor?: string | null;
   lists?: TaskList[] | null;
-  collaborators?: string[] | null;
+  collaborators?: User[] | null;
   visibility: 0 | 1 | false | true;
   favorite?: boolean | false;
 }
