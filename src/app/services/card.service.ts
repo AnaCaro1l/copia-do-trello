@@ -49,6 +49,7 @@ export class CardService {
     return {
       id: card.id,
       listId: card.listId,
+      position: typeof card.position === 'number' ? card.position : undefined,
       title: card.title,
       createdAt: card.createdAt ? new Date(card.createdAt) : new Date(),
       updatedAt: card.updatedAt ? new Date(card.updatedAt) : new Date(),
@@ -67,6 +68,7 @@ export class CardService {
       title: task.title,
       description: task.description,
       listId: task.listId,
+      position: typeof task.position === 'number' ? task.position : undefined,
       completed: task.completed,
       dueDate: task.dueDate,
       color: task.color,

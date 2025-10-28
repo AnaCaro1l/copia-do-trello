@@ -1,6 +1,7 @@
 export interface Task {
   id: number;
   listId: number;
+  position?: number;
   title: string;
   createdAt: Date;
   updatedAt: Date;

@@ -267,12 +267,14 @@ export class TaskListComponent {
 
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      event.container.data.forEach((t, idx) => (t.position = idx));
       const movedTask = event.container.data[event.currentIndex] as Task;
       const payload: Task = { ...movedTask, listId: this.taskList.id, position: event.currentIndex } as Task;
       this.cardService.updateCard(movedTask.id, payload).subscribe({
         error: (err) => {
           console.error('Erro ao reordenar card:', err);
           moveItemInArray(event.container.data, event.currentIndex, event.previousIndex);
+          event.container.data.forEach((t, idx) => (t.position = idx));
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
@@ -291,6 +293,9 @@ export class TaskListComponent {
       event.currentIndex
     );
 
+    event.container.data.forEach((t, idx) => (t.position = idx));
+    event.previousContainer.data.forEach((t, idx) => (t.position = idx));
+
     const updated: Task = { ...movedTask, listId: this.taskList.id, position: event.currentIndex } as Task;
     this.cardService.updateCard(movedTask.id, updated).subscribe({
       next: () => {
@@ -306,6 +311,8 @@ export class TaskListComponent {
           event.currentIndex,
           event.previousIndex
         );
+        event.container.data.forEach((t, idx) => (t.position = idx));
+        event.previousContainer.data.forEach((t, idx) => (t.position = idx));
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
