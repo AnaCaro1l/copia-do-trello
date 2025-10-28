@@ -1,0 +1,82 @@
+<p-dialog
+  [header]="header"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '360px', height: 'auto' }"
+  [draggable]="false"
+  [closable]="true"
+  [dismissableMask]="true"
+  [visible]="visible"
+  (visibleChange)="onVisibleChange($event)"
+>
+  <ng-template pTemplate="content">
+    <form [formGroup]="frameForm" class="flex flex-col gap-3">
+      <input
+        formControlName="name"
+        type="text"
+        placeholder="Nome do Quadro"
+        class="p-2 rounded-lg bg-transparent border border-gray-700 text-white w-full placeholder:!text-white/40 focus:outline-none"
+      />
+      <label for="state" class="text-white/80">Visibilidade</label>
+      <div class="card">
+        <p-selectButton
+          formControlName="visibility"
+          [options]="stateOptions"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+      <label for="state" class="text-white/80">Cor de fundo</label>
+      <div
+        class="flex items-center justify-center p-2 rounded-lg w-[40px]"
+        [style.background]="frameForm.value.backgroundColor"
+        (click)="inputColor?.click()"
+      >
+        <input
+          #inputColor
+          type="color"
+          name="color"
+          id="color"
+          class="h-0 w-0 opacity-0 absolute"
+          formControlName="backgroundColor"
+          (change)="onColorPicked()"
+        />
+        <lucide-angular
+          [img]="palette"
+          color="white"
+          size="20"
+        ></lucide-angular>
+      </div>
+      <label for="state" class="text-white/80">Escolha sua imagem de fundo</label>
+      <input
+        #fileInput
+        type="file"
+        accept=".png, .jpg, .jpeg"
+        (change)="onFileSelected($event)"
+        class="p-2 rounded-lg bg-transparent border border-gray-700 text-white w-full placeholder:!text-white/40 focus:outline-none"
+      />
+      <div *ngIf="selectedFileName as fname" class="text-xs text-white/60 mt-1 truncate" [title]="fname">
+        Arquivo selecionado: {{ fname }}
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button mat-flat-button color="warn" class="mr-2" (click)="onVisibleChange(false)" [disabled]="isCreating">
+      Cancelar
+    </button>
+    <button mat-flat-button [disabled]="frameForm.invalid || isCreating" (click)="submitCreate()">
+      <ng-container *ngIf="!isCreating; else creatingTpl">Criar</ng-container>
+    </button>
+    <ng-template #creatingTpl>
+      <div class="flex items-center gap-2">
+        <p-progressSpinner
+          styleClass="w-4 h-4"
+          strokeWidth="8"
+          fill="transparent"
+          animationDuration=".5s"
+        ></p-progressSpinner>
+        <span>Criando…</span>
+      </div>
+    </ng-template>
+  </ng-template>
+</p-dialog>

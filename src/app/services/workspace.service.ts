@@ -19,7 +19,7 @@ export class WorkspaceService {
       const form = new FormData();
       if (data.name !== undefined) form.append('name', String(data.name));
       if (data.visibility !== undefined) form.append('visibility', String(Number(data.visibility)));
-      if (data.backgroundColor !== undefined) form.append('backgroundColor', String(data.backgroundColor));
+      if (data.backgroundColor != null) form.append('backgroundColor', String(data.backgroundColor));
       form.append('backgroundPath', data.backgroundUrl as File);
 
       return this.http
@@ -51,7 +51,7 @@ export class WorkspaceService {
       const form = new FormData();
       if (data.name !== undefined) form.append('name', String(data.name));
       if (data.visibility !== undefined) form.append('visibility', String(Number(data.visibility)));
-      if (data.backgroundColor !== undefined) form.append('backgroundColor', String(data.backgroundColor));
+      if (data.backgroundColor != null) form.append('backgroundColor', String(data.backgroundColor));
       form.append('backgroundPath', data.backgroundUrl as File);
 
       return this.http

@@ -27,6 +27,8 @@ import { InviteService } from '../../services/invite.service';
 import { SocketService } from '../../services/socket.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
+import { DialogComponent } from "../shared/dialog/dialog.component";
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-frame',
@@ -45,7 +47,9 @@ import { FormsModule } from '@angular/forms';
     MatButtonModule,
     MatTooltip,
     FormsModule,
-  ],
+    DialogComponent,
+    MatButtonModule
+],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
   providers: [ConfirmationService, MessageService],
@@ -56,6 +60,9 @@ export class FrameComponent {
   readonly ellipsis = Ellipsis;
   readonly earth = Earth;
   readonly lockKeyhole = LockKeyhole;
+
+  display: boolean = false;
+  isCreating = false;
 
   @Input() frame!: Frame;
   editable: boolean = false;
@@ -91,6 +98,9 @@ export class FrameComponent {
           {
             label: 'Editar',
             icon: 'pi pi-pencil',
+            command: () => {
+              this.display = true;
+            }
           },
           {
             label: 'Excluir',
@@ -282,5 +292,44 @@ export class FrameComponent {
         this.visible = false;
       },
     });
+  }
+
+  handleCreate(payload: Partial<Frame> & { backgroundUrl?: File | string | null }) {
+    this.isCreating = true;
+
+    const data: Partial<Frame> & { backgroundUrl?: File | string | null } = {
+      name: payload.name,
+      // Normalize visibility coming from the dialog (0|1|boolean) to boolean for API
+      visibility:
+        typeof payload.visibility === 'boolean'
+          ? payload.visibility
+          : payload.visibility === 1,
+      backgroundColor: payload.backgroundColor,
+      backgroundUrl: payload.backgroundUrl ?? null,
+    };
+
+    this.workspaceService
+      .updateWorkspace(this.frame.id, data)
+      .pipe(finalize(() => (this.isCreating = false)))
+      .subscribe({
+        next: (workspace: Frame) => {
+          // reflect updates locally
+          this.frame = { ...this.frame, ...workspace };
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Quadro atualizado',
+            detail: 'As alterações foram salvas com sucesso.',
+          });
+          this.display = false;
+        },
+        error: (error) => {
+          console.error('Error creating workspace:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: (error?.error?.message || 'Falha ao salvar alterações.') as string,
+          });
+        },
+      });
   }
 }

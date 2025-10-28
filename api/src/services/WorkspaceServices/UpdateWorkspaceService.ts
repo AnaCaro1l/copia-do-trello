@@ -41,23 +41,49 @@ export const UpdateWorkspaceService = async ({
     }
   }
 
-  let backgroundUrl = null;
+  // Normalize incoming values from multipart/form-data (strings)
+  const normalizedVisibility: boolean | undefined =
+    typeof visibility === 'string'
+      ? visibility === '1' || visibility === 'true'
+      : visibility;
+  const normalizedBackgroundColor: string | null | undefined =
+    backgroundColor === 'null' || backgroundColor === ''
+      ? null
+      : backgroundColor;
+
+  // Build update payload explicitly so we can clear fields (set to null) when requested
+  const updateData: Partial<Workspace> & { updatedAt: Date } = {
+    updatedAt: new Date(),
+  } as any;
+
+  if (typeof name !== 'undefined') updateData.name = name as any;
+  if (typeof normalizedVisibility !== 'undefined') updateData.visibility = normalizedVisibility as any;
+
   if (backgroundPath) {
-    backgroundUrl = await uploadOnCloudinary(backgroundPath);
-    backgroundColor = null;
+    const newBackgroundUrl = await uploadOnCloudinary(backgroundPath);
+    updateData.backgroundUrl = newBackgroundUrl as any;
+    updateData.backgroundColor = null as any; // choosing image clears color
   }
 
-  if(backgroundColor) {
-    backgroundUrl = null;
+  if (typeof normalizedBackgroundColor !== 'undefined') {
+    updateData.backgroundColor = normalizedBackgroundColor as any;
+    if (normalizedBackgroundColor) {
+      updateData.backgroundUrl = null as any; // choosing color clears image
+    }
   }
+
   const updatedWorkspace = await workspace.update({
-    name: name ? name : workspace.name,
-    visibility: visibility ?? workspace.visibility,
-    backgroundUrl: backgroundUrl ? backgroundUrl : workspace.backgroundUrl,
-    backgroundColor: backgroundColor
-      ? backgroundColor
-      : workspace.backgroundColor,
-    updatedAt: new Date(),
+    name: updateData.name ?? workspace.name,
+    visibility: updateData.visibility ?? workspace.visibility,
+    backgroundUrl:
+      typeof updateData.backgroundUrl !== 'undefined'
+        ? (updateData.backgroundUrl as any)
+        : workspace.backgroundUrl,
+    backgroundColor:
+      typeof updateData.backgroundColor !== 'undefined'
+        ? (updateData.backgroundColor as any)
+        : workspace.backgroundColor,
+    updatedAt: updateData.updatedAt,
   });
 
   io.to(`user_${workspace.collaborators}`).emit(

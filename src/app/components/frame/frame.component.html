@@ -189,3 +189,11 @@
       </button>
   </ng-template>
 </p-dialog>
+
+<app-dialog
+  [(visible)]="display"
+  [header]="'Editar quadro'"
+  [isCreating]="isCreating"
+  (create)="handleCreate($event)"
+  [initialData]="frame"
+></app-dialog>
