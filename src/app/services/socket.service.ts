@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/enviroment.prod';
 import { Observable } from 'rxjs';
 import { TaskList } from '../types/tasklist';
 import { Frame } from '../types/frame';

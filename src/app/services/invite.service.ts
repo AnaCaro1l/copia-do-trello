@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/enviroment.prod';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
 import { WorkspaceService } from './workspace.service';
