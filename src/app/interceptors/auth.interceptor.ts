@@ -24,10 +24,8 @@ function getToken(): string | null {
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = getToken();
 
-  // Only attach to our API
   const isApiRequest = req.url.startsWith(environment.apiUrl);
   if (isApiRequest) {
-    // Always include credentials in case API uses cookies/sessions
     req = req.clone({ withCredentials: true });
 
     if (token) {

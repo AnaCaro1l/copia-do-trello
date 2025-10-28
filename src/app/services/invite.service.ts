@@ -30,7 +30,6 @@ export class InviteService {
   }
 
   validateInvite(status: string, inviteId: number) {
-    // Backend returns { message, invite }, not { valid }
     return this.http
       .post<{ message: string; invite: any }>(`${this.apiUrl}/invite/validate`, { status, inviteId })
       .pipe(map((res) => res.invite));

@@ -75,7 +75,6 @@ export class DialogComponent implements OnChanges {
     if (!value) return null;
     if (value instanceof File) return value.name;
     if (typeof value === 'string') {
-      // Try to extract a reasonable filename from a URL or path
       const parts = value.split('?')[0].split('#')[0].split('/');
       const last = parts[parts.length - 1];
       return last || value;
@@ -99,7 +98,6 @@ export class DialogComponent implements OnChanges {
   }
 
   onColorPicked() {
-    // When a color is chosen, clear the image
     this.frameForm.patchValue({ backgroundUrl: null });
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';
@@ -113,7 +111,6 @@ export class DialogComponent implements OnChanges {
 
   private resetForm() {
     this.frameForm.reset({ visibility: 1, backgroundColor: '#374151', name: '', backgroundUrl: null });
-    // Also clear the native file input if present
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';
     }

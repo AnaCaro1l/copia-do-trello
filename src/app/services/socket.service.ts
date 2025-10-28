@@ -62,7 +62,6 @@ export class SocketService {
     if (this.socket.connected) {
       this.socket.emit('join_workspace', workspaceId);
     } else {
-      // wait for connection then join
       this.socket.once('connect', () => {
         this.socket.emit('join_workspace', workspaceId);
       });
