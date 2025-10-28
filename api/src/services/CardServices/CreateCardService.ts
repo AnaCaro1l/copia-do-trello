@@ -31,17 +31,14 @@ export const CreateCardService = async ({
     media = await uploadOnCloudinary(mediaPath);
   }
 
-  const maxPosition = (await Card.max('position', { where: { listId } })) as   
+  const maxPosition = (await Card.max('position', { where: { listId } })) as
     | null;
   const nextPosition =
-   
     Number.isFinite(maxPosition as number) && maxPosition !== null
-     
       ? (maxPosition as number) + 1
-     
       : 0;
 
-  const card = await Card.create({
+  const newCard = await Card.create({
     title,
     description,
     listId,
@@ -49,7 +46,12 @@ export const CreateCardService = async ({
     position: nextPosition,
   });
 
-    io.to(`workspace_${card.list.workspaceId}`).emit('show_new_card', card);
-  
+  const card = await Card.findOne({
+    where: { id: newCard.id },
+    include: [{ model: List, as: 'list' }],
+  });
+
+  io.to(`workspace_${card.list.workspaceId}`).emit('show_new_card', card);
+
   return card;
 };
