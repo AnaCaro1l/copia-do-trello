@@ -3,7 +3,7 @@
   [cdkDragData]="task"
   *ngIf="task"
   (click)="displayEditDialog = true"
-  [ngStyle]="{ backgroundColor: task.coverColor || '#374151' }"
+  [ngStyle]="{ backgroundColor: task.color || '#374151' }"
   class="group rounded-lg flex items-center p-2 px-3 cursor-pointer hover:border-2"
 >
   <div
@@ -27,7 +27,7 @@
   [(visible)]="displayEditDialog"
   [modal]="true"
   [draggable]="false"
-  [style]="{  height: 'auto', minWidth: '30vw' }"
+  [style]="{ height: 'auto', minWidth: '30vw' }"
 >
   <ng-template pTemplate="content">
     <div class="w-full flex">
@@ -59,7 +59,28 @@
             />
           </ng-template>
         </div>
-
+        <label for="state" class="text-white/80">Cor de fundo</label>
+        <div
+          class="flex items-center justify-center p-2 rounded-lg w-[40px]"
+          [style.background]="task!.color || '#374151'"
+          (click)="inputColor?.click()"
+        >
+          <input
+            #inputColor
+            type="color"
+            name="coverColor"
+            id="coverColor"
+            class="h-0 w-0 opacity-0 absolute"
+            [(ngModel)]="task!.color"
+            (ngModelChange)="onColorPicked($event)"
+            aria-label="Selecionar cor de fundo"
+          />
+          <lucide-angular
+            [img]="palette"
+            color="white"
+            size="20"
+          ></lucide-angular>
+        </div>
         <div class="flex flex-col gap-2 w-full">
           <label class="text-white/70 text-sm">Descrição</label>
           <textarea

@@ -10,5 +10,5 @@ export interface Task {
   description: string | null;
   comments: string[];
   coverImageUrl: string | null;
-  coverColor: string | null;
+  color: string | null;
 }
