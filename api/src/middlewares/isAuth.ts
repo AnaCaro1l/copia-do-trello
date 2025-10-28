@@ -4,7 +4,6 @@ import { AppError } from '../errors/AppError';
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
-  console.log(authHeader);
   if (!authHeader) {
     throw new AppError('Sessão Expirada', 401);
   }

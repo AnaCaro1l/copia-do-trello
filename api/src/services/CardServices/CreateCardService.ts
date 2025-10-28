@@ -29,7 +29,6 @@ export const CreateCardService = async ({
     media = await uploadOnCloudinary(mediaPath);
   }
 
-  // position: append to the end of the list
   const maxPosition = (await Card.max('position', { where: { listId } })) as number | null;
   const nextPosition = Number.isFinite(maxPosition as number) && maxPosition !== null ? (maxPosition as number) + 1 : 0;
 
