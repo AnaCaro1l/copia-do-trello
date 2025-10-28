@@ -41,7 +41,6 @@ export const UpdateWorkspaceService = async ({
     }
   }
 
-  // Normalize incoming values from multipart/form-data (strings)
   const normalizedVisibility: boolean | undefined =
     typeof visibility === 'string'
       ? visibility === '1' || visibility === 'true'
@@ -51,7 +50,6 @@ export const UpdateWorkspaceService = async ({
       ? null
       : backgroundColor;
 
-  // Build update payload explicitly so we can clear fields (set to null) when requested
   const updateData: Partial<Workspace> & { updatedAt: Date } = {
     updatedAt: new Date(),
   } as any;
@@ -62,13 +60,13 @@ export const UpdateWorkspaceService = async ({
   if (backgroundPath) {
     const newBackgroundUrl = await uploadOnCloudinary(backgroundPath);
     updateData.backgroundUrl = newBackgroundUrl as any;
-    updateData.backgroundColor = null as any; // choosing image clears color
+    updateData.backgroundColor = null as any; 
   }
 
   if (typeof normalizedBackgroundColor !== 'undefined') {
     updateData.backgroundColor = normalizedBackgroundColor as any;
     if (normalizedBackgroundColor) {
-      updateData.backgroundUrl = null as any; // choosing color clears image
+      updateData.backgroundUrl = null as any; 
     }
   }
 
