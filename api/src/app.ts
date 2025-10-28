@@ -10,12 +10,19 @@ import { Server } from 'socket.io';
 
 const app = express();
 const port = 3333;
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:4200'
+]
+
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}
 app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-  })
+  cors((corsOptions))
 );
 
 app.use(express.json());
@@ -51,10 +58,7 @@ app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  },
+  cors: corsOptions,
 });
 
 io.on('connection', (socket) => {
