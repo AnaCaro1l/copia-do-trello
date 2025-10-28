@@ -16,7 +16,7 @@ export const DeleteCardService = async (id: string): Promise<void> => {
     throw new AppError('Lista do card não encontrada');
   }
 
-  if (list.workspace.collaborators.length > 0) {
+  if (list.workspace.collaborators && list.workspace.collaborators.length > 0) {
     io.to(`workspace_${list.workspaceId}`).emit('delete_card', card);
   }
   await card.destroy();
