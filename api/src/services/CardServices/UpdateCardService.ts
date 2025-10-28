@@ -4,6 +4,8 @@ import uploadOnCloudinary from '../../utils/cloudinary';
 import { sequelize } from '../../database';
 import { Op } from 'sequelize';
 import { AppError } from '../../errors/AppError';
+import { List } from '../../models/List';
+import { Workspace } from '../../models/Workspace';
 
 interface Request {
   title?: string;
@@ -28,7 +30,16 @@ export const UpdateCardService = async ({
   dueDate,
   color,
 }: Request): Promise<Card> => {
-  const card = await Card.findByPk(id);
+  const card = await Card.findOne({
+    where: { id: id },
+    include: [
+      {
+        model: List,
+        as: 'list',
+        include: [{ model: Workspace, as: 'workspace' }],
+      },
+    ],
+  });
   if (!card) {
     throw new AppError('Card não encontrado');
   }
@@ -157,8 +168,10 @@ export const UpdateCardService = async ({
     );
   });
 
-  if (card.list.workspace.collaborators.length > 0) {
-    io.to(`workspace_${card.list.workspaceId}`).emit('show_updated_card', updatedCard);
-  }
+  io.to(`workspace_${card.list.workspaceId}`).emit(
+    'show_updated_card',
+    updatedCard
+  );
+
   return updatedCard;
 };

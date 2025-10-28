@@ -1,6 +1,8 @@
 import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { Card } from '../../models/Card';
+import { List } from '../../models/List';
+import { Workspace } from '../../models/Workspace';
 import uploadOnCloudinary from '../../utils/cloudinary';
 import { CardSchemas } from './schemas';
 import { Op } from 'sequelize';
@@ -30,10 +32,15 @@ export const CreateCardService = async ({
   }
 
   // position: append to the end of the list
-  const maxPosition = (await Card.max('position', { where: { listId } })) as number | null;
-  const nextPosition = Number.isFinite(maxPosition as number) && maxPosition !== null ? (maxPosition as number) + 1 : 0;
+  const maxPosition = (await Card.max('position', { where: { listId } })) as
+    | number
+    | null;
+  const nextPosition =
+    Number.isFinite(maxPosition as number) && maxPosition !== null
+      ? (maxPosition as number) + 1
+      : 0;
 
-  const card = await Card.create({
+  const newCard = await Card.create({
     title,
     description,
     listId,
@@ -41,9 +48,23 @@ export const CreateCardService = async ({
     position: nextPosition,
   });
 
-  if (card.list.workspace.collaborators.length > 0) {
-    io.to(`workspace_${card.list.workspaceId}`).emit('show_new_card', card);
-  }
+  const card = await Card.findOne({
+    where: { id: newCard.id },
+    include: [
+      {
+        model: List,
+        as: 'list',
+        include: [
+          {
+            model: Workspace,
+            as: 'workspace',
+          },
+        ],
+      },
+    ],
+  });
+
+  io.to(`workspace_${card.list.workspaceId}`).emit('show_new_card', card);
 
   return card;
 };

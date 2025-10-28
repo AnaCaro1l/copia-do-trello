@@ -1,6 +1,7 @@
 import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { List } from '../../models/List';
+import { Workspace } from '../../models/Workspace';
 import { ListSchemas } from './schemas';
 
 interface Request {
@@ -18,13 +19,17 @@ export const CreateListService = async ({
     throw new AppError('Área de trabalho não encontrada');
   }
 
-  const list = await List.create({
+  const newList = await List.create({
     title,
     workspaceId,
   });
 
-  if(list.workspace.collaborators.length > 0) {
-    io.to(`workspace_${workspaceId}`).emit('show_new_list', list);
-  }
+  const list = await List.findOne({
+    where: { id: newList.id },
+    include: [{ model: Workspace, as: 'workspace' }],
+  });
+
+  io.to(`workspace_${workspaceId}`).emit('show_new_list', list);
+
   return list;
 };

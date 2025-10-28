@@ -1,6 +1,7 @@
 import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { List } from '../../models/List';
+import { Workspace } from '../../models/Workspace';
 
 interface Request {
   id: string;
@@ -13,6 +14,12 @@ export const UpdateListService = async ({
 }: Request): Promise<List> => {
   const list = await List.findOne({
     where: { id: id },
+    include: [
+      {
+        model: Workspace,
+        as: 'workspace',
+      },
+    ],
   });
 
   if (!list) {
@@ -24,12 +31,7 @@ export const UpdateListService = async ({
     updatedAt: new Date(),
   });
 
-  if (list.workspace.collaborators.length > 0) {
-    io.to(`workspace_${list.workspaceId}`).emit(
-      'show_updated_list',
-      updatedList
-    );
-  }
+  io.to(`workspace_${list.workspaceId}`).emit('show_updated_list', updatedList);
 
   return updatedList;
 };

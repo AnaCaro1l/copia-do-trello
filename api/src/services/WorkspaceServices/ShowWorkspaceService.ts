@@ -3,6 +3,7 @@ import { Workspace } from '../../models/Workspace';
 import { List } from '../../models/List';
 import { WorkspaceUser } from '../../models/WorkspaceUser';
 import { Card } from '../../models/Card';
+import { User } from '../../models/User';
 import { AppError } from '../../errors/AppError';
 
 interface Request {
@@ -17,7 +18,7 @@ export const ShowWorkspaceService = async ({
   const workspace = await Workspace.findOne({
     where: { id: id },
     include: [
-      'collaborators',
+      { model: User, as: 'collaborators', attributes: ['id','name','email'], through: { attributes: [] } },
       { model: List, as: 'lists', include: ['cards'] },
     ],
     order: [

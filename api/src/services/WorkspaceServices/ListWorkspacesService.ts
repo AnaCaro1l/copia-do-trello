@@ -1,6 +1,7 @@
 import { List } from '../../models/List';
 import { Workspace } from '../../models/Workspace';
 import { Op } from 'sequelize';
+import { User } from '../../models/User';
 
 export const ListWorkspacesServices = async (
   userId: number
@@ -14,7 +15,8 @@ export const ListWorkspacesServices = async (
     },
     include: [
       {
-        association: 'collaborators',
+        model: User,
+        as: 'collaborators',
         attributes: ['id', 'name', 'email'],
         through: { attributes: [] },
         required: false,

@@ -2,9 +2,13 @@ import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { Card } from '../../models/Card';
 import { List } from '../../models/List';
+import { Workspace } from '../../models/Workspace';
 
 export const DeleteListService = async (id: string): Promise<void> => {
-  const list = await List.findByPk(id);
+  const list = await List.findOne({
+    where: { id: id },
+    include: [{ model: Workspace, as: 'workspace' }],
+  });
 
   if (!list) {
     throw new AppError('Lista não encontrada');
@@ -20,9 +24,7 @@ export const DeleteListService = async (id: string): Promise<void> => {
     await card.destroy();
   }
 
-  if (list.workspace.collaborators.length > 0) {
-    io.to(`workspace_${list.workspaceId}`).emit('delete_list', list);
-  }
+  io.to(`workspace_${list.workspaceId}`).emit('delete_list', list);
 
   await list.destroy();
 };
