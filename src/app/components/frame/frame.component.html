@@ -93,9 +93,11 @@
     </div>
     }
     <div class="snap-start">
+      <!-- Antes: o child emitia onListCreated e atualizávamos a UI localmente.
+           Agora os sockets (show_new_list) já cuidam disso para evitar duplicação. -->
       <app-task-list-default
         [workspaceId]="frame.id"
-        (onListCreated)="onListCreated($event)"
+        
       ></app-task-list-default>
     </div>
   </div>
