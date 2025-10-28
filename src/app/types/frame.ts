@@ -8,7 +8,7 @@ export interface Frame {
   backgroundUrl?: string | null;
   backgroundColor?: string | null;
   lists?: TaskList[] | null;
-  members?: string[] | null;
+  collaborators?: string[] | null;
   visibility: 0 | 1 | false | true;
   favorite?: boolean | false;
 }

@@ -181,7 +181,7 @@ export class TaskListComponent {
 
       accept: () => {
         this.messageService.add({
-          severity: 'info',
+          severity: 'success',
           summary: 'Sucesso',
           detail: 'Lista excluída',
         });

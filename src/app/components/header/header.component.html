@@ -38,7 +38,7 @@
       </button>
       <p-avatar
         (click)="op.toggle($event)"
-        label="U"
+        label="{{ getCurrentUser()?.name.charAt(0) | uppercase }}"
         styleClass="mr-4 ml-2 cursor-pointer"
         matTooltip="Perfil"
         [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }"
@@ -53,7 +53,7 @@
     <div class="flex flex-col gap-3">
       <div class="flex items-center gap-3">
         <p-avatar
-          label="U"
+          label="{{ getCurrentUser()?.name.charAt(0) | uppercase }}"
           styleClass="mr-2"
           [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }"
           shape="circle"
