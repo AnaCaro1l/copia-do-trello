@@ -23,7 +23,7 @@ function getToken(): string | null {
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = getToken();
-
+  console.log(token);
   const isApiRequest = req.url.startsWith(environment.apiUrl);
   if (isApiRequest) {
     req = req.clone({ withCredentials: true });
