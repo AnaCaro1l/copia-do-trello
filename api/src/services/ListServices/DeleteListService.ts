@@ -20,7 +20,9 @@ export const DeleteListService = async (id: string): Promise<void> => {
     await card.destroy();
   }
 
-  io.to(`workspace_${list.workspaceId}`).emit('delete_list', list);
+  if (list.workspace.collaborators.length > 0) {
+    io.to(`workspace_${list.workspaceId}`).emit('delete_list', list);
+  }
 
   await list.destroy();
 };

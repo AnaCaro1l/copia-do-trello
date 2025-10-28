@@ -41,7 +41,9 @@ export const CreateCardService = async ({
     position: nextPosition,
   });
 
-  io.to(`workspace_${card.listId}`).emit('show_new_card', card);
+  if (card.list.workspace.collaborators.length > 0) {
+    io.to(`workspace_${card.list.workspaceId}`).emit('show_new_card', card);
+  }
 
   return card;
 };

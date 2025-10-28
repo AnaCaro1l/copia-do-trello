@@ -157,6 +157,8 @@ export const UpdateCardService = async ({
     );
   });
 
-  io.to(`workspace_${card.listId}`).emit('show_updated_card', updatedCard);
+  if (card.list.workspace.collaborators.length > 0) {
+    io.to(`workspace_${card.list.workspaceId}`).emit('show_updated_card', updatedCard);
+  }
   return updatedCard;
 };

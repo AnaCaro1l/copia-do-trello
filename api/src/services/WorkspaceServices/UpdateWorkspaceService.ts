@@ -55,18 +55,19 @@ export const UpdateWorkspaceService = async ({
   } as any;
 
   if (typeof name !== 'undefined') updateData.name = name as any;
-  if (typeof normalizedVisibility !== 'undefined') updateData.visibility = normalizedVisibility as any;
+  if (typeof normalizedVisibility !== 'undefined')
+    updateData.visibility = normalizedVisibility as any;
 
   if (backgroundPath) {
     const newBackgroundUrl = await uploadOnCloudinary(backgroundPath);
     updateData.backgroundUrl = newBackgroundUrl as any;
-    updateData.backgroundColor = null as any; 
+    updateData.backgroundColor = null as any;
   }
 
   if (typeof normalizedBackgroundColor !== 'undefined') {
     updateData.backgroundColor = normalizedBackgroundColor as any;
     if (normalizedBackgroundColor) {
-      updateData.backgroundUrl = null as any; 
+      updateData.backgroundUrl = null as any;
     }
   }
 
@@ -84,10 +85,12 @@ export const UpdateWorkspaceService = async ({
     updatedAt: updateData.updatedAt,
   });
 
-  io.to(`user_${workspace.collaborators}`).emit(
-    'show_updated_workspace',
-    updatedWorkspace
-  );
+  if (workspace.collaborators.length > 0) {
+    io.to(`user_${workspace.collaborators}`).emit(
+      'show_updated_workspace',
+      updatedWorkspace
+    );
+  }
 
   return updatedWorkspace;
 };

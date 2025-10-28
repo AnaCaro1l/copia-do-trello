@@ -24,7 +24,12 @@ export const UpdateListService = async ({
     updatedAt: new Date(),
   });
 
-  io.to(`workspace_${list.workspaceId}`).emit('show_updated_list', updatedList);
+  if (list.workspace.collaborators.length > 0) {
+    io.to(`workspace_${list.workspaceId}`).emit(
+      'show_updated_list',
+      updatedList
+    );
+  }
 
   return updatedList;
 };
