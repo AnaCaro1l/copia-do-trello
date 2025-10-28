@@ -14,25 +14,62 @@ export class CardService {
 
   createCard(card: Task) {
     return this.http
-      .post<{ message: string; card: Task }>(`${this.apiUrl}/card`, card)
-      .pipe(map((res) => res.card));
+      .post<{ message: string; card: any }>(`${this.apiUrl}/card`, card)
+      .pipe(
+        map((res) => this.mapServerCardToTask(res.card))
+      );
   }
 
   getCards(listId: number) {
     return this.http
-      .get<{ message: string; cards: Task[] }>(`${this.apiUrl}/cards/${listId}`)
-      .pipe(map((res) => res.cards));
+      .get<{ message: string; cards: any[] }>(`${this.apiUrl}/cards/${listId}`)
+      .pipe(
+        map((res) => res.cards.map((c) => this.mapServerCardToTask(c)))
+      );
   }
 
   getCardById(id: number) {
-    return this.http.get<Task>(`${this.apiUrl}/card/${id}`);
+    return this.http
+      .get<{ message: string; card: any }>(`${this.apiUrl}/card/${id}`)
+      .pipe(map((res) => this.mapServerCardToTask(res.card)));
   }
 
   updateCard(id: number, card: Task) {
-    return this.http.put<Task>(`${this.apiUrl}/card/${id}`, card);
+    const payload = this.mapTaskToServerCard(card);
+    return this.http
+      .put<{ message: string; card: any }>(`${this.apiUrl}/card/${id}`, payload)
+      .pipe(map((res) => this.mapServerCardToTask(res.card)));
   }
 
   deleteCard(id: number) {
     return this.http.delete<Task>(`${this.apiUrl}/card/${id}`);
+  }
+
+  private mapServerCardToTask(card: any): Task {
+    return {
+      id: card.id,
+      listId: card.listId,
+      title: card.title,
+      createdAt: card.createdAt ? new Date(card.createdAt) : new Date(),
+      updatedAt: card.updatedAt ? new Date(card.updatedAt) : new Date(),
+      completed: !!card.completed,
+      tags: card.tags ?? null, 
+      dueDate: card.dueDate ? new Date(card.dueDate) : null,
+      description: card.description ?? null,
+      comments: card.comments ?? [],
+      coverImageUrl: card.media ?? null,
+      color: card.color ?? null,
+    } as Task;
+  }
+
+  private mapTaskToServerCard(task: Task): any {
+    return {
+      title: task.title,
+      description: task.description,
+      listId: task.listId,
+      completed: task.completed,
+      dueDate: task.dueDate,
+      color: task.color,
+    };
   }
 }

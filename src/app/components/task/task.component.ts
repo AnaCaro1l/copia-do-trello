@@ -8,15 +8,17 @@ import { CardService } from '../../services/card.service';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 import { SocketService } from '../../services/socket.service';
+import { LucideAngularModule, Palette } from "lucide-angular";
 
 @Component({
   selector: 'app-task',
   standalone: true,
-  imports: [CommonModule, FormsModule, CheckboxModule, DragDropModule, DialogModule],
+  imports: [CommonModule, FormsModule, CheckboxModule, DragDropModule, DialogModule, LucideAngularModule ],
   templateUrl: './task.component.html',
   styleUrl: './task.component.scss',
 })
 export class TaskComponent {
+  readonly palette = Palette;
   @Input() task: Task | null = null;
 
   displayEditDialog: boolean = false;
@@ -87,6 +89,20 @@ export class TaskComponent {
       error: (err) => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error deleting task' });
         this.displayEditDialog = false;
+      },
+    });
+  }
+
+  onColorPicked(value: string) {
+    if (!this.task) return;
+    const previous = this.task.color;
+    this.task.color = value || '#374151';
+
+    this.cardService.updateCard(this.task.id, { ...this.task, color: this.task.color } as Task).subscribe({
+      next: () => {},
+      error: (err) => {
+        console.error('Erro ao atualizar cor de fundo da tarefa:', err);
+        this.task!.color = previous;
       },
     });
   }
