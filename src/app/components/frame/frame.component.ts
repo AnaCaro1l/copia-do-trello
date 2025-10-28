@@ -3,7 +3,7 @@ import { Frame } from '../../types/frame';
 import { CommonModule } from '@angular/common';
 import { TaskListComponent } from '../task-list/task-list.component';
 import { AvatarModule } from 'primeng/avatar';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { OverlayPanel, OverlayPanelModule } from 'primeng/overlaypanel';
 import { AuthService, AuthSession } from '../../services/auth.service';
 import {
   LucideAngularModule,
@@ -27,8 +27,12 @@ import { InviteService } from '../../services/invite.service';
 import { SocketService } from '../../services/socket.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
-import { DialogComponent } from "../shared/dialog/dialog.component";
+import { DialogComponent } from '../shared/dialog/dialog.component';
 import { finalize } from 'rxjs';
+import { User } from '../../types/user';
+import { UserService } from '../../services/user.service';
+
+type Collaborator = string | User;
 
 @Component({
   selector: 'app-frame',
@@ -48,8 +52,8 @@ import { finalize } from 'rxjs';
     MatTooltip,
     FormsModule,
     DialogComponent,
-    MatButtonModule
-],
+    MatButtonModule,
+  ],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
   providers: [ConfirmationService, MessageService],
@@ -74,6 +78,9 @@ export class FrameComponent {
 
   items: MenuItem[] | undefined;
 
+  collaborators: Collaborator[] = [];
+  selectedCollaborator: User | null = null;
+
   constructor(
     private authService: AuthService,
     private workspaceService: WorkspaceService,
@@ -81,12 +88,15 @@ export class FrameComponent {
     private messageService: MessageService,
     private router: Router,
     private inviteService: InviteService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private userService: UserService
   ) {}
 
   ngOnInit() {
     console.log('FrameComponent initialized with frame:', this.frame);
 
+  this.collaborators = (this.frame.collaborators || []) as Collaborator[];
+    console.log('Collaborators:', this.collaborators);
     if (this.frame?.id) {
       this.socketService.joinWorkspace(this.frame.id);
     }
@@ -100,7 +110,7 @@ export class FrameComponent {
             icon: 'pi pi-pencil',
             command: () => {
               this.display = true;
-            }
+            },
           },
           {
             label: 'Excluir',
@@ -120,6 +130,49 @@ export class FrameComponent {
         );
       }
     });
+  }
+
+  getInitial(item: string | User | null | undefined): string {
+    const name = typeof item === 'string' ? item : item?.name ?? item?.email ?? '';
+    const initial = (name || '').trim().charAt(0);
+    return initial ? initial.toUpperCase() : '?';
+  }
+
+  openCollaboratorPanel(event: Event, item: Collaborator, panel: OverlayPanel) {
+    // If it's already a full user object with id, use it directly
+    if (typeof item === 'object' && item && 'id' in item && typeof item.id === 'number') {
+      this.selectedCollaborator = item as User;
+      panel.toggle(event);
+      return;
+    }
+
+    // If item is a string, try to interpret as an id to fetch details
+    if (typeof item === 'string') {
+      const id = Number(item);
+      if (!Number.isNaN(id) && id > 0) {
+        this.userService.showUser(id).subscribe({
+          next: (u) => {
+            // Normalize to app User type shape
+            this.selectedCollaborator = {
+              id: u.id,
+              name: (u as any).name,
+              email: (u as any).email,
+            } as User;
+            panel.toggle(event);
+          },
+          error: () => {
+            // Fallback: open with minimal info from string
+            this.selectedCollaborator = null;
+            panel.toggle(event);
+          },
+        });
+        return;
+      }
+    }
+
+    // Fallback for unrecognized format: just open panel with no selected collaborator
+    this.selectedCollaborator = null;
+    panel.toggle(event);
   }
 
   get dropListIds(): string[] {
@@ -207,7 +260,7 @@ export class FrameComponent {
           next: () => {
             this.router.navigate(['/home']);
             this.messageService.add({
-              severity: 'info',
+              severity: 'success',
               summary: 'Sucesso',
               detail: 'Workspace excluído',
             });
@@ -294,7 +347,9 @@ export class FrameComponent {
     });
   }
 
-  handleCreate(payload: Partial<Frame> & { backgroundUrl?: File | string | null }) {
+  handleCreate(
+    payload: Partial<Frame> & { backgroundUrl?: File | string | null }
+  ) {
     this.isCreating = true;
 
     const data: Partial<Frame> & { backgroundUrl?: File | string | null } = {
@@ -325,7 +380,8 @@ export class FrameComponent {
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
-            detail: (error?.error?.message || 'Falha ao salvar alterações.') as string,
+            detail: (error?.error?.message ||
+              'Falha ao salvar alterações.') as string,
           });
         },
       });
