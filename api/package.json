@@ -9,7 +9,6 @@
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
     "worker": "ts-node src/workers/uploadWorker.ts",
     "start": "nodemon dist/server.js"
-
   },
   "keywords": [],
   "author": "",
@@ -31,6 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "mysql2": "^3.15.2",
+    "nodemon": "^3.1.10",
     "sequelize": "^6.37.7",
     "sequelize-typescript": "^2.1.6",
     "socket.io": "^4.8.1",
