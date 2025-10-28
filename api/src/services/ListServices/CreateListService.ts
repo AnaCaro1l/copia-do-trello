@@ -23,8 +23,7 @@ export const CreateListService = async ({
     workspaceId,
   });
 
-  if (list.workspace.collaborators && list.workspace.collaborators.length > 0) {
-    io.to(`workspace_${workspaceId}`).emit('show_new_list', list);
-  }
+  io.to(`workspace_${workspaceId}`).emit('show_new_list', list);
+
   return list;
 };
