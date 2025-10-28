@@ -36,6 +36,7 @@ export class DialogComponent implements OnChanges {
 
   @Input() isCreating = false;
   @Input() initialData: Frame | null = null;
+  @Input() submitLabel: string = 'Criar';
   @Output() create = new EventEmitter<any>();
 
   readonly palette = Palette;
@@ -61,7 +62,7 @@ export class DialogComponent implements OnChanges {
         visibility: (typeof this.initialData.visibility === 'boolean'
           ? (this.initialData.visibility ? 1 : 0)
           : (this.initialData.visibility ?? 1)),
-        backgroundColor: this.initialData.backgroundColor ?? '#374151',
+        backgroundColor: this.initialData.backgroundColor ?? null,
         backgroundUrl: (this.initialData.backgroundUrl ?? null) as File | string | null,
       });
     }

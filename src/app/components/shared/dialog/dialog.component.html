@@ -65,7 +65,7 @@
       Cancelar
     </button>
     <button mat-flat-button [disabled]="frameForm.invalid || isCreating" (click)="submitCreate()">
-      <ng-container *ngIf="!isCreating; else creatingTpl">Criar</ng-container>
+      <ng-container *ngIf="!isCreating; else creatingTpl">{{ submitLabel }}</ng-container>
     </button>
     <ng-template #creatingTpl>
       <div class="flex items-center gap-2">
