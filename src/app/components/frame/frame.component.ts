@@ -28,7 +28,7 @@ import { SocketService } from '../../services/socket.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../shared/dialog/dialog.component';
-import { finalize } from 'rxjs';
+import { Subject, finalize, takeUntil } from 'rxjs';
 import { User } from '../../types/user';
 import { UserService } from '../../services/user.service';
 
@@ -123,13 +123,62 @@ export class FrameComponent {
       },
     ];
 
-    this.socketService.onListDeleted().subscribe((deletedList: TaskList) => {
-      if (Array.isArray(this.frame.lists)) {
-        this.frame.lists = this.frame.lists.filter(
-          (list) => list.id !== deletedList.id
-        );
-      }
-    });
+    this.socketService
+      .onListDeleted()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((deletedList: TaskList) => {
+        if (Array.isArray(this.frame.lists)) {
+          this.frame.lists = this.frame.lists.filter(
+            (list) => list.id !== deletedList.id
+          );
+        }
+      });
+
+    // New lists created in this workspace
+    this.socketService
+      .onListCreated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((list: TaskList) => {
+        if (list.workspaceId !== this.frame.id) return;
+        if (!Array.isArray(this.frame.lists)) this.frame.lists = [];
+        // avoid duplicates
+        const exists = this.frame.lists.some((l) => l.id === list.id);
+        if (!exists) this.frame.lists.push(list);
+      });
+
+    // Lists updated in this workspace
+    this.socketService
+      .onListUpdated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((list: TaskList) => {
+        if (list.workspaceId !== this.frame.id) return;
+        if (!Array.isArray(this.frame.lists)) return;
+        const idx = this.frame.lists.findIndex((l) => l.id === list.id);
+        if (idx > -1) this.frame.lists[idx] = { ...this.frame.lists[idx], ...list };
+      });
+
+    // Frame (workspace) updated anywhere (user room event)
+    this.socketService
+      .onFrameUpdated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((updated) => {
+        if (!updated || updated.id !== this.frame.id) return;
+        this.frame = { ...this.frame, ...updated };
+      });
+
+    // Frame (workspace) deleted elsewhere
+    this.socketService
+      .onFrameDeleted()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((deletedId) => {
+        if (deletedId !== this.frame.id) return;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Quadro removido',
+          detail: 'Este quadro foi excluído por outro colaborador.',
+        });
+        this.router.navigate(['/home']);
+      });
   }
 
   getInitial(item: string | User | null | undefined): string {
@@ -139,20 +188,17 @@ export class FrameComponent {
   }
 
   openCollaboratorPanel(event: Event, item: Collaborator, panel: OverlayPanel) {
-    // If it's already a full user object with id, use it directly
     if (typeof item === 'object' && item && 'id' in item && typeof item.id === 'number') {
       this.selectedCollaborator = item as User;
       panel.toggle(event);
       return;
     }
 
-    // If item is a string, try to interpret as an id to fetch details
     if (typeof item === 'string') {
       const id = Number(item);
       if (!Number.isNaN(id) && id > 0) {
         this.userService.showUser(id).subscribe({
           next: (u) => {
-            // Normalize to app User type shape
             this.selectedCollaborator = {
               id: u.id,
               name: (u as any).name,
@@ -161,7 +207,6 @@ export class FrameComponent {
             panel.toggle(event);
           },
           error: () => {
-            // Fallback: open with minimal info from string
             this.selectedCollaborator = null;
             panel.toggle(event);
           },
@@ -170,7 +215,6 @@ export class FrameComponent {
       }
     }
 
-    // Fallback for unrecognized format: just open panel with no selected collaborator
     this.selectedCollaborator = null;
     panel.toggle(event);
   }
@@ -235,13 +279,17 @@ export class FrameComponent {
     if (this.frame?.id) {
       this.socketService.leaveWorkspace(this.frame.id);
     }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onListCreated(list: TaskList) {
-    if (!Array.isArray(this.frame.lists)) {
-      this.frame.lists = [];
-    }
-    this.frame.lists.push(list);
+    // Antes: adicionávamos a lista localmente ao criar.
+    // Agora os sockets (show_new_list) atualizam o quadro para evitar duplicação.
+    // if (!Array.isArray(this.frame.lists)) {
+    //   this.frame.lists = [];
+    // }
+    // this.frame.lists.push(list);
   }
 
   confirm2(event: Event) {
@@ -386,4 +434,6 @@ export class FrameComponent {
         },
       });
   }
+
+  private destroy$ = new Subject<void>();
 }
