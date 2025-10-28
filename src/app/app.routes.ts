@@ -8,7 +8,6 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  // dashboard route with optional frame id as a path param
   {
     path: 'dashboard/:frameId',
     component: DashboardComponent,

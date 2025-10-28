@@ -299,7 +299,6 @@ export class FrameComponent {
 
     const data: Partial<Frame> & { backgroundUrl?: File | string | null } = {
       name: payload.name,
-      // Normalize visibility coming from the dialog (0|1|boolean) to boolean for API
       visibility:
         typeof payload.visibility === 'boolean'
           ? payload.visibility
@@ -313,7 +312,6 @@ export class FrameComponent {
       .pipe(finalize(() => (this.isCreating = false)))
       .subscribe({
         next: (workspace: Frame) => {
-          // reflect updates locally
           this.frame = { ...this.frame, ...workspace };
           this.messageService.add({
             severity: 'success',
