@@ -57,14 +57,11 @@ export class DialogComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialData'] && this.initialData) {
-      this.frameForm.patchValue({
-        name: this.initialData.name ?? '',
-        visibility: (typeof this.initialData.visibility === 'boolean'
-          ? (this.initialData.visibility ? 1 : 0)
-          : (this.initialData.visibility ?? 1)),
-        backgroundColor: this.initialData.backgroundColor ?? null,
-        backgroundUrl: (this.initialData.backgroundUrl ?? null) as File | string | null,
-      });
+      this.populateFromInitialData();
+    }
+    // When dialog becomes visible again, re-populate the form with the latest data
+    if (changes['visible'] && this.visible && this.initialData) {
+      this.populateFromInitialData();
     }
   }
 
@@ -87,6 +84,9 @@ export class DialogComponent implements OnChanges {
     this.visibleChange.emit(value);
     if (!value) {
       this.resetForm();
+    } else if (this.initialData) {
+      // Ensure the form is populated every time the dialog opens
+      this.populateFromInitialData();
     }
   }
 
@@ -114,5 +114,19 @@ export class DialogComponent implements OnChanges {
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';
     }
+  }
+
+  private populateFromInitialData() {
+    const data = this.initialData;
+    if (!data) return;
+    this.frameForm.patchValue({
+      name: data.name ?? '',
+      visibility:
+        typeof data.visibility === 'boolean'
+          ? data.visibility ? 1 : 0
+          : (data.visibility ?? 1),
+      backgroundColor: data.backgroundColor ?? null,
+      backgroundUrl: (data.backgroundUrl ?? null) as File | string | null,
+    });
   }
 }

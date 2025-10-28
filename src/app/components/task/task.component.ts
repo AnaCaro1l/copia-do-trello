@@ -30,7 +30,6 @@ export class TaskComponent {
 
   onCheckboxChange() {
     const newCard = { ...this.task };
-    console.log('Task completion changed:', newCard);
     this.cardService.updateCard(this.task!.id, newCard as Task).subscribe();
   }
 

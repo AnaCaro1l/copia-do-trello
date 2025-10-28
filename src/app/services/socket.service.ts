@@ -90,10 +90,14 @@ export class SocketService {
 
   onCardDeleted(): Observable<Task> {
     return new Observable<Task>((observer) => {
-      this.socket.on('delete_card', (card: Task) => {
+      const handler = (card: Task) => {
         console.log('[SocketService] received delete_card', card);
         observer.next(card);
-      });
+      };
+      this.socket.on('delete_card', handler);
+      return () => {
+        this.socket.off('delete_card', handler);
+      };
     });
   }
 }
