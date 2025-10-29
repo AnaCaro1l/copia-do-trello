@@ -31,6 +31,8 @@ import { DialogComponent } from '../shared/dialog/dialog.component';
 import { Subject, finalize, takeUntil } from 'rxjs';
 import { User } from '../../types/user';
 import { UserService } from '../../services/user.service';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 type Collaborator = string | User;
 
@@ -89,13 +91,14 @@ export class FrameComponent {
     private router: Router,
     private inviteService: InviteService,
     private socketService: SocketService,
-    private userService: UserService
+    private userService: UserService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
     console.log('FrameComponent initialized with frame:', this.frame);
 
-  this.collaborators = (this.frame.collaborators || []) as Collaborator[];
+    this.collaborators = (this.frame.collaborators || []) as Collaborator[];
     console.log('Collaborators:', this.collaborators);
     if (this.frame?.id) {
       this.socketService.joinWorkspace(this.frame.id);
@@ -116,7 +119,36 @@ export class FrameComponent {
             label: 'Excluir',
             icon: 'pi pi-trash',
             command: () => {
-              this.confirm2(event!);
+              this.dialog
+                .open(ConfirmDialogComponent, {
+                  data: {
+                    message: 'Tem certeza que deseja excluir esse quadro?',
+                  },
+                })
+                .afterClosed()
+                .subscribe((confirmed: boolean) => {
+                  if (confirmed) {
+                    this.workspaceService
+                      .deleteWorkspace(this.frame.id)
+                      .subscribe({
+                        next: () => {
+                          this.router.navigate(['/home']);
+                          this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Workspace excluído',
+                          });
+                        },
+                        error: (err) => {
+                          this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: err.error?.message as string,
+                          });
+                        },
+                      });
+                  }
+                });
             },
           },
         ],
@@ -141,7 +173,6 @@ export class FrameComponent {
       .subscribe((list: TaskList) => {
         if (list.workspaceId !== this.frame.id) return;
         if (!Array.isArray(this.frame.lists)) this.frame.lists = [];
-        // avoid duplicates
         const exists = this.frame.lists.some((l) => l.id === list.id);
         if (!exists) this.frame.lists.push(list);
       });
@@ -154,7 +185,8 @@ export class FrameComponent {
         if (list.workspaceId !== this.frame.id) return;
         if (!Array.isArray(this.frame.lists)) return;
         const idx = this.frame.lists.findIndex((l) => l.id === list.id);
-        if (idx > -1) this.frame.lists[idx] = { ...this.frame.lists[idx], ...list };
+        if (idx > -1)
+          this.frame.lists[idx] = { ...this.frame.lists[idx], ...list };
       });
 
     // Frame (workspace) updated anywhere (user room event)
@@ -182,13 +214,19 @@ export class FrameComponent {
   }
 
   getInitial(item: string | User | null | undefined): string {
-    const name = typeof item === 'string' ? item : item?.name ?? item?.email ?? '';
+    const name =
+      typeof item === 'string' ? item : item?.name ?? item?.email ?? '';
     const initial = (name || '').trim().charAt(0);
     return initial ? initial.toUpperCase() : '?';
   }
 
   openCollaboratorPanel(event: Event, item: Collaborator, panel: OverlayPanel) {
-    if (typeof item === 'object' && item && 'id' in item && typeof item.id === 'number') {
+    if (
+      typeof item === 'object' &&
+      item &&
+      'id' in item &&
+      typeof item.id === 'number'
+    ) {
       this.selectedCollaborator = item as User;
       panel.toggle(event);
       return;
@@ -281,51 +319,6 @@ export class FrameComponent {
     }
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  onListCreated(list: TaskList) {
-    // Antes: adicionávamos a lista localmente ao criar.
-    // Agora os sockets (show_new_list) atualizam o quadro para evitar duplicação.
-    // if (!Array.isArray(this.frame.lists)) {
-    //   this.frame.lists = [];
-    // }
-    // this.frame.lists.push(list);
-  }
-
-  confirm2(event: Event) {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: 'Você tem certeza que deseja excluir este item?',
-      header: 'Confirmação de Exclusão',
-      icon: 'pi pi-info-circle',
-      acceptButtonStyleClass: 'p-button-danger p-button-text',
-      rejectButtonStyleClass: 'p-button-text p-button-text',
-      acceptIcon: 'none',
-      rejectIcon: 'none',
-
-      accept: () => {
-        this.workspaceService.deleteWorkspace(this.frame.id).subscribe({
-          next: () => {
-            this.router.navigate(['/home']);
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Sucesso',
-              detail: 'Workspace excluído',
-            });
-          },
-          error: (err) => {
-            console.error('Error deleting workspace:', err);
-          },
-        });
-      },
-      reject: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Rejected',
-          detail: 'You have rejected',
-        });
-      },
-    });
   }
 
   getCurrentUser() {

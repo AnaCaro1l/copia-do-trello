@@ -2,7 +2,6 @@ import {
   ChangeDetectorRef,
   Component,
   Input,
-  computed,
   signal,
 } from '@angular/core';
 import { CardModule } from 'primeng/card';
@@ -21,9 +20,8 @@ import { TaskList } from '../../types/tasklist';
 import { TaskComponent } from '../task/task.component';
 import { CommonModule } from '@angular/common';
 import { MenuModule } from 'primeng/menu';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { ListService } from '../../services/list.service';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
 import { CardService } from '../../services/card.service';
@@ -44,6 +42,8 @@ import {
   moveItemInArray,
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-task-list',
@@ -56,16 +56,16 @@ import {
     TaskComponent,
     CommonModule,
     MenuModule,
-    ConfirmDialogModule,
     ToastModule,
     ButtonModule,
     ReactiveFormsModule,
     DialogModule,
     DragDropModule,
+    MatDialogModule,
   ],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
-  providers: [ConfirmationService, MessageService],
+  providers: [MessageService],
 })
 export class TaskListComponent {
   readonly minimize = Minimize2;
@@ -95,11 +95,11 @@ export class TaskListComponent {
   constructor(
     private cdr: ChangeDetectorRef,
     private listService: ListService,
-    private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private cardService: CardService,
     private fb: FormBuilder,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -122,7 +122,26 @@ export class TaskListComponent {
             label: 'Excluir',
             icon: 'pi pi-trash',
             command: () => {
-              this.confirm2(event!);
+              this.dialog
+                .open(ConfirmDialogComponent, {
+                  data: {
+                    message: 'Tem certeza que deseja excluir esta lista?',
+                  },
+                })
+                .afterClosed()
+                .subscribe((confirmed: boolean) => {
+                  if (confirmed) {
+                    this.listService.deleteList(this.taskList?.id!).subscribe({
+                      next: () => {
+                        this.messageService.add({
+                          severity: 'success',
+                          summary: 'Lista excluída',
+                          detail: 'A lista foi excluída com sucesso.',
+                        });
+                      },
+                    });
+                  }
+                });
             },
           },
         ],
@@ -207,19 +226,6 @@ export class TaskListComponent {
     return `list-${this.taskList?.id ?? 'unknown'}`;
   }
 
-  // private loadTasks(listId: number) {
-  //   this.cardService.getCards(listId).subscribe({
-  //     next: (tasks) => {
-  //       if (!this.taskList) return;
-  //       this.taskList.tasks = tasks ?? [];
-  //       this.cdr.markForCheck();
-  //     },
-  //     error: (err) => {
-  //       console.error('Failed to load tasks', err);
-  //     },
-  //   });
-  // }
-
   buildForm() {
     return this.fb.group({
       title: ['', [Validators.required, this.nonWhitespaceValidator]],
@@ -229,40 +235,6 @@ export class TaskListComponent {
   nonWhitespaceValidator(control: AbstractControl): ValidationErrors | null {
     const value: string = control.value ?? '';
     return value.trim().length > 0 ? null : { whitespace: true };
-  }
-
-  confirm2(event: Event) {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: 'Você tem certeza que deseja excluir este item?',
-      header: 'Confirmação de Exclusão',
-      icon: 'pi pi-info-circle',
-      acceptButtonStyleClass: 'p-button-danger p-button-text',
-      rejectButtonStyleClass: 'p-button-text p-button-text',
-      acceptIcon: 'none',
-      rejectIcon: 'none',
-
-      accept: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: 'Lista excluída',
-        });
-        this.listService.deleteList(this.taskList!.id).subscribe({
-          next: () => {},
-          error: (error) => {
-            console.error('Error deleting list:', error);
-          },
-        });
-      },
-      reject: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Rejected',
-          detail: 'You have rejected',
-        });
-      },
-    });
   }
 
   toggleOpen() {
