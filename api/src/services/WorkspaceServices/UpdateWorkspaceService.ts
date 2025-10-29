@@ -85,12 +85,10 @@ export const UpdateWorkspaceService = async ({
     updatedAt: updateData.updatedAt,
   });
 
-  if (workspace.collaborators.length > 0) {
-    io.to(`user_${workspace.collaborators}`).emit(
-      'show_updated_workspace',
-      updatedWorkspace
-    );
-  }
+  io.to(`user_${workspace.collaborators}`).emit(
+    'show_updated_workspace',
+    updatedWorkspace
+  );
 
   return updatedWorkspace;
 };
