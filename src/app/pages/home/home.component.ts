@@ -71,8 +71,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
     
     const user = this.socketService.getCurrentUser();
-
-    this.socketService.joinUserRoom(user.id);
+    if (user?.id) {
+      this.socketService.joinUserRoom(user.id);
+    }
 
     this.socketService.onFrameCreated()
       .pipe(takeUntil(this.destroy$))
@@ -81,6 +82,25 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.frames = [];
         }
         this.frames.unshift(frame);
+      });
+
+    // Frame updated elsewhere
+    this.socketService
+      .onFrameUpdated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((updated: Frame) => {
+        if (!Array.isArray(this.frames)) return;
+        const idx = this.frames.findIndex((f) => f.id === updated.id);
+        if (idx > -1) this.frames[idx] = { ...this.frames[idx], ...updated };
+      });
+
+    // Frame deleted elsewhere
+    this.socketService
+      .onFrameDeleted()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((deletedId: number) => {
+        if (!Array.isArray(this.frames)) return;
+        this.frames = this.frames.filter((f) => f.id !== deletedId);
       });
   }
   toggleMenu() {

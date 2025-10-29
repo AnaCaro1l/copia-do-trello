@@ -100,4 +100,73 @@ export class SocketService {
       };
     });
   }
+
+  // Cards
+  onCardCreated(): Observable<Task> {
+    return new Observable<Task>((observer) => {
+      const handler = (card: Task) => {
+        console.log('[SocketService] received show_new_card', card);
+        observer.next(card);
+      };
+      this.socket.on('show_new_card', handler);
+      return () => this.socket.off('show_new_card', handler);
+    });
+  }
+
+  onCardUpdated(): Observable<Task> {
+    return new Observable<Task>((observer) => {
+      const handler = (card: Task) => {
+        console.log('[SocketService] received show_updated_card', card);
+        observer.next(card);
+      };
+      this.socket.on('show_updated_card', handler);
+      return () => this.socket.off('show_updated_card', handler);
+    });
+  }
+
+  // Lists
+  onListCreated(): Observable<TaskList> {
+    return new Observable<TaskList>((observer) => {
+      const handler = (list: TaskList) => {
+        console.log('[SocketService] received show_new_list', list);
+        observer.next(list);
+      };
+      this.socket.on('show_new_list', handler);
+      return () => this.socket.off('show_new_list', handler);
+    });
+  }
+
+  onListUpdated(): Observable<TaskList> {
+    return new Observable<TaskList>((observer) => {
+      const handler = (list: TaskList) => {
+        console.log('[SocketService] received show_updated_list', list);
+        observer.next(list);
+      };
+      this.socket.on('show_updated_list', handler);
+      return () => this.socket.off('show_updated_list', handler);
+    });
+  }
+
+  // Frames (Workspaces)
+  onFrameUpdated(): Observable<Frame> {
+    return new Observable<Frame>((observer) => {
+      const handler = (frame: Frame) => {
+        console.log('[SocketService] received show_updated_workspace', frame);
+        observer.next(frame);
+      };
+      this.socket.on('show_updated_workspace', handler);
+      return () => this.socket.off('show_updated_workspace', handler);
+    });
+  }
+
+  onFrameDeleted(): Observable<number> {
+    return new Observable<number>((observer) => {
+      const handler = (frameId: number) => {
+        console.log('[SocketService] received delete_workspace', frameId);
+        observer.next(frameId);
+      };
+      this.socket.on('delete_workspace', handler);
+      return () => this.socket.off('delete_workspace', handler);
+    });
+  }
 }
