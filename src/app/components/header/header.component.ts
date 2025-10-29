@@ -23,6 +23,7 @@ import { SocketService } from '../../services/socket.service';
 import { InviteService } from '../../services/invite.service';
 import { TabViewModule } from 'primeng/tabview';
 import { Invite } from '../../types/invite';
+import { BadgeModule } from 'primeng/badge';
 
 @Component({
   selector: 'app-header',
@@ -36,7 +37,8 @@ import { Invite } from '../../types/invite';
     MatButtonModule,
     HttpClientModule,
     CommonModule,
-    TabViewModule
+    TabViewModule,
+    BadgeModule,
   ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
@@ -139,6 +141,7 @@ export class HeaderComponent implements OnInit {
         this.invites = invites;
         this.invitesUnread = invites.filter(invite => invite.status === 'pending');
         this.invitesRead = invites.filter(invite => invite.status !== 'pending');
+        console.log(this.invitesRead.length);
       },
       error: (err) => {
         console.error('Erro ao carregar convites:', err);
