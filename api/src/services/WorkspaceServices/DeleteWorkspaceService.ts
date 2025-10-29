@@ -7,11 +7,20 @@ import { WorkspaceUser } from '../../models/WorkspaceUser';
 import io from '../../app';
 import { List } from '../../models/List';
 
-export const DeleteWorkspaceService = async (id: string): Promise<void> => {
+interface Request {
+  id: string;
+  userId: number;
+}
+
+export const DeleteWorkspaceService = async ({ id, userId }: Request): Promise<void> => {
   const workspace = await Workspace.findByPk(id);
 
   if (!workspace) {
     throw new AppError('Área de trabalho não encontrada');
+  }
+
+  if(workspace.ownerId !== userId) {
+    throw new AppError('Você não tem permissão para deletar esta área de trabalho');
   }
 
   const lists = await List.findAll({
