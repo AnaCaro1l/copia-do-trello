@@ -17,7 +17,7 @@
       *ngIf="!isEditingTitle"
       (click)="startEditTitle()"
       [ngClass]="[editable ? '' : 'cursor-default']"
-      class="hover:bg-white/10 transition-colors cursor-text text-black/70 text-xl p-1 rounded-lg font-bold"
+      class="hover:bg-white/10 transition-colors cursor-text text-black/70 text-xl p-1 rounded-lg font-bold truncate"
     >
       {{ frame.name }}
     </h1>
