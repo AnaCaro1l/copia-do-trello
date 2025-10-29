@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Task } from '../../types/task';
 import { CommonModule } from '@angular/common';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -8,6 +8,8 @@ import { CardService } from '../../services/card.service';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 import { SocketService } from '../../services/socket.service';
+import { Subject, EMPTY } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil, catchError } from 'rxjs/operators';
 import { LucideAngularModule, Palette } from "lucide-angular";
 
 @Component({
@@ -17,7 +19,7 @@ import { LucideAngularModule, Palette } from "lucide-angular";
   templateUrl: './task.component.html',
   styleUrl: './task.component.scss',
 })
-export class TaskComponent {
+export class TaskComponent implements OnInit, OnDestroy {
   readonly palette = Palette;
   @Input() task: Task | null = null;
 
@@ -27,6 +29,33 @@ export class TaskComponent {
   tempTitle = '';
 
   constructor(private cardService: CardService, private messageService: MessageService, private socketService: SocketService) {}
+
+  private colorChange$ = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
+  ngOnInit() {
+    this.colorChange$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((value) => {
+          if (!this.task) return EMPTY;
+          const previous = this.task.color;
+          this.task.color = value || '#374151';
+          return this.cardService
+            .updateCard(this.task.id, { ...this.task, color: this.task.color } as Task)
+            .pipe(
+              catchError((err) => {
+                console.error('Erro ao atualizar cor de fundo da tarefa:', err);
+                if (this.task) this.task.color = previous;
+                return EMPTY;
+              })
+            );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
+  }
 
   onCheckboxChange() {
     const newCard = { ...this.task };
@@ -94,15 +123,11 @@ export class TaskComponent {
 
   onColorPicked(value: string) {
     if (!this.task) return;
-    const previous = this.task.color;
-    this.task.color = value || '#374151';
+    this.colorChange$.next(value || '#374151');
+  }
 
-    this.cardService.updateCard(this.task.id, { ...this.task, color: this.task.color } as Task).subscribe({
-      next: () => {},
-      error: (err) => {
-        console.error('Erro ao atualizar cor de fundo da tarefa:', err);
-        this.task!.color = previous;
-      },
-    });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
