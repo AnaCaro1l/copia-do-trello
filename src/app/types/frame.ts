@@ -12,4 +12,5 @@ export interface Frame {
   collaborators?: User[] | null;
   visibility: boolean;
   favorite?: boolean | false;
+  ownerId?: number; 
 }
