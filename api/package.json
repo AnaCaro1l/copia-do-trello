@@ -2,6 +2,7 @@
   "name": "api",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "rimraf dist && tsc",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
