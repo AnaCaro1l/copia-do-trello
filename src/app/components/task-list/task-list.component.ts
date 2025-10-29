@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, Input, computed, signal } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  computed,
+  signal,
+} from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { MatCardModule } from '@angular/material/card';
 import {
@@ -32,7 +38,12 @@ import { Task } from '../../types/task';
 import { SocketService } from '../../services/socket.service';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { DialogModule } from 'primeng/dialog';
-import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import {
+  DragDropModule,
+  CdkDragDrop,
+  moveItemInArray,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-task-list',
@@ -77,6 +88,10 @@ export class TaskListComponent {
 
   visible: boolean = false;
 
+  get cards() {
+    return this.taskList?.cards || [];
+  }
+
   constructor(
     private cdr: ChangeDetectorRef,
     private listService: ListService,
@@ -90,17 +105,6 @@ export class TaskListComponent {
   ngOnInit() {
     this.isOpen.set(this.taskList?.isOpen ?? true);
 
-    if (this.taskList && !Array.isArray(this.taskList.tasks)) {
-      this.taskList.tasks = [];
-    }
-
-    if (
-      this.taskList &&
-      (!this.taskList.tasks || this.taskList.tasks.length === 0)
-    ) {
-      this.loadTasks(this.taskList.id);
-    }
-
     this.items = [
       {
         label: 'Options',
@@ -112,7 +116,7 @@ export class TaskListComponent {
               const currentTitle = this.taskList?.title ?? '';
               this.formTaskEdit.patchValue({ title: currentTitle });
               this.visible = true;
-            }
+            },
           },
           {
             label: 'Excluir',
@@ -125,35 +129,34 @@ export class TaskListComponent {
       },
     ];
 
-    // Card deleted
     this.cardDeletedSub = this.socketService
       .onCardDeleted()
       .pipe(takeUntil(this.destroy$))
       .subscribe((deletedCard: Task) => {
         if (!this.taskList) return;
         if (deletedCard.listId === this.taskList.id) {
-          this.taskList.tasks = (this.taskList.tasks || []).filter((t) => t.id !== deletedCard.id);
+          this.taskList.cards = (this.taskList.cards || []).filter(
+            (t) => t.id !== deletedCard.id
+          );
           this.cdr.markForCheck();
         }
       });
 
-    // Card created
     this.socketService
       .onCardCreated()
       .pipe(takeUntil(this.destroy$))
       .subscribe((card: Task) => {
         if (!this.taskList) return;
         if (card.listId !== this.taskList.id) return;
-        if (!Array.isArray(this.taskList.tasks)) this.taskList.tasks = [];
-        const exists = this.taskList.tasks.some((t) => t.id === card.id);
+        if (!Array.isArray(this.taskList.cards)) this.taskList.cards = [];
+        const exists = this.taskList.cards.some((t) => t.id === card.id);
         if (!exists) {
-          this.taskList.tasks.push(card);
+          this.taskList.cards.push(card);
           this.sortTasksByPosition();
           this.cdr.markForCheck();
         }
       });
 
-    // Card updated (may include position or list change)
     this.socketService
       .onCardUpdated()
       .pipe(takeUntil(this.destroy$))
@@ -161,26 +164,26 @@ export class TaskListComponent {
         if (!this.taskList) return;
 
         const isInThisList = card.listId === this.taskList.id;
-        const idx = (this.taskList.tasks || []).findIndex((t) => t.id === card.id);
+        const idx = (this.taskList.cards || []).findIndex(
+          (t) => t.id === card.id
+        );
 
         if (isInThisList) {
-          if (idx > -1 && this.taskList.tasks) {
-            this.taskList.tasks[idx] = { ...this.taskList.tasks[idx], ...card };
+          if (idx > -1 && this.taskList.cards) {
+            this.taskList.cards[idx] = { ...this.taskList.cards[idx], ...card };
           } else {
-            if (!Array.isArray(this.taskList.tasks)) this.taskList.tasks = [];
-            this.taskList.tasks.push(card);
+            if (!Array.isArray(this.taskList.cards)) this.taskList.cards = [];
+            this.taskList.cards.push(card);
           }
           this.sortTasksByPosition();
         } else {
-          // moved to another list: remove from here if exists
-          if (idx > -1 && this.taskList.tasks) {
-            this.taskList.tasks.splice(idx, 1);
+          if (idx > -1 && this.taskList.cards) {
+            this.taskList.cards.splice(idx, 1);
           }
         }
         this.cdr.markForCheck();
       });
 
-    // List updated (e.g., title changes by another user)
     this.socketService
       .onListUpdated()
       .pipe(takeUntil(this.destroy$))
@@ -204,18 +207,18 @@ export class TaskListComponent {
     return `list-${this.taskList?.id ?? 'unknown'}`;
   }
 
-  private loadTasks(listId: number) {
-    this.cardService.getCards(listId).subscribe({
-      next: (tasks) => {
-        if (!this.taskList) return;
-        this.taskList.tasks = tasks ?? [];
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Failed to load tasks', err);
-      },
-    });
-  }
+  // private loadTasks(listId: number) {
+  //   this.cardService.getCards(listId).subscribe({
+  //     next: (tasks) => {
+  //       if (!this.taskList) return;
+  //       this.taskList.tasks = tasks ?? [];
+  //       this.cdr.markForCheck();
+  //     },
+  //     error: (err) => {
+  //       console.error('Failed to load tasks', err);
+  //     },
+  //   });
+  // }
 
   buildForm() {
     return this.fb.group({
@@ -284,10 +287,10 @@ export class TaskListComponent {
         // Antes: atualizávamos a UI localmente empurrando o card recém-criado.
         // Agora os sockets (show_new_card) vão inserir o card para evitar duplicação.
         // if (!this.taskList) return;
-        // if (!Array.isArray(this.taskList.tasks)) {
-        //   this.taskList.tasks = [];
+        // if (!Array.isArray(this.taskList.cards)) {
+        //   this.taskList.cards = [];
         // }
-        // this.taskList.tasks.push(task);
+        // this.taskList.cards.push(task);
         this.formTask.reset();
         this.isEditMode.set(false);
       },
@@ -328,14 +331,26 @@ export class TaskListComponent {
     if (!this.taskList) return;
 
     if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      moveItemInArray(
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
       event.container.data.forEach((t, idx) => (t.position = idx));
       const movedTask = event.container.data[event.currentIndex] as Task;
-      const payload: Task = { ...movedTask, listId: this.taskList.id, position: event.currentIndex } as Task;
+      const payload: Task = {
+        ...movedTask,
+        listId: this.taskList.id,
+        position: event.currentIndex,
+      } as Task;
       this.cardService.updateCard(movedTask.id, payload).subscribe({
         error: (err) => {
           console.error('Erro ao reordenar card:', err);
-          moveItemInArray(event.container.data, event.currentIndex, event.previousIndex);
+          moveItemInArray(
+            event.container.data,
+            event.currentIndex,
+            event.previousIndex
+          );
           event.container.data.forEach((t, idx) => (t.position = idx));
           this.messageService.add({
             severity: 'error',
@@ -358,12 +373,16 @@ export class TaskListComponent {
     event.container.data.forEach((t, idx) => (t.position = idx));
     event.previousContainer.data.forEach((t, idx) => (t.position = idx));
 
-    const updated: Task = { ...movedTask, listId: this.taskList.id, position: event.currentIndex } as Task;
+    const updated: Task = {
+      ...movedTask,
+      listId: this.taskList.id,
+      position: event.currentIndex,
+    } as Task;
     this.cardService.updateCard(movedTask.id, updated).subscribe({
       next: () => {
         const list = this.taskList as TaskList;
-        const idx = (list.tasks || []).findIndex(t => t.id === movedTask.id);
-        if (idx > -1 && list.tasks) list.tasks[idx].listId = list.id;
+        const idx = (list.cards || []).findIndex((t) => t.id === movedTask.id);
+        if (idx > -1 && list.cards) list.cards[idx].listId = list.id;
       },
       error: (err) => {
         console.error('Erro ao mover card de lista:', err);
@@ -385,8 +404,8 @@ export class TaskListComponent {
   }
 
   private sortTasksByPosition() {
-    if (!this.taskList || !Array.isArray(this.taskList.tasks)) return;
-    this.taskList.tasks.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+    if (!this.taskList || !Array.isArray(this.taskList.cards)) return;
+    this.taskList.cards.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
   }
 
   private destroy$ = new Subject<void>();

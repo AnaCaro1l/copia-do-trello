@@ -84,7 +84,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.frames.unshift(frame);
       });
 
-    // Frame updated elsewhere
     this.socketService
       .onFrameUpdated()
       .pipe(takeUntil(this.destroy$))
@@ -94,7 +93,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         if (idx > -1) this.frames[idx] = { ...this.frames[idx], ...updated };
       });
 
-    // Frame deleted elsewhere
     this.socketService
       .onFrameDeleted()
       .pipe(takeUntil(this.destroy$))

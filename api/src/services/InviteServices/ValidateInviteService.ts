@@ -28,6 +28,13 @@ export const ValidateInviteService = async ({ status, inviteId }: Request) => {
     await UpdateInviteService({ id: inviteId, status: 'accepted' });
     const user = await ShowUserService(String(invite.receiverId));
     await workspace.$add('collaborators', user);
+
+    const enriched = await ShowWorkspaceService({ id, userId: invite.receiverId });
+
+    io.to(`user_${invite.receiverId}`).emit('show_new_workspace', enriched);
+
+    io.to(`workspace_${invite.workspaceId}`).emit('validate_invite', invite);
+
     return invite;
   }
 
@@ -35,8 +42,6 @@ export const ValidateInviteService = async ({ status, inviteId }: Request) => {
     await UpdateInviteService({ id: inviteId, status: 'declined' });
     return invite;
   }
-
-  io.to(`workspace_${invite.workspaceId}`).emit('validate_invite', invite);
 
   return invite;
 };

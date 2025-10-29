@@ -4,11 +4,9 @@ export interface TaskList {
   id: number;
   workspaceId: number;
   title: string;
-  createdAt: Date;
-  updatedAt: Date;
-  tasks: Task[];
-  coverImageUrl: string | null;
-  coverColor: string | null;
-  archived: boolean;
-  isOpen: boolean;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  cards: Task[];
+  // UI-only state (not from backend)
+  isOpen?: boolean;
 }
