@@ -1,3 +1,4 @@
+import io from '../../app';
 import { AppError } from '../../errors/AppError';
 import { Invite } from '../../models/Invite';
 import { ShowUserService } from '../UserServices/ShowUserService';
@@ -34,6 +35,8 @@ export const ValidateInviteService = async ({ status, inviteId }: Request) => {
     await UpdateInviteService({ id: inviteId, status: 'declined' });
     return invite;
   }
+
+  io.to(`workspace_${invite.workspaceId}`).emit('validate_invite', invite);
 
   return invite;
 };
