@@ -169,4 +169,15 @@ export class SocketService {
       return () => this.socket.off('delete_workspace', handler);
     });
   }
+
+  onInviteUpdated(): Observable<any> {
+    return new Observable<any>((observer) => {
+      const handler = (invite: any) => {
+        console.log('[SocketService] received validate_invite', invite);
+        observer.next(invite);
+      };
+      this.socket.on('validate_invite', handler);
+      return () => this.socket.off('validate_invite', handler);
+    });
+  }
 }

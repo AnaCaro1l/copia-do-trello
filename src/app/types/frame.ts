@@ -4,12 +4,12 @@ import { User } from "./user";
 export interface Frame {
   id: number;
   name: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
   backgroundUrl?: string | null;
   backgroundColor?: string | null;
   lists?: TaskList[] | null;
   collaborators?: User[] | null;
-  visibility: 0 | 1 | false | true;
+  visibility: boolean;
   favorite?: boolean | false;
 }

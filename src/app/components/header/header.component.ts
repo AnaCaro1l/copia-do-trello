@@ -137,27 +137,11 @@ export class HeaderComponent implements OnInit {
     this.inviteService.listInvites().subscribe({
       next: (invites) => {
         this.invites = invites;
-      },
-      error: (err) => {
-        console.error('Erro ao carregar convites:', err);
-      },
-    });
-
-    this.inviteService.listInvites().subscribe({
-      next: (invites) => {
         this.invitesUnread = invites.filter(invite => invite.status === 'pending');
-      },
-      error: (err) => {
-        console.error('Erro ao carregar convites não lidos:', err);
-      },
-    });
-
-    this.inviteService.listInvites().subscribe({
-      next: (invites) => {
         this.invitesRead = invites.filter(invite => invite.status !== 'pending');
       },
       error: (err) => {
-        console.error('Erro ao carregar convites lidos:', err);
+        console.error('Erro ao carregar convites:', err);
       },
     });
   }
