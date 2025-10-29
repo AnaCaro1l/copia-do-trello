@@ -35,7 +35,7 @@ export const CreateWorkspaceService = async ({
   if (backgroundColor) {
     backgroundUrl = null;
   }
-  
+
   const workspace = await Workspace.create({
     name,
     visibility,
@@ -45,8 +45,6 @@ export const CreateWorkspaceService = async ({
   });
 
   await workspace.$set('collaborators', [ownerId]);
-
-  
 
   io.to(`user_${ownerId}`).emit('show_new_workspace', workspace);
   return workspace;
