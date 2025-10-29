@@ -81,7 +81,8 @@ export const deleteWorkspace = async (
   res: Response
 ): Promise<Response> => {
   const id = req.params.id;
-  await DeleteWorkspaceService(id);
+  const userId = req.user.id;
+  await DeleteWorkspaceService({ id, userId });
   return res.status(204).json({
     message: 'Área de trabalho deletada com sucesso',
   });

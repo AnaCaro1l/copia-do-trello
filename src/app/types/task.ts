@@ -3,13 +3,11 @@ export interface Task {
   listId: number;
   position?: number;
   title: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   completed: boolean;
-  tags: string[] | null;
-  dueDate: Date | null;
+  dueDate: string | Date | null;
   description: string | null;
-  comments: string[];
-  coverImageUrl: string | null;
   color: string | null;
+  media: string | null;
 }
