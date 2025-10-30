@@ -82,9 +82,13 @@
   </div>
   <div
     class="flex gap-3 md:gap-4 p-2 md:p-2 m-1 md:m-2 overflow-x-auto max-w-[96vw] md:max-w-[95vw] h-[80vh] md:h-[76vh]"
+    cdkDropList
+    cdkDropListOrientation="horizontal"
+  [cdkDropListData]="frame.lists || []"
+    (cdkDropListDropped)="dropListReorder($event)"
   >
     @for (tasklist of frame.lists; track $index) {
-    <div class="snap-start">
+    <div class="snap-start" cdkDrag [cdkDragData]="tasklist">
       <app-task-list
         [taskList]="tasklist"
         [connectedDropLists]="dropListIds"

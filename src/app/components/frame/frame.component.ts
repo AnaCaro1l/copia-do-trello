@@ -1,4 +1,5 @@
 import { Component, Input, ViewChild, SimpleChanges, OnChanges } from '@angular/core';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Frame } from '../../types/frame';
 import { CommonModule } from '@angular/common';
 import { TaskListComponent } from '../task-list/task-list.component';
@@ -55,6 +56,7 @@ type Collaborator = string | User;
     FormsModule,
     DialogComponent,
     MatButtonModule,
+    DragDropModule,
   ],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
@@ -480,6 +482,14 @@ export class FrameComponent implements OnChanges {
           });
         },
       });
+  }
+
+  // Reordenar listas (CDK Drag & Drop)
+  dropListReorder(event: CdkDragDrop<TaskList[]>) {
+    const lists = this.frame?.lists;
+    if (!Array.isArray(lists)) return;
+    moveItemInArray(lists, event.previousIndex, event.currentIndex);
+    // TODO: Persistir ordem no backend quando houver suporte (campo position)
   }
 
 
