@@ -15,7 +15,7 @@ import {
   takeUntil,
   catchError,
 } from 'rxjs/operators';
-import { LucideAngularModule, Palette } from 'lucide-angular';
+import { LucideAngularModule, Palette, Trash } from 'lucide-angular';
 import { UIStateService } from '../../services/ui-state.service';
 
 @Component({
@@ -34,6 +34,9 @@ import { UIStateService } from '../../services/ui-state.service';
 })
 export class TaskComponent implements OnInit, OnDestroy {
   readonly palette = Palette;
+  readonly trash = Trash;
+
+  defaultColor: string = '#374151';
   @Input() task: Task | null = null;
 
   displayEditDialog: boolean = false;
@@ -163,5 +166,10 @@ export class TaskComponent implements OnInit, OnDestroy {
 
   onDialogHide() {
     this.uiState.setCardDialogOpen(false);
+  }
+
+  onDefaultColor() {
+    if (!this.task) return;
+    this.task.color = this.defaultColor;
   }
 }
