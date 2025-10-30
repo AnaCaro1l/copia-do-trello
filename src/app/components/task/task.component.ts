@@ -16,6 +16,7 @@ import {
   catchError,
 } from 'rxjs/operators';
 import { LucideAngularModule, Palette } from 'lucide-angular';
+import { UIStateService } from '../../services/ui-state.service';
 
 @Component({
   selector: 'app-task',
@@ -42,7 +43,8 @@ export class TaskComponent implements OnInit, OnDestroy {
 
   constructor(
     private cardService: CardService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private uiState: UIStateService
   ) {}
 
   private colorChange$ = new Subject<string>();
@@ -134,10 +136,12 @@ export class TaskComponent implements OnInit, OnDestroy {
     this.cardService.deleteCard(this.task.id).subscribe({
       next: () => {
         this.displayEditDialog = false;
+        this.uiState.setCardDialogOpen(false);
       },
       error: (err) => {
         console.error('Erro ao deletar tarefa:', err);
         this.displayEditDialog = false;
+        this.uiState.setCardDialogOpen(false);
       },
     });
   }
@@ -148,7 +152,16 @@ export class TaskComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.uiState.setCardDialogOpen(false);
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  onDialogShow() {
+    this.uiState.setCardDialogOpen(true);
+  }
+
+  onDialogHide() {
+    this.uiState.setCardDialogOpen(false);
   }
 }

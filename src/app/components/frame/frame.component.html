@@ -85,10 +85,11 @@
     cdkDropList
     cdkDropListOrientation="horizontal"
     [cdkDropListData]="frame.lists || []"
+    [cdkDropListDisabled]="isCardDialogOpen"
     (cdkDropListDropped)="dropListReorder($event)"
   >
     @for (tasklist of frame.lists; track $index) {
-    <div class="snap-start" cdkDrag [cdkDragData]="tasklist">
+    <div class="snap-start" cdkDrag [cdkDragData]="tasklist" [cdkDragDisabled]="isCardDialogOpen">
       <app-task-list
         [taskList]="tasklist"
         [connectedDropLists]="dropListIds"

@@ -45,6 +45,7 @@ import { User } from '../../types/user';
 import { UserService } from '../../services/user.service';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { UIStateService } from '../../services/ui-state.service';
 
 type Collaborator = string | User;
 
@@ -96,6 +97,7 @@ export class FrameComponent implements OnInit, OnChanges, OnDestroy {
   selectedCollaborator: User | null = null;
   @ViewChild('op') collaboratorPanel?: OverlayPanel;
   isOwner = false;
+  isCardDialogOpen = false;
 
   constructor(
     private authService: AuthService,
@@ -105,7 +107,8 @@ export class FrameComponent implements OnInit, OnChanges, OnDestroy {
     private inviteService: InviteService,
     private socketService: SocketService,
     private userService: UserService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private uiState: UIStateService
   ) {}
 
   ngOnInit() {
@@ -113,6 +116,9 @@ export class FrameComponent implements OnInit, OnChanges, OnDestroy {
     this.joinWorkspaceRoom();
     this.buildMenuItems();
     this.setupSocketSubscriptions();
+    this.uiState.cardDialogOpen$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((open) => (this.isCardDialogOpen = open));
   }
 
   private initState(): void {

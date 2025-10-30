@@ -29,6 +29,8 @@
   [modal]="true"
   [draggable]="false"
   [style]="{ height: 'auto', minWidth: '30vw' }"
+  (onShow)="onDialogShow()"
+  (onHide)="onDialogHide()"
 >
   <ng-template pTemplate="content">
     <div class="w-full flex">
