@@ -3,14 +3,18 @@ import { AppError } from '../../errors/AppError';
 import { List } from '../../models/List';
 import { Workspace } from '../../models/Workspace';
 
+interface ListData {
+  title?: string;
+}
+
 interface Request {
   id: string;
-  title?: string;
+  listData: ListData;
 }
 
 export const UpdateListService = async ({
   id,
-  title,
+  listData,
 }: Request): Promise<List> => {
   const list = await List.findOne({
     where: { id: id },
@@ -26,9 +30,12 @@ export const UpdateListService = async ({
     throw new AppError('Lista não encontrada');
   }
 
+  const {
+    title,
+  } = listData;
+
   const updatedList = await list.update({
-    title: title ? title : list.title,
-    updatedAt: new Date(),
+    ...listData,
   });
 
   io.to(`workspace_${list.workspaceId}`).emit('show_updated_list', updatedList);

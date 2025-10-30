@@ -55,8 +55,8 @@ export const updateUser = async (
   res: Response
 ): Promise<Response> => {
   const id = req.user.id;
-  const { name, email, password } = req.body;
-  const updatedUser = await UpdateUserService({ id, name, email, password });
+  const userData = req.body;
+  const updatedUser = await UpdateUserService({ id, userData });
   return res.status(200).json({
     message: 'Usuário atualizado com sucesso',
     updatedUser,

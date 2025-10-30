@@ -7,11 +7,9 @@ import { AppError } from '../../errors/AppError';
 import { List } from '../../models/List';
 import { Workspace } from '../../models/Workspace';
 
-interface Request {
+interface CardData {
   title?: string;
   description?: string;
-  mediaPath?: string;
-  id: string;
   completed?: boolean;
   listId?: number;
   position?: number;
@@ -19,16 +17,14 @@ interface Request {
   color?: string;
 }
 
+interface Request {
+  id: string;
+  cardData: CardData;
+}
+
 export const UpdateCardService = async ({
-  title,
-  description,
-  mediaPath,
   id,
-  completed,
-  listId,
-  position,
-  dueDate,
-  color,
+  cardData,
 }: Request): Promise<Card> => {
   const card = await Card.findOne({
     where: { id: id },
@@ -44,28 +40,37 @@ export const UpdateCardService = async ({
     throw new AppError('Card não encontrado');
   }
 
+  let {
+    title,
+    description,
+    completed,
+    listId,
+    position,
+    dueDate,
+    color,
+  } = cardData;
+
   let media = null;
-  if (mediaPath) {
-    media = await uploadOnCloudinary(mediaPath);
-  }
 
   if (dueDate) {
     dueDate = new Date(dueDate);
   }
 
-  const oldListId = card.listId;
-  const oldPos = card.position;
-  const targetListId = typeof listId === 'number' ? listId : oldListId;
+  const currentListId = card.listId;
+  const currentPos = card.position;
+  const targetListId = listId ? listId : currentListId;
 
-  let newPos = typeof position === 'number' ? position : undefined;
+  let newPos = position ? position : undefined;
 
   const updatedCard = await sequelize.transaction(async (t) => {
-    if (targetListId !== oldListId) {
+
+    if (targetListId !== currentListId) {
+
       await Card.increment('position', {
         by: -1,
         where: {
-          listId: oldListId,
-          position: { [Op.gt]: oldPos },
+          listId: currentListId,
+          position: { [Op.gt]: currentPos },
         },
         transaction: t,
       });
@@ -75,7 +80,7 @@ export const UpdateCardService = async ({
         transaction: t,
       })) as number | null;
       const endPos =
-        Number.isFinite(maxTargetPos as number) && maxTargetPos !== null
+        maxTargetPos as number && maxTargetPos !== null
           ? (maxTargetPos as number) + 1
           : 0;
       if (newPos === undefined || newPos > endPos) newPos = endPos;
@@ -94,7 +99,6 @@ export const UpdateCardService = async ({
         {
           title: title ?? card.title,
           description: description ?? card.description,
-          media: media ?? card.media,
           completed: completed ?? card.completed,
           listId: targetListId,
           position: newPos,
@@ -106,33 +110,33 @@ export const UpdateCardService = async ({
       );
     }
 
-    if (typeof newPos === 'number' && newPos !== oldPos) {
+    if (typeof newPos === 'number' && newPos !== currentPos) {
       const maxPos = (await Card.max('position', {
-        where: { listId: oldListId },
+        where: { listId: currentListId },
         transaction: t,
       })) as number | null;
       const endPos =
-        Number.isFinite(maxPos as number) && maxPos !== null
+        maxPos as number && maxPos !== null
           ? (maxPos as number)
           : 0;
       if (newPos > endPos) newPos = endPos;
       if (newPos < 0) newPos = 0;
 
-      if (newPos > oldPos) {
+      if (newPos > currentPos) {
         await Card.increment('position', {
           by: -1,
           where: {
-            listId: oldListId,
-            position: { [Op.and]: [{ [Op.gt]: oldPos }, { [Op.lte]: newPos }] },
+            listId: currentListId,
+            position: { [Op.and]: [{ [Op.gt]: currentPos }, { [Op.lte]: newPos }] },
           },
           transaction: t,
         });
-      } else if (newPos < oldPos) {
+      } else if (newPos < currentPos) {
         await Card.increment('position', {
           by: 1,
           where: {
-            listId: oldListId,
-            position: { [Op.and]: [{ [Op.gte]: newPos }, { [Op.lt]: oldPos }] },
+            listId: currentListId,
+            position: { [Op.and]: [{ [Op.gte]: newPos }, { [Op.lt]: currentPos }] },
           },
           transaction: t,
         });
@@ -140,14 +144,7 @@ export const UpdateCardService = async ({
 
       return await card.update(
         {
-          title: title ?? card.title,
-          description: description ?? card.description,
-          media: media ?? card.media,
-          completed: completed ?? card.completed,
-          position: newPos,
-          dueDate: dueDate ?? card.dueDate,
-          color: color ?? card.color,
-          updatedAt: new Date(),
+          ...cardData,
         },
         { transaction: t }
       );
@@ -155,14 +152,7 @@ export const UpdateCardService = async ({
 
     return await card.update(
       {
-        title: title ?? card.title,
-        description: description ?? card.description,
-        media: media ?? card.media,
-        completed: completed ?? card.completed,
-        listId: listId ?? card.listId,
-        dueDate: dueDate ?? card.dueDate,
-        color: color ?? card.color,
-        updatedAt: new Date(),
+        ...cardData,
       },
       { transaction: t }
     );

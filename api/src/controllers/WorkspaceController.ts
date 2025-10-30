@@ -59,14 +59,12 @@ export const updateWorkspace = async (
   res: Response
 ): Promise<Response> => {
   const id = req.params.id;
-  const { name, visibility, backgroundColor } = req.body;
   const backgroundPath = req.file?.path;
-
+  const workspaceData = req.body;
+  
   const workspace = await UpdateWorkspaceService({
-    name,
-    visibility,
+    workspaceData,
     backgroundPath,
-    backgroundColor,
     id,
   });
 

@@ -23,9 +23,11 @@ export const ValidateInviteService = async ({ status, inviteId }: Request) => {
   if (!invite) {
     throw new AppError('Convite não encontrado');
   }
-
+  const inviteData = {
+    status,
+  };
   if (status === 'accepted') {
-    await UpdateInviteService({ id: inviteId, status: 'accepted' });
+    await UpdateInviteService({ id: inviteId, inviteData });
     const user = await ShowUserService(String(invite.receiverId));
     await workspace.$add('collaborators', user);
 
@@ -39,7 +41,7 @@ export const ValidateInviteService = async ({ status, inviteId }: Request) => {
   }
 
   if (status === 'declined') {
-    await UpdateInviteService({ id: inviteId, status: 'declined' });
+    await UpdateInviteService({ id: inviteId, inviteData });
     return invite;
   }
 
