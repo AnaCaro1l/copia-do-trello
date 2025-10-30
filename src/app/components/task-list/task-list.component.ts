@@ -2,6 +2,8 @@ import {
   ChangeDetectorRef,
   Component,
   Input,
+  OnDestroy,
+  OnInit,
   signal,
 } from '@angular/core';
 import { CardModule } from 'primeng/card';
@@ -22,7 +24,6 @@ import { CommonModule } from '@angular/common';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { ListService } from '../../services/list.service';
-import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
 import { CardService } from '../../services/card.service';
 import {
@@ -34,7 +35,7 @@ import {
 } from '@angular/forms';
 import { Task } from '../../types/task';
 import { SocketService } from '../../services/socket.service';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { DialogModule } from 'primeng/dialog';
 import {
   DragDropModule,
@@ -56,7 +57,6 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.
     TaskComponent,
     CommonModule,
     MenuModule,
-    ToastModule,
     ButtonModule,
     ReactiveFormsModule,
     DialogModule,
@@ -67,7 +67,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.
   styleUrl: './task-list.component.scss',
   
 })
-export class TaskListComponent {
+export class TaskListComponent implements OnInit, OnDestroy {
   readonly minimize = Minimize2;
   readonly ellipsis = Ellipsis;
   readonly maximize = Maximize2;
@@ -103,114 +103,11 @@ export class TaskListComponent {
 
   ngOnInit() {
     this.isOpen.set(this.taskList?.isOpen ?? true);
-
-    this.items = [
-      {
-        label: 'Options',
-        items: [
-          {
-            label: 'Editar',
-            icon: 'pi pi-pencil',
-            command: () => {
-              const currentTitle = this.taskList?.title ?? '';
-              this.formTaskEdit.patchValue({ title: currentTitle });
-              this.visible = true;
-            },
-          },
-          {
-            label: 'Excluir',
-            icon: 'pi pi-trash',
-            command: () => {
-              this.dialog
-                .open(ConfirmDialogComponent, {
-                  data: {
-                    message: 'Tem certeza que deseja excluir esta lista?',
-                  },
-                })
-                .afterClosed()
-                .subscribe((confirmed: boolean) => {
-                  if (confirmed) {
-                    this.listService.deleteList(this.taskList?.id!).subscribe({
-                      next: () => {},
-                    });
-                  }
-                });
-            },
-          },
-        ],
-      },
-    ];
-
-    this.cardDeletedSub = this.socketService
-      .onCardDeleted()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((deletedCard: Task) => {
-        if (!this.taskList) return;
-        if (deletedCard.listId === this.taskList.id) {
-          this.taskList.cards = (this.taskList.cards || []).filter(
-            (t) => t.id !== deletedCard.id
-          );
-          this.cdr.markForCheck();
-        }
-      });
-
-    this.socketService
-      .onCardCreated()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((card: Task) => {
-        if (!this.taskList) return;
-        if (card.listId !== this.taskList.id) return;
-        if (!Array.isArray(this.taskList.cards)) this.taskList.cards = [];
-        const exists = this.taskList.cards.some((t) => t.id === card.id);
-        if (!exists) {
-          this.taskList.cards.push(card);
-          this.sortTasksByPosition();
-          this.cdr.markForCheck();
-        }
-      });
-
-    this.socketService
-      .onCardUpdated()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((card: Task) => {
-        if (!this.taskList) return;
-
-        const isInThisList = card.listId === this.taskList.id;
-        const idx = (this.taskList.cards || []).findIndex(
-          (t) => t.id === card.id
-        );
-
-        if (isInThisList) {
-          if (idx > -1 && this.taskList.cards) {
-            this.taskList.cards[idx] = { ...this.taskList.cards[idx], ...card };
-          } else {
-            if (!Array.isArray(this.taskList.cards)) this.taskList.cards = [];
-            this.taskList.cards.push(card);
-          }
-          this.sortTasksByPosition();
-        } else {
-          if (idx > -1 && this.taskList.cards) {
-            this.taskList.cards.splice(idx, 1);
-          }
-        }
-        this.cdr.markForCheck();
-      });
-
-    this.socketService
-      .onListUpdated()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((list) => {
-        if (!this.taskList) return;
-        if (list.id !== this.taskList.id) return;
-        this.taskList = { ...this.taskList, ...list } as TaskList;
-        this.cdr.markForCheck();
-      });
+    this.buildMenuItems();
+    this.setupSocketSubscriptions();
   }
 
-  private cardDeletedSub?: Subscription;
-
   ngOnDestroy() {
-    this.cardDeletedSub?.unsubscribe();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -256,6 +153,109 @@ export class TaskListComponent {
         console.error('Error adding card:', error);
       },
     });
+  }
+
+  private buildMenuItems(): void {
+    this.items = [
+      {
+        label: 'Options',
+        items: [
+          {
+            label: 'Editar',
+            icon: 'pi pi-pencil',
+            command: () => {
+              const currentTitle = this.taskList?.title ?? '';
+              this.formTaskEdit.patchValue({ title: currentTitle });
+              this.visible = true;
+            },
+          },
+          {
+            label: 'Excluir',
+            icon: 'pi pi-trash',
+            command: () => this.confirmAndDelete(),
+          },
+        ],
+      },
+    ];
+  }
+
+  private confirmAndDelete(): void {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: { message: 'Tem certeza que deseja excluir esta lista?' },
+      })
+      .afterClosed()
+      .subscribe((confirmed: boolean) => {
+        if (!confirmed) return;
+        this.listService.deleteList(this.taskList?.id!).subscribe({ next: () => {} });
+      });
+  }
+
+  private setupSocketSubscriptions(): void {
+    this.socketService
+      .onCardDeleted()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((deletedCard: Task) => this.onCardDeleted(deletedCard));
+
+    this.socketService
+      .onCardCreated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((card: Task) => this.onCardCreated(card));
+
+    this.socketService
+      .onCardUpdated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((card: Task) => this.onCardUpdated(card));
+
+    this.socketService
+      .onListUpdated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((list) => this.onListUpdated(list));
+  }
+
+  private onCardDeleted(deletedCard: Task): void {
+    if (!this.taskList) return;
+    if (deletedCard.listId !== this.taskList.id) return;
+    this.taskList.cards = (this.taskList.cards || []).filter((t) => t.id !== deletedCard.id);
+    this.cdr.markForCheck();
+  }
+
+  private onCardCreated(card: Task): void {
+    if (!this.taskList) return;
+    if (card.listId !== this.taskList.id) return;
+    if (!Array.isArray(this.taskList.cards)) this.taskList.cards = [];
+    const exists = this.taskList.cards.some((t) => t.id === card.id);
+    if (!exists) {
+      this.taskList.cards.push(card);
+      this.sortTasksByPosition();
+      this.cdr.markForCheck();
+    }
+  }
+
+  private onCardUpdated(card: Task): void {
+    if (!this.taskList) return;
+    const isInThisList = card.listId === this.taskList.id;
+    const idx = (this.taskList.cards || []).findIndex((t) => t.id === card.id);
+
+    if (isInThisList) {
+      if (idx > -1 && this.taskList.cards) {
+        this.taskList.cards[idx] = { ...this.taskList.cards[idx], ...card };
+      } else {
+        if (!Array.isArray(this.taskList.cards)) this.taskList.cards = [];
+        this.taskList.cards.push(card);
+      }
+      this.sortTasksByPosition();
+    } else {
+      if (idx > -1 && this.taskList.cards) this.taskList.cards.splice(idx, 1);
+    }
+    this.cdr.markForCheck();
+  }
+
+  private onListUpdated(list: TaskList): void {
+    if (!this.taskList) return;
+    if (list.id !== this.taskList.id) return;
+    this.taskList = { ...this.taskList, ...list } as TaskList;
+    this.cdr.markForCheck();
   }
 
   close() {
