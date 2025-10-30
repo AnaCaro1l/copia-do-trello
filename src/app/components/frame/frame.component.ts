@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild, SimpleChanges, OnChanges } from '@angular/core';
 import { Frame } from '../../types/frame';
 import { CommonModule } from '@angular/common';
 import { TaskListComponent } from '../task-list/task-list.component';
@@ -60,7 +60,7 @@ type Collaborator = string | User;
   styleUrl: './frame.component.scss',
   providers: [ConfirmationService, MessageService],
 })
-export class FrameComponent {
+export class FrameComponent implements OnChanges {
   readonly usersRound = UsersRound;
   readonly userRoundPlus = UserRoundPlus;
   readonly ellipsis = Ellipsis;
@@ -82,6 +82,8 @@ export class FrameComponent {
 
   collaborators: Collaborator[] = [];
   selectedCollaborator: User | null = null;
+  @ViewChild('op') collaboratorPanel?: OverlayPanel;
+  isOwner = false;
 
   constructor(
     private authService: AuthService,
@@ -100,6 +102,7 @@ export class FrameComponent {
 
     this.collaborators = (this.frame.collaborators || []) as Collaborator[];
     console.log('Collaborators:', this.collaborators);
+    this.updateIsOwner();
     if (this.frame?.id) {
       this.socketService.joinWorkspace(this.frame.id);
     }
@@ -196,6 +199,7 @@ export class FrameComponent {
       .subscribe((updated) => {
         if (!updated || updated.id !== this.frame.id) return;
         this.frame = { ...this.frame, ...updated };
+        this.updateIsOwner();
       });
 
     // Frame (workspace) deleted elsewhere
@@ -409,6 +413,7 @@ export class FrameComponent {
       .subscribe({
         next: (workspace: Frame) => {
           this.frame = { ...this.frame, ...workspace };
+          this.updateIsOwner();
           this.messageService.add({
             severity: 'success',
             summary: 'Quadro atualizado',
@@ -427,6 +432,56 @@ export class FrameComponent {
         },
       });
   }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['frame']) {
+      this.updateIsOwner();
+    }
+  }
+
+  private updateIsOwner() {
+    const currentUserId = Number(this.getCurrentUser()?.id || 0);
+    const ownerId = Number(this.frame?.ownerId || 0);
+    this.isOwner = !!currentUserId && !!ownerId && currentUserId === ownerId;
+  }
+
+  removeCollaborator(selectedCollaborator: User) {
+    if (!selectedCollaborator) return;
+    this.workspaceService
+      .removeCollaborator(this.frame.id, selectedCollaborator.id!)
+      .subscribe({
+        next: () => {
+          this.collaborators = this.collaborators.filter((c) => {
+            if (typeof c === 'object' && c.id) {
+              return c.id !== selectedCollaborator.id;
+            }
+            return c !== String(selectedCollaborator.id);
+          });
+          if (Array.isArray(this.frame.collaborators)) {
+            this.frame.collaborators = this.frame.collaborators.filter(
+              (u) => u.id !== selectedCollaborator.id
+            );
+          }
+          this.selectedCollaborator = null;
+          this.collaboratorPanel?.hide();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Colaborador removido',
+            detail: `${selectedCollaborator.name || selectedCollaborator.email} foi removido do quadro.`,
+          });
+        },
+        error: (err) => {
+          console.error('Erro ao remover colaborador:', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: (err.error?.message ||
+              'Não foi possível remover o colaborador.') as string,
+          });
+        },
+      });
+  }
+
 
   private destroy$ = new Subject<void>();
 }

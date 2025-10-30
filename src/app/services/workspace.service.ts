@@ -67,5 +67,11 @@ export class WorkspaceService {
   deleteWorkspace(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/workspace/${id}`);
   }
+
+  removeCollaborator(workspaceId: number, userId: number): Observable<void> {
+    return this.http.request<void>('DELETE', `${this.apiUrl}/workspace/collaborators`, {
+      body: { workspaceId, userIds: [userId] }
+    });
+  }
 }
  
