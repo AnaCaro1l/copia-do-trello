@@ -16,7 +16,6 @@ export const createCard = async (
     title,
     description,
     listId,
-    mediaPath,
   });
 
   return res.status(201).json({

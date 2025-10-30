@@ -20,6 +20,9 @@ export class List extends Model<List> {
   @Column
   workspaceId: number;
 
+  @Column
+  orderIndex: number;
+
   @CreatedAt
   createdAt: Date;
 

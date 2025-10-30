@@ -11,24 +11,17 @@ interface Request {
   title: string;
   description?: string;
   listId: number;
-  mediaPath?: string;
 }
 
 export const CreateCardService = async ({
   title,
   description,
   listId,
-  mediaPath,
 }: Request): Promise<Card> => {
   await CardSchemas.createCard.validate({ title, description });
 
   if (!listId) {
     throw new AppError('Lista não encontrada');
-  }
-
-  let media = null;
-  if (mediaPath) {
-    media = await uploadOnCloudinary(mediaPath);
   }
 
   const maxPosition = (await Card.max('position', {

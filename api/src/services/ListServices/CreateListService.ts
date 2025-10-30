@@ -19,8 +19,15 @@ export const CreateListService = async ({
     throw new AppError('Área de trabalho não encontrada');
   }
 
+  const maxOrder = (await List.max('orderIndex', {
+    where: { workspaceId },
+  })) as number;
+
+  const nextOrder = (maxOrder ?? - 1) + 1;
+
   const newList = await List.create({
     title,
+    orderIndex: nextOrder,
     workspaceId,
   });
 

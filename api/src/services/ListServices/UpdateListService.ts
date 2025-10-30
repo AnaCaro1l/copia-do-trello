@@ -5,6 +5,7 @@ import { Workspace } from '../../models/Workspace';
 
 interface ListData {
   title?: string;
+  orderIndex?: number;
 }
 
 interface Request {
@@ -30,9 +31,21 @@ export const UpdateListService = async ({
     throw new AppError('Lista não encontrada');
   }
 
-  const {
-    title,
-  } = listData;
+  const { title, orderIndex } = listData;
+
+  if (orderIndex !== undefined) {
+    const oldListOrder = await List.findOne({
+      where: { orderIndex: orderIndex, workspaceId: list.workspaceId },
+    });
+
+    await oldListOrder?.update({
+      orderIndex: list.orderIndex,
+    });
+
+    await list.update({
+      orderIndex: orderIndex,
+    });
+  }
 
   const updatedList = await list.update({
     ...listData,
