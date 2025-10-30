@@ -20,7 +20,7 @@ import { TaskList } from '../../types/tasklist';
 import { TaskComponent } from '../task/task.component';
 import { CommonModule } from '@angular/common';
 import { MenuModule } from 'primeng/menu';
-import { MenuItem, MessageService } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
 import { ListService } from '../../services/list.service';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
@@ -65,7 +65,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.
   ],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
-  providers: [MessageService],
+  
 })
 export class TaskListComponent {
   readonly minimize = Minimize2;
@@ -95,7 +95,6 @@ export class TaskListComponent {
   constructor(
     private cdr: ChangeDetectorRef,
     private listService: ListService,
-    private messageService: MessageService,
     private cardService: CardService,
     private fb: FormBuilder,
     private socketService: SocketService,
@@ -132,13 +131,7 @@ export class TaskListComponent {
                 .subscribe((confirmed: boolean) => {
                   if (confirmed) {
                     this.listService.deleteList(this.taskList?.id!).subscribe({
-                      next: () => {
-                        this.messageService.add({
-                          severity: 'success',
-                          summary: 'Lista excluída',
-                          detail: 'A lista foi excluída com sucesso.',
-                        });
-                      },
+                      next: () => {},
                     });
                   }
                 });
@@ -256,13 +249,6 @@ export class TaskListComponent {
     };
     this.cardService.createCard(newCard as Task).subscribe({
       next: (task) => {
-        // Antes: atualizávamos a UI localmente empurrando o card recém-criado.
-        // Agora os sockets (show_new_card) vão inserir o card para evitar duplicação.
-        // if (!this.taskList) return;
-        // if (!Array.isArray(this.taskList.cards)) {
-        //   this.taskList.cards = [];
-        // }
-        // this.taskList.cards.push(task);
         this.formTask.reset();
         this.isEditMode.set(false);
       },
@@ -284,12 +270,7 @@ export class TaskListComponent {
     this.listService
       .updateList(this.taskList?.id!, newList as TaskList)
       .subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Lista atualizada',
-          });
+          next: () => {
           this.taskList!.title = newList.title!;
           this.visible = false;
         },
@@ -324,11 +305,6 @@ export class TaskListComponent {
             event.previousIndex
           );
           event.container.data.forEach((t, idx) => (t.position = idx));
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Não foi possível reordenar a tarefa.',
-          });
         },
       });
       return;
@@ -366,11 +342,6 @@ export class TaskListComponent {
         );
         event.container.data.forEach((t, idx) => (t.position = idx));
         event.previousContainer.data.forEach((t, idx) => (t.position = idx));
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: 'Não foi possível mover a tarefa.',
-        });
       },
     });
   }

@@ -1,5 +1,17 @@
-import { Component, Input, ViewChild, SimpleChanges, OnChanges } from '@angular/core';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import {
+  Component,
+  Input,
+  ViewChild,
+  SimpleChanges,
+  OnChanges,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { Frame } from '../../types/frame';
 import { CommonModule } from '@angular/common';
 import { TaskListComponent } from '../task-list/task-list.component';
@@ -16,9 +28,8 @@ import {
 } from 'lucide-angular';
 import { WorkspaceService } from '../../services/workspace.service';
 import { MenuModule } from 'primeng/menu';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
 import { TaskListDefaultComponent } from '../task-list-default/task-list-default.component';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
 import { TaskList } from '../../types/tasklist';
@@ -48,7 +59,6 @@ type Collaborator = string | User;
     LucideAngularModule,
     MenuModule,
     TaskListDefaultComponent,
-    ConfirmDialogModule,
     ToastModule,
     DialogModule,
     MatButtonModule,
@@ -60,9 +70,9 @@ type Collaborator = string | User;
   ],
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.scss',
-  providers: [ConfirmationService, MessageService],
+  
 })
-export class FrameComponent implements OnChanges {
+export class FrameComponent implements OnInit, OnChanges, OnDestroy {
   readonly usersRound = UsersRound;
   readonly userRoundPlus = UserRoundPlus;
   readonly ellipsis = Ellipsis;
@@ -90,8 +100,7 @@ export class FrameComponent implements OnChanges {
   constructor(
     private authService: AuthService,
     private workspaceService: WorkspaceService,
-    private confirmationService: ConfirmationService,
-    private messageService: MessageService,
+    
     private router: Router,
     private inviteService: InviteService,
     private socketService: SocketService,
@@ -100,15 +109,22 @@ export class FrameComponent implements OnChanges {
   ) {}
 
   ngOnInit() {
-    console.log('FrameComponent initialized with frame:', this.frame);
+    this.initState();
+    this.joinWorkspaceRoom();
+    this.buildMenuItems();
+    this.setupSocketSubscriptions();
+  }
 
+  private initState(): void {
     this.collaborators = (this.frame.collaborators || []) as Collaborator[];
-    console.log('Collaborators:', this.collaborators);
     this.updateIsOwner();
-    if (this.frame?.id) {
-      this.socketService.joinWorkspace(this.frame.id);
-    }
+  }
 
+  private joinWorkspaceRoom(): void {
+    if (this.frame?.id) this.socketService.joinWorkspace(this.frame.id);
+  }
+
+  private buildMenuItems(): void {
     this.items = [
       {
         label: 'Options',
@@ -116,106 +132,87 @@ export class FrameComponent implements OnChanges {
           {
             label: 'Editar',
             icon: 'pi pi-pencil',
-            command: () => {
-              this.display = true;
-            },
+            command: () => (this.display = true),
           },
           {
             label: 'Excluir',
             icon: 'pi pi-trash',
-            command: () => {
-              this.dialog
-                .open(ConfirmDialogComponent, {
-                  data: {
-                    message: 'Tem certeza que deseja excluir esse quadro?',
-                  },
-                })
-                .afterClosed()
-                .subscribe((confirmed: boolean) => {
-                  if (confirmed) {
-                    this.workspaceService
-                      .deleteWorkspace(this.frame.id)
-                      .subscribe({
-                        next: () => {
-                          this.router.navigate(['/home']);
-                          this.messageService.add({
-                            severity: 'success',
-                            summary: 'Sucesso',
-                            detail: 'Workspace excluído',
-                          });
-                        },
-                        error: (err) => {
-                          this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: err.error?.message as string,
-                          });
-                        },
-                      });
-                  }
-                });
-            },
+            command: () => this.confirmAndDelete(),
           },
         ],
       },
     ];
+  }
 
+  private setupSocketSubscriptions(): void {
     this.socketService
       .onListDeleted()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((deletedList: TaskList) => {
-        if (Array.isArray(this.frame.lists)) {
-          this.frame.lists = this.frame.lists.filter(
-            (list) => list.id !== deletedList.id
-          );
-        }
-      });
+      .subscribe((deletedList: TaskList) => this.onListDeleted(deletedList));
 
-    // New lists created in this workspace
     this.socketService
       .onListCreated()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((list: TaskList) => {
-        if (list.workspaceId !== this.frame.id) return;
-        if (!Array.isArray(this.frame.lists)) this.frame.lists = [];
-        const exists = this.frame.lists.some((l) => l.id === list.id);
-        if (!exists) this.frame.lists.push(list);
-      });
+      .subscribe((list: TaskList) => this.onListCreated(list));
 
-    // Lists updated in this workspace
     this.socketService
       .onListUpdated()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((list: TaskList) => {
-        if (list.workspaceId !== this.frame.id) return;
-        if (!Array.isArray(this.frame.lists)) return;
-        const idx = this.frame.lists.findIndex((l) => l.id === list.id);
-        if (idx > -1)
-          this.frame.lists[idx] = { ...this.frame.lists[idx], ...list };
-      });
+      .subscribe((list: TaskList) => this.onListUpdated(list));
 
-    // Frame (workspace) updated anywhere (user room event)
     this.socketService
       .onFrameUpdated()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((updated) => {
-        if (!updated || updated.id !== this.frame.id) return;
-        this.frame = { ...this.frame, ...updated };
-        this.updateIsOwner();
-      });
+      .subscribe((updated) => this.onFrameUpdated(updated));
 
-    // Frame (workspace) deleted elsewhere
     this.socketService
       .onFrameDeleted()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((deletedId) => {
-        if (deletedId !== this.frame.id) return;
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Quadro removido',
-          detail: 'Este quadro foi excluído por outro colaborador.',
+      .subscribe((deletedId) => this.onFrameDeleted(deletedId));
+  }
+
+  private onListDeleted(deletedList: TaskList): void {
+    if (!Array.isArray(this.frame.lists)) return;
+    this.frame.lists = this.frame.lists.filter((l) => l.id !== deletedList.id);
+  }
+
+  private onListCreated(list: TaskList): void {
+    if (list.workspaceId !== this.frame.id) return;
+    if (!Array.isArray(this.frame.lists)) this.frame.lists = [];
+    const exists = this.frame.lists.some((l) => l.id === list.id);
+    if (!exists) this.frame.lists.push(list);
+  }
+
+  private onListUpdated(list: TaskList): void {
+    if (list.workspaceId !== this.frame.id) return;
+    if (!Array.isArray(this.frame.lists)) return;
+    const idx = this.frame.lists.findIndex((l) => l.id === list.id);
+    if (idx > -1) this.frame.lists[idx] = { ...this.frame.lists[idx], ...list };
+  }
+
+  private onFrameUpdated(updated: any): void {
+    if (!updated || updated.id !== this.frame.id) return;
+    this.frame = { ...this.frame, ...updated };
+    this.updateIsOwner();
+  }
+
+  private onFrameDeleted(deletedId: number): void {
+    if (deletedId !== this.frame.id) return;
+    this.router.navigate(['/home']);
+  }
+
+  private confirmAndDelete(): void {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: { message: 'Tem certeza que deseja excluir esse quadro?' },
+      })
+      .afterClosed()
+      .subscribe((confirmed: boolean) => {
+        if (!confirmed) return;
+        this.workspaceService.deleteWorkspace(this.frame.id).subscribe({
+          next: () => this.router.navigate(['/home']),
+          error: (err) => console.error('Erro ao excluir workspace:', err),
         });
-        this.router.navigate(['/home']);
       });
   }
 
@@ -300,21 +297,10 @@ export class FrameComponent implements OnChanges {
     this.workspaceService
       .updateWorkspace(this.frame.id, { name: newTitle })
       .subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Quadro atualizado',
-            detail: 'Título alterado com sucesso.',
-          });
-        },
+        next: () => {},
         error: (err) => {
           this.frame.name = previous;
           console.error('Erro ao atualizar título do quadro:', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Não foi possível atualizar o título do quadro.',
-          });
         },
       });
   }
@@ -348,23 +334,10 @@ export class FrameComponent implements OnChanges {
       this.workspaceService
         .updateWorkspace(this.frame.id, { visibility: type })
         .subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'info',
-              summary: 'Visibilidade Alterada',
-              detail: type
-                ? 'O quadro agora é público.'
-                : 'O quadro agora é privado.',
-            });
-          },
+          next: () => {},
           error: (err) => {
             this.frame.visibility = !type;
             console.error('Erro ao atualizar visibilidade:', err);
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erro',
-              detail: 'Não foi possível atualizar a visibilidade no servidor.',
-            });
           },
         });
     }
@@ -373,22 +346,10 @@ export class FrameComponent implements OnChanges {
     const emails = (document.querySelector('#email') as HTMLInputElement).value;
     this.inviteService.addCollaborators(this.frame.id, [emails]).subscribe({
       next: () => {
-        this.messageService.add({
-          severity: 'info',
-          summary: 'Convite Enviado',
-          detail: 'O convite foi enviado com sucesso.',
-        });
         this.visible = false;
       },
       error: (err) => {
         console.error('Erro ao enviar convite:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: (err.error?.message ||
-            'Não foi possível enviar o convite.') as string,
-          life: 3000,
-        });
         this.visible = false;
       },
     });
@@ -416,21 +377,10 @@ export class FrameComponent implements OnChanges {
         next: (workspace: Frame) => {
           this.frame = { ...this.frame, ...workspace };
           this.updateIsOwner();
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Quadro atualizado',
-            detail: 'As alterações foram salvas com sucesso.',
-          });
           this.display = false;
         },
         error: (error) => {
           console.error('Error creating workspace:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: (error?.error?.message ||
-              'Falha ao salvar alterações.') as string,
-          });
         },
       });
   }
@@ -466,32 +416,19 @@ export class FrameComponent implements OnChanges {
           }
           this.selectedCollaborator = null;
           this.collaboratorPanel?.hide();
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Colaborador removido',
-            detail: `${selectedCollaborator.name || selectedCollaborator.email} foi removido do quadro.`,
-          });
+          
         },
         error: (err) => {
           console.error('Erro ao remover colaborador:', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: (err.error?.message ||
-              'Não foi possível remover o colaborador.') as string,
-          });
         },
       });
   }
 
-  // Reordenar listas (CDK Drag & Drop)
   dropListReorder(event: CdkDragDrop<TaskList[]>) {
     const lists = this.frame?.lists;
     if (!Array.isArray(lists)) return;
     moveItemInArray(lists, event.previousIndex, event.currentIndex);
-    // TODO: Persistir ordem no backend quando houver suporte (campo position)
   }
-
 
   private destroy$ = new Subject<void>();
 }

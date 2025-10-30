@@ -24,7 +24,6 @@ import { LucideAngularModule, Palette } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { Frame } from '../../../types/frame';
 import { DropdownModule } from 'primeng/dropdown';
-import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-dialog',
@@ -89,8 +88,7 @@ export class DialogComponent implements OnChanges {
   ];
 
   constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService
+    private fb: FormBuilder
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -141,12 +139,6 @@ export class DialogComponent implements OnChanges {
       if (this.fileInput?.nativeElement) {
         this.fileInput.nativeElement.value = '';
       }
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail:
-          'Tipo de arquivo inválido. Por favor, selecione uma imagem válida.',
-      });
       return;
     }
 
@@ -156,11 +148,6 @@ export class DialogComponent implements OnChanges {
       if (this.fileInput?.nativeElement) {
         this.fileInput.nativeElement.value = '';
       }
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'O tamanho do arquivo excede o limite de 5MB.',
-      });
       return;
     }
 

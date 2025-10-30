@@ -12,7 +12,6 @@ import { MatButtonModule, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AvatarModule } from 'primeng/avatar';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
-import { MessageService } from 'primeng/api';
 import { AuthService, AuthSession } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
@@ -42,7 +41,7 @@ import { BadgeModule } from 'primeng/badge';
   ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  providers: [MessageService, UserService],
+  providers: [UserService],
 })
 export class HeaderComponent implements OnInit {
   readonly panelLeftClose = PanelLeftClose;
@@ -67,7 +66,6 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private messageService: MessageService,
     private router: Router,
     private userService: UserService,
     private dialog: MatDialog,
@@ -101,11 +99,6 @@ export class HeaderComponent implements OnInit {
     localStorage.setItem('auth', 'false');
     this.authService.clearSession();
     this.router.navigate(['/login']);
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Sucesso',
-      detail: 'Deslogado com sucesso',
-    });
   }
 
   private getCurrentUserId(): number | null {
@@ -153,11 +146,6 @@ export class HeaderComponent implements OnInit {
     this.inviteService.validateInvite('accepted', inviteId).subscribe({
       next: (invite) => {
         const success = !!invite;
-        this.messageService.add({
-          severity: success ? 'success' : 'error',
-          summary: success ? 'Convite Aceito' : 'Erro',
-          detail: success ? 'Você aceitou o convite com sucesso.' : 'Erro ao aceitar o convite.',
-        });
         if (success) this.getInvites();
       },
       error: (err) => {
@@ -169,11 +157,6 @@ export class HeaderComponent implements OnInit {
   declineInvite(inviteId: number) {
     this.inviteService.validateInvite('declined', inviteId).subscribe({
       next: (valid) => {
-        this.messageService.add({
-          severity: valid ? 'success' : 'error',
-          summary: valid ? 'Convite Recusado' : 'Erro',
-          detail: valid ? 'Você recusou o convite com sucesso.' : 'Erro ao recusar o convite.',
-        });
       },
       error: (err) => {
         console.error('Erro ao recusar convite:', err);
