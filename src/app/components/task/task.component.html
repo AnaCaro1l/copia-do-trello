@@ -28,7 +28,8 @@
   [(visible)]="displayEditDialog"
   [modal]="true"
   [draggable]="false"
-  [style]="{ height: 'auto', minWidth: '30vw' }"
+  [style]="{ height: 'auto', minWidth: '30vw', maxWidth: '90vw' }"
+  styleClass="task-dialog"
   (onShow)="onDialogShow()"
   (onHide)="onDialogHide()"
 >
