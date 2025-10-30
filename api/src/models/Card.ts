@@ -18,9 +18,6 @@ export class Card extends Model<Card> {
   @Column
   description: string;
 
-  @Column
-  media: string;
-
   @ForeignKey(() => List)
   @Column
   listId: number;
