@@ -1,10 +1,12 @@
 import {
   BelongsTo,
   Column,
+  CreatedAt,
   ForeignKey,
   HasMany,
   Model,
   Table,
+  UpdatedAt,
 } from 'sequelize-typescript';
 import { Workspace } from './Workspace';
 import { Card } from './Card';
@@ -18,10 +20,10 @@ export class List extends Model<List> {
   @Column
   workspaceId: number;
 
-  @Column
+  @CreatedAt
   createdAt: Date;
 
-  @Column
+  @UpdatedAt
   updatedAt: Date;
 
   @BelongsTo(() => Workspace, 'workspaceId')
