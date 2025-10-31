@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/enviroment.prod';
 import { catchError, throwError } from 'rxjs';
 import { inject } from '@angular/core';
 import { MessageService } from 'primeng/api';
