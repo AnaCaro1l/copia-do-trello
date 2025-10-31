@@ -10,7 +10,6 @@ import {
 import {
   CdkDragDrop,
   DragDropModule,
-  moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import { Frame } from '../../types/frame';
 import { CommonModule } from '@angular/common';
@@ -196,6 +195,12 @@ export class FrameComponent implements OnInit, OnChanges, OnDestroy {
     if (!Array.isArray(this.frame.lists)) return;
     const idx = this.frame.lists.findIndex((l) => l.id === list.id);
     if (idx > -1) this.frame.lists[idx] = { ...this.frame.lists[idx], ...list };
+    // Reordenar localmente com base no orderIndex recebido do socket
+    this.frame.lists.sort((a, b) => {
+      const ao = typeof a.orderIndex === 'number' ? a.orderIndex : Number.MAX_SAFE_INTEGER;
+      const bo = typeof b.orderIndex === 'number' ? b.orderIndex : Number.MAX_SAFE_INTEGER;
+      return ao - bo;
+    });
   }
 
   private onFrameUpdated(updated: any): void {
@@ -435,19 +440,34 @@ export class FrameComponent implements OnInit, OnChanges, OnDestroy {
   dropListReorder(event: CdkDragDrop<TaskList[]>) {
     const lists = this.frame?.lists;
     if (!Array.isArray(lists)) return;
-    moveItemInArray(lists, event.previousIndex, event.currentIndex);
 
-    const moved = lists[event.currentIndex];
+    if (event.previousIndex === event.currentIndex) return;
+    const from = event.previousIndex;
+    const to = event.currentIndex;
+
+    const a = lists[from];
+    const b = lists[to];
+    if (!a || !b) return;
+    [lists[from], lists[to]] = [b, a];
+
+    const prevAOrder = a.orderIndex;
+    const prevBOrder = b.orderIndex;
+    a.orderIndex = to;
+    b.orderIndex = from;
+
+    const moved = lists[to];
     if (!moved || typeof moved.id !== 'number') return;
 
-    const targetOrderIndex = event.currentIndex;
+    const targetOrderIndex = to;
 
     this.listService
-      .updateList(moved.id, { ...(moved as TaskList), orderIndex: targetOrderIndex })
+      .updateList(moved.id, { ...moved, orderIndex: targetOrderIndex })
       .subscribe({
         next: () => {},
         error: (err) => {
-          moveItemInArray(lists, event.currentIndex, event.previousIndex);
+          [lists[from], lists[to]] = [a, b];
+          a.orderIndex = prevAOrder;
+          b.orderIndex = prevBOrder;
           console.error('Erro ao atualizar ordem das listas:', err);
         },
       });
