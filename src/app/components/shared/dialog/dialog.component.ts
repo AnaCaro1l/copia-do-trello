@@ -1,7 +1,21 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ColorPickerModule } from 'primeng/colorpicker';
@@ -9,7 +23,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { LucideAngularModule, Palette } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { Frame } from '../../../types/frame';
-
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-dialog',
@@ -23,7 +37,9 @@ import { Frame } from '../../../types/frame';
     ColorPickerModule,
     FileUploadModule,
     LucideAngularModule,
-    MatButtonModule
+    MatButtonModule,
+    DropdownModule,
+    FormsModule,
   ],
   templateUrl: './dialog.component.html',
   styleUrls: ['./dialog.component.scss'],
@@ -39,27 +55,46 @@ export class DialogComponent implements OnChanges {
   @Input() submitLabel: string = 'Criar';
   @Output() create = new EventEmitter<any>();
 
+  options: { label: string; value: 'color' | 'image' }[] = [
+    { label: 'Cor de Fundo', value: 'color' },
+    { label: 'Imagem de Fundo', value: 'image' },
+  ];
+
+  selectedOption: 'color' | 'image' = 'color';
+
   readonly palette = Palette;
 
-  frameForm = this.fb.group({
-    name: ['', Validators.required],
-    visibility: [1, Validators.required],
-    backgroundColor: ['#374151'],
-    backgroundUrl: [null as File | string | null],
-  }, { validators: [] });
+  readonly allowedImageTypes = new Set([
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'image/webp',
+  ]);
+  readonly maxFileSizeBytes = 5 * 1024 * 1024;
+
+  frameForm = this.fb.group(
+    {
+      name: ['', Validators.required],
+      visibility: [1, Validators.required],
+      backgroundColor: ['#374151'],
+      backgroundUrl: [null as File | string | null],
+    },
+    { validators: [] }
+  );
 
   stateOptions: any[] = [
     { label: 'Particular', value: 0 },
     { label: 'Público', value: 1 },
   ];
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialData'] && this.initialData) {
       this.populateFromInitialData();
     }
-    // When dialog becomes visible again, re-populate the form with the latest data
     if (changes['visible'] && this.visible && this.initialData) {
       this.populateFromInitialData();
     }
@@ -85,20 +120,44 @@ export class DialogComponent implements OnChanges {
     if (!value) {
       this.resetForm();
     } else if (this.initialData) {
-      // Ensure the form is populated every time the dialog opens
       this.populateFromInitialData();
     }
   }
 
   onFileSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.frameForm.patchValue({ backgroundUrl: file, backgroundColor: null });
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] || null;
+    const control = this.frameForm.get('backgroundUrl');
+
+    if (!file) {
+      return;
     }
+
+    if (!this.allowedImageTypes.has(file.type)) {
+      control?.setErrors({ invalidType: true });
+      this.frameForm.patchValue({ backgroundUrl: null });
+      if (this.fileInput?.nativeElement) {
+        this.fileInput.nativeElement.value = '';
+      }
+      return;
+    }
+
+    if (file.size > this.maxFileSizeBytes) {
+      control?.setErrors({ maxSizeExceeded: true });
+      this.frameForm.patchValue({ backgroundUrl: null });
+      if (this.fileInput?.nativeElement) {
+        this.fileInput.nativeElement.value = '';
+      }
+      return;
+    }
+
+    control?.setErrors(null);
+    this.frameForm.patchValue({ backgroundUrl: file, backgroundColor: null });
   }
 
   onColorPicked() {
     this.frameForm.patchValue({ backgroundUrl: null });
+    this.frameForm.get('backgroundUrl')?.setErrors(null);
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';
     }
@@ -110,7 +169,12 @@ export class DialogComponent implements OnChanges {
   }
 
   private resetForm() {
-    this.frameForm.reset({ visibility: 1, backgroundColor: '#374151', name: '', backgroundUrl: null });
+    this.frameForm.reset({
+      visibility: 1,
+      backgroundColor: '#374151',
+      name: '',
+      backgroundUrl: null,
+    });
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';
     }
@@ -123,8 +187,10 @@ export class DialogComponent implements OnChanges {
       name: data.name ?? '',
       visibility:
         typeof data.visibility === 'boolean'
-          ? data.visibility ? 1 : 0
-          : (data.visibility ?? 1),
+          ? data.visibility
+            ? 1
+            : 0
+          : data.visibility ?? 1,
       backgroundColor: data.backgroundColor ?? null,
       backgroundUrl: (data.backgroundUrl ?? null) as File | string | null,
     });

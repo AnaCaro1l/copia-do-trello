@@ -1,10 +1,12 @@
 import {
   BelongsTo,
   Column,
+  CreatedAt,
   Default,
   ForeignKey,
   Model,
   Table,
+  UpdatedAt,
 } from 'sequelize-typescript';
 import { User } from './User';
 import { Workspace } from './Workspace';
@@ -27,10 +29,10 @@ export class Invite extends Model<Invite> {
   @Column
   status: 'pending' | 'accepted' | 'declined';
 
-  @Column
+  @CreatedAt
   createdAt: Date;
 
-  @Column
+  @UpdatedAt
   updatedAt: Date;
 
   @BelongsTo(() => User, 'senderId')

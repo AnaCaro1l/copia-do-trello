@@ -22,6 +22,7 @@ export const ShowWorkspaceService = async ({
       { model: List, as: 'lists', include: ['cards'] },
     ],
     order: [
+      [{ model: List, as: 'lists' }, 'orderIndex', 'ASC'],
       [{ model: List, as: 'lists' }, 'createdAt', 'ASC'],
       [{ model: List, as: 'lists' }, { model: Card, as: 'cards' }, 'position', 'ASC'],
       [{ model: List, as: 'lists' }, { model: Card, as: 'cards' }, 'createdAt', 'ASC'],

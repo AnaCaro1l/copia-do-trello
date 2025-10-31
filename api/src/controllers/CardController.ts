@@ -16,7 +16,6 @@ export const createCard = async (
     title,
     description,
     listId,
-    mediaPath,
   });
 
   return res.status(201).json({
@@ -54,19 +53,11 @@ export const updateCard = async (
   res: Response
 ): Promise<Response> => {
   const id = req.params.id;
-  const { title, description, completed, dueDate, color, listId, position } = req.body;
-  const mediaPath = req.file?.path;
+  const cardData = req.body;
 
   const card = await UpdateCardService({
-    title,
-    description,
-    mediaPath,
     id,
-    completed,
-    dueDate,
-    color,
-    listId,
-    position,
+    cardData,
   });
 
   return res.status(200).json({

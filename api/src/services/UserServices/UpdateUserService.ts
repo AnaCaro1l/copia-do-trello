@@ -2,24 +2,32 @@ import { AppError } from '../../errors/AppError';
 import { User } from '../../models/User';
 import bcrypt from 'bcrypt';
 
-interface Request {
-  id: number;
+interface UserData {
   name?: string;
   email?: string;
   password?: string;
 }
 
+interface Request {
+  id: number;
+  userData: UserData;
+}
+
 export const UpdateUserService = async ({
   id,
-  name,
-  email,
-  password,
+  userData,
 }: Request): Promise<User> => {
   const user = await User.findByPk(id);
 
   if (!user) {
     throw new AppError('Usuário não encontrado');
   }
+
+  let {
+    name,
+    email,
+    password,
+  } = userData;
 
   if (password) {
     const isOldPassword = await bcrypt.compare(password, user.passwordHash);
@@ -32,10 +40,7 @@ export const UpdateUserService = async ({
   }
 
   const updatedUser = await user.update({
-    name: name ? name : user.name,
-    email: email ? email : user.email,
-    passwordHash: password ? password : user.passwordHash,
-    updatedAt: new Date(),
+    ...userData,
   });
 
   return updatedUser;

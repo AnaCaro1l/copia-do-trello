@@ -9,6 +9,7 @@ export const ListListsService = async (
   const lists = await List.findAll({
     where: { workspaceId: workspaceId },
     include: includeOptions,
+    order: [['orderIndex', 'ASC']],
   });
 
   for (const list of lists) {

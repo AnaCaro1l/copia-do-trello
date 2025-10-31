@@ -1,10 +1,12 @@
 import {
   BelongsToMany,
   Column,
+  CreatedAt,
   DataType,
   HasMany,
   Model,
   Table,
+  UpdatedAt,
 } from 'sequelize-typescript';
 import { Workspace } from './Workspace';
 import { WorkspaceUser } from './WorkspaceUser';
@@ -29,6 +31,12 @@ export class User extends Model<User> {
 
   @HasMany(() => Workspace)
   workspaces: Workspace[];
+
+  @CreatedAt
+  createdAt: Date;
+
+  @UpdatedAt
+  updatedAt: Date;
 
   @BelongsToMany(() => Workspace, () => WorkspaceUser)
   collaborations: Workspace[];

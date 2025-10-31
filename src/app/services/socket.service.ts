@@ -138,23 +138,43 @@ export class SocketService {
     this.socket.emit('leave_workspace', workspaceId);
   }
 
-  onListDeleted(): Observable<TaskList> { return this.listDeleted$.asObservable(); }
+  onListDeleted(): Observable<TaskList> {
+    return this.listDeleted$.asObservable();
+  }
 
-  onFrameCreated(): Observable<Frame> { return this.frameCreated$.asObservable(); }
+  onFrameCreated(): Observable<Frame> {
+    return this.frameCreated$.asObservable();
+  }
 
-  onCardDeleted(): Observable<Task> { return this.cardDeleted$.asObservable(); }
+  onCardDeleted(): Observable<Task> {
+    return this.cardDeleted$.asObservable();
+  }
 
-  onCardCreated(): Observable<Task> { return this.cardCreated$.asObservable(); }
+  onCardCreated(): Observable<Task> {
+    return this.cardCreated$.asObservable();
+  }
 
-  onCardUpdated(): Observable<Task> { return this.cardUpdated$.asObservable(); }
+  onCardUpdated(): Observable<Task> {
+    return this.cardUpdated$.asObservable();
+  }
 
-  onListCreated(): Observable<TaskList> { return this.listCreated$.asObservable(); }
+  onListCreated(): Observable<TaskList> {
+    return this.listCreated$.asObservable();
+  }
 
-  onListUpdated(): Observable<TaskList> { return this.listUpdated$.asObservable(); }
+  onListUpdated(): Observable<TaskList> {
+    return this.listUpdated$.asObservable();
+  }
 
-  onFrameUpdated(): Observable<Frame> { return this.frameUpdated$.asObservable(); }
+  onFrameUpdated(): Observable<Frame> {
+    return this.frameUpdated$.asObservable();
+  }
 
-  onFrameDeleted(): Observable<number> { return this.frameDeleted$.asObservable(); }
+  onFrameDeleted(): Observable<number> {
+    return this.frameDeleted$.asObservable();
+  }
 
-  onInviteUpdated(): Observable<number> { return this.inviteUpdated$.asObservable(); }
+  onInviteUpdated(): Observable<number> {
+    return this.inviteUpdated$.asObservable();
+  }
 }

@@ -1,11 +1,9 @@
-<p-toast />
-<p-confirmDialog />
 <div
   *ngIf="isOpen()"
-  class="bg-gray-900 rounded-lg w-[272px] cursor-pointer shadow-lg hover:shadow-2xl hover:bg-opacity-95 transition-shadow"
+  class="bg-gray-900 rounded-lg min-w-[272px] cursor-pointer shadow-lg hover:shadow-2xl hover:bg-opacity-95 transition-shadow"
 >
   <div class="justify-between flex p-4 items-center">
-  <div class="text-white">{{ taskList?.title || 'Sem nome' }}</div>
+    <div class="text-white">{{ taskList?.title }}</div>
     <div>
       <button
         (click)="toggleOpen()"
@@ -38,12 +36,12 @@
     [cdkDropListConnectedTo]="connectedDropLists"
     (cdkDropListDropped)="drop($event)"
   >
-  @for (task of cards; track task.id) {
+    @for (task of cards; track task.id) {
     <app-task [task]="task"></app-task>
     }
     <div
       *ngIf="(cards?.length ?? 0) === 0"
-      class="text-white/50 text-sm border border-dashed border-white/20 rounded-md p-3 text-center select-none"
+      class="text-white/50 text-sm h-[40px] border border-dashed border-white/20 rounded-md p-3 text-center select-none"
     >
       Solte tarefas aqui
     </div>
@@ -66,7 +64,7 @@
         [formGroup]="formTask"
         (ngSubmit)="Submit()"
         *ngIf="isEditMode()"
-        class="flex gap-2 items-center px-1 "
+        class="flex gap-2 items-center px-1 w-full justify-between"
       >
         <input
           type="text"
@@ -105,7 +103,7 @@
     >
       <lucide-angular [img]="maximize" color="white" size="18"></lucide-angular>
     </button>
-  <div class="text-white py-2">{{ taskList?.title || 'Sem nome' }}</div>
+    <div class="text-white py-2">{{ taskList?.title || "Sem nome" }}</div>
   </div>
 </div>
 
@@ -121,9 +119,20 @@
     </form>
   </ng-template>
   <ng-template pTemplate="footer">
-    <button mat-flat-button color="warn" class="mr-2" (click)="this.visible = false">
+    <button
+      mat-flat-button
+      color="warn"
+      class="mr-2"
+      (click)="this.visible = false"
+    >
       Cancelar
     </button>
-    <button mat-flat-button [disabled]="formTaskEdit.invalid" (click)="onEditList()">Salvar</button>
+    <button
+      mat-flat-button
+      [disabled]="formTaskEdit.invalid"
+      (click)="onEditList()"
+    >
+      Salvar
+    </button>
   </ng-template>
 </p-dialog>

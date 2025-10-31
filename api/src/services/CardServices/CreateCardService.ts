@@ -11,14 +11,12 @@ interface Request {
   title: string;
   description?: string;
   listId: number;
-  mediaPath?: string;
 }
 
 export const CreateCardService = async ({
   title,
   description,
   listId,
-  mediaPath,
 }: Request): Promise<Card> => {
   await CardSchemas.createCard.validate({ title, description });
 
@@ -26,23 +24,16 @@ export const CreateCardService = async ({
     throw new AppError('Lista não encontrada');
   }
 
-  let media = null;
-  if (mediaPath) {
-    media = await uploadOnCloudinary(mediaPath);
-  }
+  const maxPosition = (await Card.max('position', {
+    where: { listId },
+  })) as number;
 
-  const maxPosition = (await Card.max('position', { where: { listId } })) as
-    | null;
-  const nextPosition =
-    Number.isFinite(maxPosition as number) && maxPosition !== null
-      ? (maxPosition as number) + 1
-      : 0;
+  const nextPosition = maxPosition ? maxPosition + 1 : 0;
 
   const newCard = await Card.create({
     title,
     description,
     listId,
-    media,
     position: nextPosition,
   });
 
