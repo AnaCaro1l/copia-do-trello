@@ -1,5 +1,4 @@
 <p-toast />
-<p-confirmDialog />
 <div
   [ngClass]="{ 'bg-[#374151]': !frame.backgroundColor }"
   [style.background-color]="frame.backgroundColor"
@@ -11,7 +10,7 @@
   class="bg-[#374151] rounded-2xl w-[98vw] md:w-[97vw] h-[89vh] md:h-[87vh] m-2 md:m-5 frame overflow-x-auto"
 >
   <div
-    class="bg-white/10 w-full rounded-t-xl p-2 md:p-3 justify-between flex flex-wrap items-center gap-2"
+    class="bg-white/20 w-full rounded-t-xl p-2 md:p-3 justify-between flex flex-wrap items-center gap-2"
   >
     <h1
       *ngIf="!isEditingTitle"
@@ -83,9 +82,14 @@
   </div>
   <div
     class="flex gap-3 md:gap-4 p-2 md:p-2 m-1 md:m-2 overflow-x-auto max-w-[96vw] md:max-w-[95vw] h-[80vh] md:h-[76vh]"
+    cdkDropList
+    cdkDropListOrientation="horizontal"
+    [cdkDropListData]="frame.lists || []"
+    [cdkDropListDisabled]="isCardDialogOpen"
+    (cdkDropListDropped)="dropListReorder($event)"
   >
     @for (tasklist of frame.lists; track $index) {
-    <div class="snap-start">
+    <div class="snap-start" cdkDrag [cdkDragData]="tasklist" [cdkDragDisabled]="isCardDialogOpen">
       <app-task-list
         [taskList]="tasklist"
         [connectedDropLists]="dropListIds"
@@ -165,6 +169,20 @@
           <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full"
             >Proprietário</span
           >
+        </div>
+        <div *ngIf="selectedCollaborator?.id !== frame.ownerId && isOwner">
+          <button
+            (click)="removeCollaborator(selectedCollaborator!)"
+            class="text-xs text-red-600 hover:underline mt-1"
+          >
+            Remover do quadro
+          </button>
+        </div>
+        <div
+          *ngIf="selectedCollaborator?.id !== frame.ownerId && !isOwner"
+          class="text-xs text-gray-400 mt-1"
+        >
+          Apenas o proprietário pode remover colaboradores
         </div>
       </div>
     </div>

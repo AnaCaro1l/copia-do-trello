@@ -27,6 +27,7 @@
       </button>
     </div>
     <div class="flex items-center">
+      @if (invitesUnread.length === 0) {
       <button
         (click)="op2.toggle($event)"
         mat-icon-button
@@ -36,6 +37,21 @@
       >
         <lucide-angular [img]="bell" color="white" size="20"></lucide-angular>
       </button>
+      } @else {
+      <button
+        (click)="op2.toggle($event)"
+        class="group mt-2 rounded-full p-1 px-2 text-white hover:bg-white/10 transition-colors"
+        aria-label="Notificações"
+        matTooltip="Notificações"
+      >
+        <i
+          class="pi pi-bell text-xl p-1"
+          pBadge
+          value="{{ invitesUnread.length }}"
+        ></i>
+      </button>
+      }
+
       <p-avatar
         (click)="op.toggle($event)"
         label="{{ getCurrentUser()?.name.charAt(0) | uppercase }}"
@@ -100,8 +116,20 @@
           {{ invite.workspace.name }}
         </p>
         <div *ngIf="invite.status === 'pending'" class="flex gap-1">
-          <button mat-flat-button color="primary" (click)="acceptInvite(invite.id)">Aceitar</button>
-          <button mat-flat-button color="warn" (click)="declineInvite(invite.id)">Recusar</button>
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="acceptInvite(invite.id)"
+          >
+            Aceitar
+          </button>
+          <button
+            mat-flat-button
+            color="warn"
+            (click)="declineInvite(invite.id)"
+          >
+            Recusar
+          </button>
         </div>
         <p class="text-xs text-gray-400">
           {{ invite.createdAt | date : "short" }}
@@ -118,15 +146,27 @@
           {{ invite.workspace.name }}
         </p>
         <div class="flex gap-1">
-          <button mat-flat-button color="primary" (click)="acceptInvite(invite.id)">Aceitar</button>
-          <button mat-flat-button color="warn" (click)="declineInvite(invite.id)">Recusar</button>
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="acceptInvite(invite.id)"
+          >
+            Aceitar
+          </button>
+          <button
+            mat-flat-button
+            color="warn"
+            (click)="declineInvite(invite.id)"
+          >
+            Recusar
+          </button>
         </div>
         <p class="text-xs text-gray-400">
           {{ invite.createdAt | date : "short" }}
         </p>
       </div>
     </p-tabPanel>
-    <p-tabPanel header="Lidos"> 
+    <p-tabPanel header="Lidos">
       <div
         *ngFor="let invite of invitesRead"
         class="p-1 border-b border-t border-gray-700 w-full gap-2 flex flex-col"

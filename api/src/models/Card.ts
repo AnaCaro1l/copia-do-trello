@@ -1,10 +1,12 @@
 import {
   BelongsTo,
   Column,
+  CreatedAt,
   Default,
   ForeignKey,
   Model,
   Table,
+  UpdatedAt,
 } from 'sequelize-typescript';
 import { List } from './List';
 
@@ -15,9 +17,6 @@ export class Card extends Model<Card> {
 
   @Column
   description: string;
-
-  @Column
-  media: string;
 
   @ForeignKey(() => List)
   @Column
@@ -36,10 +35,10 @@ export class Card extends Model<Card> {
   @Column
   position: number;
 
-  @Column
+  @CreatedAt
   createdAt: Date;
 
-  @Column
+  @UpdatedAt
   updatedAt: Date;
 
   @BelongsTo(() => List, 'listId')

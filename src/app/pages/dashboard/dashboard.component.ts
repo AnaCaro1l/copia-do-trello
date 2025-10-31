@@ -3,15 +3,15 @@ import { ToastModule } from 'primeng/toast';
 import { HeaderComponent } from '../../components/header/header.component';
 import { MessageService } from 'primeng/api';
 import { FrameComponent } from '../../components/frame/frame.component';
-import { ActivatedRoute } from '@angular/router'; // Correto
+import { ActivatedRoute } from '@angular/router'; 
 import { WorkspaceService } from '../../services/workspace.service';
 import { Frame } from '../../types/frame';
-import { CommonModule } from '@angular/common'; // Importe para usar *ngIf no template
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ToastModule, HeaderComponent, FrameComponent, CommonModule], // Adicione CommonModule
+  imports: [ToastModule, HeaderComponent, FrameComponent, CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   providers: [MessageService],

@@ -6,21 +6,37 @@ import { FormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CardService } from '../../services/card.service';
 import { DialogModule } from 'primeng/dialog';
-import { MessageService } from 'primeng/api';
 import { SocketService } from '../../services/socket.service';
 import { Subject, EMPTY } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, takeUntil, catchError } from 'rxjs/operators';
-import { LucideAngularModule, Palette } from "lucide-angular";
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  takeUntil,
+  catchError,
+} from 'rxjs/operators';
+import { LucideAngularModule, Palette, Trash } from 'lucide-angular';
+import { UIStateService } from '../../services/ui-state.service';
 
 @Component({
   selector: 'app-task',
   standalone: true,
-  imports: [CommonModule, FormsModule, CheckboxModule, DragDropModule, DialogModule, LucideAngularModule ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CheckboxModule,
+    DragDropModule,
+    DialogModule,
+    LucideAngularModule,
+  ],
   templateUrl: './task.component.html',
   styleUrl: './task.component.scss',
 })
 export class TaskComponent implements OnInit, OnDestroy {
   readonly palette = Palette;
+  readonly trash = Trash;
+
+  defaultColor: string = '#374151';
   @Input() task: Task | null = null;
 
   displayEditDialog: boolean = false;
@@ -28,7 +44,11 @@ export class TaskComponent implements OnInit, OnDestroy {
   isEditingTitle = false;
   tempTitle = '';
 
-  constructor(private cardService: CardService, private messageService: MessageService, private socketService: SocketService) {}
+  constructor(
+    private cardService: CardService,
+    private socketService: SocketService,
+    private uiState: UIStateService
+  ) {}
 
   private colorChange$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -43,7 +63,10 @@ export class TaskComponent implements OnInit, OnDestroy {
           const previous = this.task.color;
           this.task.color = value || '#374151';
           return this.cardService
-            .updateCard(this.task.id, { ...this.task, color: this.task.color } as Task)
+            .updateCard(this.task.id, {
+              ...this.task,
+              color: this.task.color,
+            } as Task)
             .pipe(
               catchError((err) => {
                 console.error('Erro ao atualizar cor de fundo da tarefa:', err);
@@ -67,7 +90,9 @@ export class TaskComponent implements OnInit, OnDestroy {
     this.tempTitle = this.task.title || '';
     this.isEditingTitle = true;
     setTimeout(() => {
-      const input = document.getElementById('task-title-input') as HTMLInputElement | null;
+      const input = document.getElementById(
+        'task-title-input'
+      ) as HTMLInputElement | null;
       if (input) input.focus();
     });
   }
@@ -87,13 +112,15 @@ export class TaskComponent implements OnInit, OnDestroy {
     this.task.title = newTitle;
     this.isEditingTitle = false;
 
-    this.cardService.updateCard(this.task.id, { ...this.task, title: newTitle } as Task).subscribe({
-      next: () => {},
-      error: (err) => {
-        console.error('Erro ao atualizar título da tarefa:', err);
-        if (this.task) this.task.title = previous as string;
-      },
-    });
+    this.cardService
+      .updateCard(this.task.id, { ...this.task, title: newTitle } as Task)
+      .subscribe({
+        next: () => {},
+        error: (err) => {
+          console.error('Erro ao atualizar título da tarefa:', err);
+          if (this.task) this.task.title = previous as string;
+        },
+      });
   }
 
   saveDescription() {
@@ -111,12 +138,13 @@ export class TaskComponent implements OnInit, OnDestroy {
     if (!this.task) return;
     this.cardService.deleteCard(this.task.id).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Task deleted successfully' });
         this.displayEditDialog = false;
+        this.uiState.setCardDialogOpen(false);
       },
       error: (err) => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error deleting task' });
+        console.error('Erro ao deletar tarefa:', err);
         this.displayEditDialog = false;
+        this.uiState.setCardDialogOpen(false);
       },
     });
   }
@@ -127,7 +155,21 @@ export class TaskComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.uiState.setCardDialogOpen(false);
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  onDialogShow() {
+    this.uiState.setCardDialogOpen(true);
+  }
+
+  onDialogHide() {
+    this.uiState.setCardDialogOpen(false);
+  }
+
+  onDefaultColor() {
+    if (!this.task) return;
+    this.task.color = this.defaultColor;
   }
 }

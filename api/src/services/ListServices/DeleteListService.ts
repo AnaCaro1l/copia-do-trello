@@ -14,17 +14,31 @@ export const DeleteListService = async (id: string): Promise<void> => {
     throw new AppError('Lista não encontrada');
   }
 
-  const cards = await Card.findAll({
-    where: {
-      listId: id,
-    },
+  const lists = await List.findAll({
+    where: { workspaceId: list.workspaceId },
   });
 
-  for (const card of cards) {
-    await card.destroy();
+  for (const l of lists) {
+    if (l.orderIndex > list.orderIndex) {
+      const newOrder = l.orderIndex - 1;
+
+      await l.update({
+        orderIndex: newOrder < 0 ? 0 : newOrder,
+      });
+    }
+
+    const cards = await Card.findAll({
+      where: {
+        listId: id,
+      },
+    });
+
+    for (const card of cards) {
+      await card.destroy();
+    }
+
+    io.to(`workspace_${list.workspaceId}`).emit('delete_list', list);
+
+    await list.destroy();
   }
-
-  io.to(`workspace_${list.workspaceId}`).emit('delete_list', list);
-
-  await list.destroy();
 };

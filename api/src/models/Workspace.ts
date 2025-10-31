@@ -2,11 +2,13 @@ import {
   BelongsTo,
   BelongsToMany,
   Column,
+  CreatedAt,
   Default,
   ForeignKey,
   HasMany,
   Model,
   Table,
+  UpdatedAt,
 } from 'sequelize-typescript';
 import { User } from './User';
 import { WorkspaceUser } from './WorkspaceUser';
@@ -34,6 +36,12 @@ export class Workspace extends Model<Workspace> {
   @ForeignKey(() => User)
   @Column
   ownerId: number;
+
+  @CreatedAt
+  createdAt: Date;
+
+  @UpdatedAt
+  updatedAt: Date;
 
   @BelongsTo(() => User, 'ownerId')
   owner: User;

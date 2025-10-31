@@ -7,6 +7,6 @@ export interface TaskList {
   createdAt: string | Date;
   updatedAt: string | Date;
   cards: Task[];
-  // UI-only state (not from backend)
   isOpen?: boolean;
+  orderIndex?: number;
 }

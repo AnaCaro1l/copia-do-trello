@@ -2,16 +2,13 @@ import io from '../../app';
 import { Card } from '../../models/Card';
 import uploadOnCloudinary from '../../utils/cloudinary';
 import { sequelize } from '../../database';
-import { Op } from 'sequelize';
 import { AppError } from '../../errors/AppError';
 import { List } from '../../models/List';
 import { Workspace } from '../../models/Workspace';
 
-interface Request {
+interface CardData {
   title?: string;
   description?: string;
-  mediaPath?: string;
-  id: string;
   completed?: boolean;
   listId?: number;
   position?: number;
@@ -19,19 +16,17 @@ interface Request {
   color?: string;
 }
 
+interface Request {
+  id: string;
+  cardData: CardData;
+}
+
 export const UpdateCardService = async ({
-  title,
-  description,
-  mediaPath,
   id,
-  completed,
-  listId,
-  position,
-  dueDate,
-  color,
+  cardData,
 }: Request): Promise<Card> => {
   const card = await Card.findOne({
-    where: { id: id },
+    where: { id },
     include: [
       {
         model: List,
@@ -40,132 +35,77 @@ export const UpdateCardService = async ({
       },
     ],
   });
-  if (!card) {
-    throw new AppError('Card não encontrado');
-  }
 
-  let media = null;
-  if (mediaPath) {
-    media = await uploadOnCloudinary(mediaPath);
-  }
+  if (!card) throw new AppError('Card não encontrado');
 
-  if (dueDate) {
-    dueDate = new Date(dueDate);
-  }
+  const {
+    title,
+    description,
+    completed,
+    listId,
+    position,
+    dueDate,
+    color,
+  } = cardData;
 
-  const oldListId = card.listId;
-  const oldPos = card.position;
-  const targetListId = typeof listId === 'number' ? listId : oldListId;
+  const currentListId = card.listId;
+  const targetListId = listId ?? currentListId;
 
-  let newPos = typeof position === 'number' ? position : undefined;
+  const oldListCards = await Card.findAll({
+    where: { listId: currentListId },
+    order: [['position', 'ASC']],
+  });
+
+  const newListCards = await Card.findAll({
+    where: { listId: targetListId },
+    order: [['position', 'ASC']],
+  });
 
   const updatedCard = await sequelize.transaction(async (t) => {
-    if (targetListId !== oldListId) {
-      await Card.increment('position', {
-        by: -1,
-        where: {
-          listId: oldListId,
-          position: { [Op.gt]: oldPos },
-        },
-        transaction: t,
-      });
+    if (targetListId !== currentListId) {
+      const oldIndex = oldListCards.findIndex((c) => c.id === card.id);
+      if (oldIndex >= 0) oldListCards.splice(oldIndex, 1);
 
-      const maxTargetPos = (await Card.max('position', {
-        where: { listId: targetListId },
-        transaction: t,
-      })) as number | null;
-      const endPos =
-        Number.isFinite(maxTargetPos as number) && maxTargetPos !== null
-          ? (maxTargetPos as number) + 1
-          : 0;
-      if (newPos === undefined || newPos > endPos) newPos = endPos;
-      if (newPos < 0) newPos = 0;
+      let newPos = position;
+      if (newPos < 0 || newPos > newListCards.length) {
+        throw new AppError('Posição inválida');
+      } 
 
-      await Card.increment('position', {
-        by: 1,
-        where: {
-          listId: targetListId,
-          position: { [Op.gte]: newPos },
-        },
-        transaction: t,
-      });
+      newListCards.splice(newPos, 0, card);
 
-      return await card.update(
-        {
-          title: title ?? card.title,
-          description: description ?? card.description,
-          media: media ?? card.media,
-          completed: completed ?? card.completed,
-          listId: targetListId,
-          position: newPos,
-          dueDate: dueDate ?? card.dueDate,
-          color: color ?? card.color,
-          updatedAt: new Date(),
-        },
-        { transaction: t }
-      );
+      await Promise.all([
+        ...oldListCards.map((c, i) =>
+          c.update({ position: i }, { transaction: t })
+        ),
+        ...newListCards.map((c, i) =>
+          c.update({ position: i, listId: targetListId }, { transaction: t })
+        ),
+      ]);
+
+      return await card.update({ ...cardData }, { transaction: t });
     }
 
-    if (typeof newPos === 'number' && newPos !== oldPos) {
-      const maxPos = (await Card.max('position', {
-        where: { listId: oldListId },
-        transaction: t,
-      })) as number | null;
-      const endPos =
-        Number.isFinite(maxPos as number) && maxPos !== null
-          ? (maxPos as number)
-          : 0;
-      if (newPos > endPos) newPos = endPos;
+    if (position && position !== card.position) {
+      const cards = [...oldListCards];
+      const oldIndex = cards.findIndex((c) => c.id === card.id);
+      if (oldIndex >= 0) cards.splice(oldIndex, 1);
+
+      let newPos = position;
       if (newPos < 0) newPos = 0;
+      if (newPos > cards.length) newPos = cards.length;
 
-      if (newPos > oldPos) {
-        await Card.increment('position', {
-          by: -1,
-          where: {
-            listId: oldListId,
-            position: { [Op.and]: [{ [Op.gt]: oldPos }, { [Op.lte]: newPos }] },
-          },
-          transaction: t,
-        });
-      } else if (newPos < oldPos) {
-        await Card.increment('position', {
-          by: 1,
-          where: {
-            listId: oldListId,
-            position: { [Op.and]: [{ [Op.gte]: newPos }, { [Op.lt]: oldPos }] },
-          },
-          transaction: t,
-        });
-      }
+      cards.splice(newPos, 0, card);
 
-      return await card.update(
-        {
-          title: title ?? card.title,
-          description: description ?? card.description,
-          media: media ?? card.media,
-          completed: completed ?? card.completed,
-          position: newPos,
-          dueDate: dueDate ?? card.dueDate,
-          color: color ?? card.color,
-          updatedAt: new Date(),
-        },
-        { transaction: t }
+      await Promise.all(
+        cards.map((c, i) =>
+          c.update({ position: i }, { transaction: t })
+        )
       );
+
+      return await card.update(cardData, { transaction: t });
     }
 
-    return await card.update(
-      {
-        title: title ?? card.title,
-        description: description ?? card.description,
-        media: media ?? card.media,
-        completed: completed ?? card.completed,
-        listId: listId ?? card.listId,
-        dueDate: dueDate ?? card.dueDate,
-        color: color ?? card.color,
-        updatedAt: new Date(),
-      },
-      { transaction: t }
-    );
+    return await card.update(cardData, { transaction: t });
   });
 
   io.to(`workspace_${card.list.workspaceId}`).emit(

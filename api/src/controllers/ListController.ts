@@ -48,8 +48,8 @@ export const updateList = async (
   res: Response
 ): Promise<Response> => {
   const id = req.params.id;
-  const { title } = req.body;
-  const list = await UpdateListService({ id, title });
+  const listData = req.body;
+  const list = await UpdateListService({ id, listData });
   return res.status(200).json({
     message: 'Lista atualizada com sucesso',
     list,
