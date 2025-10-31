@@ -8,4 +8,5 @@ export interface TaskList {
   updatedAt: string | Date;
   cards: Task[];
   isOpen?: boolean;
+  orderIndex?: number;
 }

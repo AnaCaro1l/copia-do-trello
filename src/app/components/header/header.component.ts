@@ -134,7 +134,6 @@ export class HeaderComponent implements OnInit {
         this.invites = invites;
         this.invitesUnread = invites.filter(invite => invite.status === 'pending');
         this.invitesRead = invites.filter(invite => invite.status !== 'pending');
-        console.log(this.invitesRead.length);
       },
       error: (err) => {
         console.error('Erro ao carregar convites:', err);

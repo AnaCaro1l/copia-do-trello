@@ -46,6 +46,7 @@ import { UserService } from '../../services/user.service';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UIStateService } from '../../services/ui-state.service';
+import { ListService } from '../../services/list.service';
 
 type Collaborator = string | User;
 
@@ -108,7 +109,8 @@ export class FrameComponent implements OnInit, OnChanges, OnDestroy {
     private socketService: SocketService,
     private userService: UserService,
     private dialog: MatDialog,
-    private uiState: UIStateService
+    private uiState: UIStateService,
+    private listService: ListService
   ) {}
 
   ngOnInit() {
@@ -434,6 +436,21 @@ export class FrameComponent implements OnInit, OnChanges, OnDestroy {
     const lists = this.frame?.lists;
     if (!Array.isArray(lists)) return;
     moveItemInArray(lists, event.previousIndex, event.currentIndex);
+
+    const moved = lists[event.currentIndex];
+    if (!moved || typeof moved.id !== 'number') return;
+
+    const targetOrderIndex = event.currentIndex;
+
+    this.listService
+      .updateList(moved.id, { ...(moved as TaskList), orderIndex: targetOrderIndex })
+      .subscribe({
+        next: () => {},
+        error: (err) => {
+          moveItemInArray(lists, event.currentIndex, event.previousIndex);
+          console.error('Erro ao atualizar ordem das listas:', err);
+        },
+      });
   }
 
   private destroy$ = new Subject<void>();
